@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-18 14:00 -->
+<!-- BUILD_DATE: 2026-05-18 14:22 -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -61,7 +61,7 @@ body {
 .refresh-btn:hover { background: #e8e8e8; }
 .build-date { color: #999; }
 
-/* ===== 레이아웃 (상하 분할) ===== */
+/* ===== 레이아웃 ===== */
 .layout {
   display: flex;
   flex-direction: column;
@@ -122,9 +122,7 @@ body {
   align-items: center;
   gap: 8px;
 }
-.field label {
-  width: 90px;
-}
+.field label { width: 90px; }
 .field input, .field select {
   flex: 1;
   padding: 6px 10px;
@@ -148,12 +146,8 @@ body {
   border-color: #1a2c5b;
   box-shadow: 0 0 0 2px rgba(26,44,91,0.08);
 }
-.input-row.full input {
-  width: 100%;
-}
-.input-block {
-  margin-bottom: 10px;
-}
+.input-row.full input { width: 100%; }
+.input-block { margin-bottom: 10px; }
 .input-block .blk-label {
   font-size: 12px;
   font-weight: 600;
@@ -223,15 +217,52 @@ textarea {
 }
 .btn-mini:hover { background: #f0f0f0; }
 .btn-mini.danger { color: #c0392b; }
-.opinion-set {
-  margin-top: 10px;
-}
-.opinion-set .ot {
-  font-size: 11.5px;
+
+/* 자동 채움 input (반영전) */
+.auto-filled {
+  background: #f0f4fa !important;
+  border-color: #1a2c5b !important;
+  color: #1a2c5b;
   font-weight: 600;
-  color: #555;
-  margin: 8px 0 4px;
 }
+
+/* 의견 박스 (동적) */
+.opinion-item {
+  border: 1px solid #d8dde6;
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background: #fafbfc;
+}
+.opinion-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.opinion-no {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a2c5b;
+}
+.del-op-btn {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  background: #fff;
+  border-radius: 3px;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  font-family: inherit;
+}
+.del-op-btn:hover { background: #c0392b; color: #fff; }
+.opinion-item textarea {
+  min-height: 56px;
+  margin-top: 2px;
+}
+
 .help-text {
   font-size: 11px;
   color: #888;
@@ -239,7 +270,7 @@ textarea {
   line-height: 1.5;
 }
 
-/* ===== 보고서 페이지 (A4 시뮬레이션) ===== */
+/* ===== 보고서 페이지 ===== */
 .report-page {
   background: #fff;
   width: 210mm;
@@ -257,7 +288,6 @@ textarea {
 }
 .report-content { flex: 1; }
 
-/* 보고서 메인 타이틀 */
 .rp-main-title {
   text-align: center;
   font-size: 22px;
@@ -269,7 +299,6 @@ textarea {
   letter-spacing: 2px;
 }
 
-/* 섹션 타이틀 */
 .rp-title {
   color: #0d1b3d;
   font-weight: 700;
@@ -296,7 +325,6 @@ textarea {
   font-size: 11px;
 }
 
-/* 표 공통 */
 .rp-table {
   width: 100%;
   border-collapse: collapse;
@@ -348,7 +376,6 @@ textarea {
 .rp-table td.ctr { text-align: center; }
 .rp-table td.txt { padding: 9px 8px; }
 
-/* 표 그룹별 여백 */
 .rp-table.compact td, .rp-table.compact th { padding: 9px 4px; }
 .rp-table.compact .rp-dist { padding: 0 4px; }
 
@@ -360,7 +387,6 @@ textarea {
 .rp-table.medium td.cost-label .rp-dist { padding: 0 10px; }
 .rp-table.medium td.num { padding-right: 18px; }
 
-/* 균등분할 */
 .rp-dist {
   display: flex;
   justify-content: space-between;
@@ -375,7 +401,6 @@ textarea {
 }
 .rp-table th .rp-dist.sub { color: #cdd5e6; }
 
-/* 이미지 출력 */
 .rp-image {
   width: 100%;
   margin: 8px 0 12px;
@@ -386,7 +411,6 @@ textarea {
   border: 1px solid #bbb;
 }
 
-/* 의견 박스 */
 .rp-opinion {
   background: #fafbfc;
   border: 1px solid #d8dde6;
@@ -402,8 +426,15 @@ textarea {
   color: #1a2c5b;
   margin-right: 6px;
 }
+.rp-op-img {
+  text-align: center;
+  margin: 8px 0;
+}
+.rp-op-img img {
+  max-width: 100%;
+  border: 1px solid #bbb;
+}
 
-/* 주석 */
 .rp-note {
   color: #555;
   font-size: 11.5px;
@@ -411,7 +442,6 @@ textarea {
   line-height: 1.65;
 }
 
-/* 보고서 푸터 */
 .rp-footer {
   margin-top: auto;
   padding-top: 18px;
@@ -437,10 +467,8 @@ textarea {
   font-weight: 700;
 }
 
-/* 자동 숨김 */
 .is-hidden { display: none !important; }
 
-/* 다중 항목 표 (세액공제·세무조정) */
 .dyn-row {
   display: grid;
   gap: 6px;
@@ -449,9 +477,6 @@ textarea {
 }
 .dyn-row.taxcredit {
   grid-template-columns: 1.3fr 0.7fr 0.5fr 0.5fr 0.4fr 0.5fr 1fr 28px;
-}
-.dyn-row.taxadj {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1.2fr 28px;
 }
 .dyn-row input, .dyn-row select {
   padding: 5px 7px;
@@ -487,9 +512,6 @@ textarea {
 .dyn-head.taxcredit {
   grid-template-columns: 1.3fr 0.7fr 0.5fr 0.5fr 0.4fr 0.5fr 1fr 28px;
 }
-.dyn-head.taxadj {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1.2fr 28px;
-}
 .btn-add {
   padding: 5px 12px;
   background: #1a2c5b;
@@ -503,7 +525,6 @@ textarea {
 }
 .btn-add:hover { background: #0d1b3d; }
 
-/* ===== 인쇄 ===== */
 @media print {
   body { background: #fff; }
   .tool-header,
@@ -511,10 +532,7 @@ textarea {
   .sync-info,
   .refresh-btn,
   .build-date { display: none !important; }
-  .layout {
-    display: block;
-    height: auto;
-  }
+  .layout { display: block; height: auto; }
   .preview-area {
     width: 100%;
     background: #fff;
@@ -535,20 +553,14 @@ textarea {
   .rp-table { page-break-inside: avoid; }
   .rp-image { page-break-inside: avoid; }
   .rp-opinion { page-break-inside: avoid; }
-  .rp-footer {
-    page-break-inside: avoid;
-    margin-top: 60px;
-  }
-  @page {
-    size: A4;
-    margin: 18mm 16mm;
-  }
+  .rp-op-img { page-break-inside: avoid; }
+  .rp-footer { page-break-inside: avoid; margin-top: 60px; }
+  @page { size: A4; margin: 18mm 16mm; }
 }
 </style>
 </head>
 <body>
 
-<!-- ===== 도구 헤더 ===== -->
 <header class="tool-header">
   <div class="tool-title">
     <h1>종합소득세 신고보고서 작성 도구</h1>
@@ -557,20 +569,18 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-18 14:00</span>
+    <span class="build-date">업데이트 2026-05-18 14:22</span>
   </div>
 </header>
 
 <div class="layout">
 
-  <!-- ===== 좌측: 입력 패널 ===== -->
   <aside class="input-panel">
 
-    <!-- 1. 기본정보 -->
     <section class="input-section">
       <h3>1. 기본정보</h3>
       <div class="input-row col-half">
-        <div class="field"><label>성함</label><input type="text" id="inp_name" data-field="name" autofocus></div>
+        <div class="field"><label>대표자명</label><input type="text" id="inp_name" data-field="name" autofocus></div>
         <div class="field"><label>주민등록번호</label><input type="text" id="inp_rrn" data-field="rrn" data-format="rrn" maxlength="14"></div>
       </div>
       <div class="input-row col-half">
@@ -594,7 +604,6 @@ textarea {
       <div class="help-text">※ 신고예정일자는 4자리(MMDD) 입력 시 자동으로 "2026년 M월 D일"로 변환됩니다. 기본값 0531(2026년 5월 31일).</div>
     </section>
 
-    <!-- 2. 신고시 유의할 사항 -->
     <section class="input-section">
       <h3>2. 신고시 유의할 사항</h3>
       <div class="input-block">
@@ -614,7 +623,6 @@ textarea {
       </div>
     </section>
 
-    <!-- 3. 신고 안내자료 -->
     <section class="input-section">
       <h3>3. 신고 안내자료</h3>
       <div class="input-block">
@@ -634,7 +642,6 @@ textarea {
       </div>
     </section>
 
-    <!-- 4. 신고상황 종합분석 -->
     <section class="input-section">
       <h3>4. 신고상황 종합분석</h3>
       <div class="input-block">
@@ -654,7 +661,6 @@ textarea {
       </div>
     </section>
 
-    <!-- 5. 매출·소득 요약 -->
     <section class="input-section">
       <h3>5. 매출·소득 요약 및 절세효과</h3>
       <div class="field" style="margin-bottom:8px;">
@@ -662,7 +668,7 @@ textarea {
         <input type="text" id="inp_income_after" data-field="income_after" data-format="num" inputmode="numeric">
       </div>
       <div class="field" style="margin-bottom:8px;">
-        <label>추가증빙필요한경비</label>
+        <label>추가증빙 필요한 경비</label>
         <input type="text" id="inp_cost1" data-field="cost1" data-format="num" inputmode="numeric">
       </div>
       <div class="field" style="margin-bottom:8px;">
@@ -671,16 +677,15 @@ textarea {
       </div>
       <div class="field" style="margin-bottom:8px;">
         <label>종합소득금액(반영전)</label>
-        <input type="text" id="inp_income_before" data-field="income_before" data-format="num" inputmode="numeric" placeholder="비워두면 자동 합산">
+        <input type="text" id="inp_income_before" data-format="num" inputmode="numeric" placeholder="자동 합산값">
       </div>
       <div class="help-text">
         ※ 종합소득금액(반영후)는 신고서상 사업소득금액을 입력합니다.<br>
-        ※ 종합소득금액(반영전)을 직접 입력하면 그 값을 사용하고, 비워두면 (반영후 + 추가증빙 + 인건비)로 자동 합산됩니다.<br>
+        ※ 종합소득금액(반영전)은 위 세 금액의 합계가 자동으로 채워집니다. 직접 수정 가능하며, 비우면 다시 자동 합산값으로 돌아옵니다.<br>
         ※ 산출세액·절세액 합계·적용세율은 자동 계산됩니다 (누진구간 6/15/24/35/38/40/42/45%).
       </div>
     </section>
 
-    <!-- 6. 세액공제·감면 상세표 -->
     <section class="input-section">
       <h3>6. 세액공제·감면 상세표</h3>
       <div class="dyn-head taxcredit">
@@ -690,17 +695,11 @@ textarea {
       <button type="button" class="btn-add" onclick="addTaxCreditRow()">＋ 항목 추가</button>
     </section>
 
-    <!-- 7. 종합 검토의견 -->
     <section class="input-section">
       <h3>7. 종합 검토의견</h3>
-      <div class="opinion-set">
-        <div class="ot">의견 ①</div>
-        <textarea id="inp_op1" data-field="op1"></textarea>
-        <div class="ot">의견 ②</div>
-        <textarea id="inp_op2" data-field="op2"></textarea>
-        <div class="ot">의견 ③</div>
-        <textarea id="inp_op3" data-field="op3"></textarea>
-      </div>
+      <div id="opinions_list"></div>
+      <button type="button" class="btn-add" onclick="addOpinion()">＋ 항목 추가</button>
+      <div class="help-text">※ 각 의견 박스에 이미지 또는 텍스트 중 하나라도 입력하면 보고서에 출력됩니다. 모두 비어 있으면 Ⅶ 종합 검토의견 섹션 자체가 출력되지 않습니다.</div>
     </section>
 
     <div style="text-align:center; margin: 12px 0 20px;">
@@ -709,21 +708,19 @@ textarea {
 
   </aside>
 
-  <!-- ===== 우측: 보고서 미리보기 ===== -->
   <main class="preview-area">
     <div class="report-page" id="reportPage">
       <div class="report-content">
 
         <h1 class="rp-main-title">종합소득세 신고보고서</h1>
 
-        <!-- Ⅰ. 기본정보 -->
         <section id="sec_basic">
           <h2 class="rp-title">Ⅰ. 기본정보</h2>
           <table class="rp-table compact">
             <colgroup><col style="width:18%"><col style="width:32%"><col style="width:18%"><col style="width:32%"></colgroup>
             <tbody>
               <tr>
-                <td class="lab" data-distr="성함"></td>
+                <td class="lab" data-distr="대표자명"></td>
                 <td class="txt" id="rp_name">　</td>
                 <td class="lab" data-distr="주민등록번호"></td>
                 <td class="txt" id="rp_rrn">　</td>
@@ -751,28 +748,24 @@ textarea {
           <p class="rp-note">※ 신고(예정)일자는 종합소득세 신고기한 안에서 최종 검토 과정 중 변경될 수 있습니다.</p>
         </section>
 
-        <!-- Ⅱ. 신고시 유의할 사항 -->
         <section id="sec_caution" class="is-hidden">
           <h2 class="rp-title">Ⅱ. 신고시 유의할 사항</h2>
           <div class="rp-image" id="rp_caution_img"></div>
           <div class="rp-opinion" id="rp_caution_opinion"></div>
         </section>
 
-        <!-- Ⅲ. 신고 안내자료 -->
         <section id="sec_guide" class="is-hidden">
           <h2 class="rp-title">Ⅲ. 신고 안내자료</h2>
           <div class="rp-image" id="rp_guide_img"></div>
           <div class="rp-opinion" id="rp_guide_opinion"></div>
         </section>
 
-        <!-- Ⅳ. 신고상황 종합분석 -->
         <section id="sec_analysis" class="is-hidden">
           <h2 class="rp-title">Ⅳ. 신고상황 종합분석</h2>
           <div class="rp-image" id="rp_analysis_img"></div>
           <div class="rp-opinion" id="rp_analysis_opinion"></div>
         </section>
 
-        <!-- Ⅴ. 매출·소득 요약 및 절세효과 -->
         <section id="sec_income">
           <h2 class="rp-title">Ⅴ. 매출·소득 요약 및 절세효과<span class="unit">(단위: 원)</span></h2>
 
@@ -786,11 +779,11 @@ textarea {
               </tr>
               <tr>
                 <td class="lab cost-label" rowspan="2" data-distr="조정경비"></td>
-                <td class="lab2 sub-dist" style="text-align:left; font-weight:600;">1. 추가증빙필요한경비</td>
+                <td class="lab2 sub-dist" data-distr="1. 추가증빙 필요한 경비"></td>
                 <td class="num" id="rp_cost1">　</td>
               </tr>
               <tr>
-                <td class="lab2 sub-dist" style="text-align:left; font-weight:600;">2. 인건비 추가 반영</td>
+                <td class="lab2 sub-dist" data-distr="2. 인건비 추가 반영"></td>
                 <td class="num" id="rp_cost2">　</td>
               </tr>
               <tr>
@@ -837,11 +830,9 @@ textarea {
             </tbody>
           </table>
           <p class="rp-note">※ 소득공제는 납세자별 적용 여부와 금액이 상이하므로 절세효과 계산에서는 제외하였습니다. 본 계산은 종합소득금액을 과세표준으로 간주하여 산출세액 기준으로 세액 변동 효과를 산정한 것입니다.</p>
-          <p class="rp-note">※ 건강보험료 절감 = (추가증빙필요한경비 + 인건비 추가 반영) × 8.13% (건강보험료 7.19% + 장기요양보험료는 건강보험료의 13.14%, 2026년 직장가입자 통합요율 기준)</p>
-          <p class="rp-note">※ 본 도구의 절세효과는 단순 추정치이며, 실제 신고 결과와 차이가 있을 수 있습니다.</p>
+          <p class="rp-note">※ 건강보험료 절감 = (추가증빙 필요한 경비 + 인건비 추가 반영) × 8.13% (건강보험료 7.19% + 장기요양보험료는 건강보험료의 13.14%, 2026년 직장가입자 통합요율 기준)</p>
         </section>
 
-        <!-- Ⅵ. 세액공제·감면 상세표 -->
         <section id="sec_taxcredit" class="is-hidden">
           <h2 class="rp-title">Ⅵ. 세액공제·감면 상세표<span class="unit">(단위: 원)</span></h2>
           <table class="rp-table compact">
@@ -864,17 +855,13 @@ textarea {
           </table>
         </section>
 
-        <!-- Ⅶ. 종합 검토의견 -->
         <section id="sec_opinions" class="is-hidden">
           <h2 class="rp-title">Ⅶ. 종합 검토의견</h2>
-          <div class="rp-opinion is-hidden" id="rp_op1"><span class="rp-opinion-label">의견 ①</span><span id="rp_op1_text"></span></div>
-          <div class="rp-opinion is-hidden" id="rp_op2"><span class="rp-opinion-label">의견 ②</span><span id="rp_op2_text"></span></div>
-          <div class="rp-opinion is-hidden" id="rp_op3"><span class="rp-opinion-label">의견 ③</span><span id="rp_op3_text"></span></div>
+          <div id="rp_opinions_body"></div>
         </section>
 
       </div>
 
-      <!-- 보고서 마지막 고정 푸터 (항상 표시) -->
       <div class="rp-footer">
         <p class="firm">세무법인삼호 남부지점</p>
         <p class="note">이 보고서는 귀사의 자료 검토 및 종합소득세 신고 후 신고총평입니다.</p>
@@ -898,7 +885,6 @@ function hardReload() {
   } catch (e) { location.reload(); }
 }
 
-// ===== 페이지 로드 시 ?v= 정리 =====
 (function cleanupQuery() {
   try {
     var url = new URL(location.href);
@@ -909,7 +895,6 @@ function hardReload() {
   } catch (e) {}
 })();
 
-// ===== 동기화 시간 표시 =====
 (function showSyncTime() {
   try {
     var d = new Date(document.lastModified);
@@ -921,16 +906,13 @@ function hardReload() {
   } catch (e) {}
 })();
 
-// ===== 균등분할 처리 =====
-// data-distr="텍스트1|텍스트2" → 메인줄 + 부연줄로 자동 분리
-// 숫자+%(38%, 3.8%, 8.13% 등)는 한 단위로 묶음
+// ===== 균등분할 =====
 function tokenize(text) {
   var tokens = [];
   var i = 0;
   while (i < text.length) {
     var rest = text.slice(i);
-    // 숫자(.숫자)?%? 패턴
-    var m = rest.match(/^(\d+(?:\.\d+)?%?)/);
+    var m = rest.match(/^(\d+(?:\.\d*)?%?)/);
     if (m) {
       tokens.push(m[1]);
       i += m[1].length;
@@ -942,7 +924,6 @@ function tokenize(text) {
   }
   return tokens;
 }
-
 function applyDistribute(el) {
   var raw = el.getAttribute('data-distr');
   if (!raw) return;
@@ -954,11 +935,9 @@ function applyDistribute(el) {
   }).join('');
   el.innerHTML = html;
 }
-
 function reapplyAllDistribute() {
   document.querySelectorAll('[data-distr]').forEach(applyDistribute);
 }
-
 reapplyAllDistribute();
 
 // ===== 숫자 포맷 =====
@@ -973,8 +952,6 @@ function formatNum(v) {
   if (n == null) return '';
   return n.toLocaleString('ko-KR');
 }
-
-// ===== 자동 포맷 핸들러 =====
 function formatRRN(v) {
   var d = String(v).replace(/[^\d]/g, '');
   if (d.length <= 6) return d;
@@ -987,8 +964,6 @@ function formatBRN(v) {
   return d.slice(0, 3) + '-' + d.slice(3, 5) + '-' + d.slice(5, 10);
 }
 function formatReportDate(v) {
-  // "MMDD" → "2026년 M월 D일"
-  // 이미 변환된 텍스트는 그대로
   var d = String(v).replace(/[^\d]/g, '');
   if (d.length === 4) {
     var mm = parseInt(d.slice(0, 2), 10);
@@ -1000,7 +975,7 @@ function formatReportDate(v) {
   return v;
 }
 
-// ===== 입력 자동 포맷 적용 =====
+// ===== 입력 자동 포맷 =====
 document.querySelectorAll('input[data-format]').forEach(function (inp) {
   var fmt = inp.getAttribute('data-format');
   inp.addEventListener('input', function () {
@@ -1019,7 +994,6 @@ document.querySelectorAll('input[data-format]').forEach(function (inp) {
       inp.value = formatReportDate(inp.value);
       updatePreview();
     }
-    // 자모만(ㅁ, ㅇ 등) 입력된 경우 자동 클리어
     if (inp.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(inp.value)) {
       inp.value = '';
       updatePreview();
@@ -1027,12 +1001,10 @@ document.querySelectorAll('input[data-format]').forEach(function (inp) {
   });
 });
 
-// ===== 일반 입력에도 미리보기 갱신 =====
 document.querySelectorAll('input[data-field], select[data-field], textarea[data-field]').forEach(function (el) {
   el.addEventListener('input', updatePreview);
   el.addEventListener('change', updatePreview);
   el.addEventListener('blur', function () {
-    // 자모만 자동 클리어
     if (el.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(el.value)) {
       el.value = '';
       updatePreview();
@@ -1040,7 +1012,22 @@ document.querySelectorAll('input[data-field], select[data-field], textarea[data-
   });
 });
 
-// ===== 신고예정일자 기본값 (0531) =====
+// ===== 종합소득금액(반영전) 사용자 수정 플래그 =====
+var userEditedIncomeBefore = false;
+(function () {
+  var inp = document.getElementById('inp_income_before');
+  inp.addEventListener('input', function () {
+    if (inp.value.trim() === '') {
+      userEditedIncomeBefore = false;
+    } else {
+      userEditedIncomeBefore = true;
+    }
+    inp.classList.remove('auto-filled');
+    updatePreview();
+  });
+})();
+
+// ===== 신고예정일자 기본값 =====
 (function () {
   var d = document.getElementById('inp_reportdate');
   d.value = formatReportDate('0531');
@@ -1049,9 +1036,7 @@ document.querySelectorAll('input[data-field], select[data-field], textarea[data-
 // ===== 키보드 네비게이션 =====
 function getFocusableInputs() {
   return Array.from(document.querySelectorAll('.input-panel input, .input-panel textarea, .input-panel select'))
-    .filter(function (el) {
-      return el.offsetParent !== null && !el.disabled;
-    });
+    .filter(function (el) { return el.offsetParent !== null && !el.disabled; });
 }
 document.addEventListener('keydown', function (e) {
   var target = e.target;
@@ -1059,9 +1044,8 @@ document.addEventListener('keydown', function (e) {
   var all = getFocusableInputs();
   var idx = all.indexOf(target);
   if (idx < 0) return;
-
   if (e.key === 'Enter') {
-    if (target.tagName === 'TEXTAREA' && !e.ctrlKey && !e.metaKey) return; // textarea는 줄바꿈 허용
+    if (target.tagName === 'TEXTAREA' && !e.ctrlKey && !e.metaKey) return;
     e.preventDefault();
     var next = all[idx + 1];
     if (next) { next.focus(); if (next.select) try { next.select(); } catch (er) {} }
@@ -1076,30 +1060,32 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-// ===== 이미지 첨부 =====
-var imageStore = { caution: null, guide: null, analysis: null };
+// ===== 이미지 첨부 (정적·동적 통합) =====
+var imageStore = {};
 
 function setImage(key, dataUrl) {
   imageStore[key] = dataUrl;
   var dropEl = document.getElementById('img_' + key);
+  if (!dropEl) return;
   dropEl.classList.add('has-image');
   dropEl.innerHTML = '<img src="' + dataUrl + '" alt="">';
-  document.getElementById('btnRow_' + key).style.display = 'flex';
+  var btnRow = document.getElementById('btnRow_' + key);
+  if (btnRow) btnRow.style.display = 'flex';
   updatePreview();
 }
-
 function clearImage(key) {
   imageStore[key] = null;
   var dropEl = document.getElementById('img_' + key);
+  if (!dropEl) return;
   dropEl.classList.remove('has-image');
   dropEl.innerHTML =
     '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
     '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + key + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
     '<input type="file" id="file_' + key + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + key + '\')">';
-  document.getElementById('btnRow_' + key).style.display = 'none';
+  var btnRow = document.getElementById('btnRow_' + key);
+  if (btnRow) btnRow.style.display = 'none';
   updatePreview();
 }
-
 function handleFileSelect(ev, key) {
   var f = ev.target.files && ev.target.files[0];
   if (!f) return;
@@ -1110,8 +1096,7 @@ function handleFileSelect(ev, key) {
 window.handleFileSelect = handleFileSelect;
 window.clearImage = clearImage;
 
-// 클릭 시 포커스만 (파일 팝업 X — 별도 버튼만)
-document.querySelectorAll('.image-drop').forEach(function (drop) {
+function attachImageDropHandlers(drop) {
   drop.addEventListener('click', function (e) {
     if (e.target.tagName === 'BUTTON') return;
     drop.focus();
@@ -1147,9 +1132,10 @@ document.querySelectorAll('.image-drop').forEach(function (drop) {
       }
     }
   });
-});
+}
+document.querySelectorAll('.image-drop').forEach(attachImageDropHandlers);
 
-// ===== 누진세율 산출세액 =====
+// ===== 누진세율 =====
 function calcTax(income) {
   var i = parseNum(income);
   if (i == null || i <= 0) return 0;
@@ -1177,10 +1163,8 @@ function getRate(income) {
   return 45;
 }
 
-// ===== 다중 행 (세액공제·세무조정) =====
+// ===== 세액공제 행 =====
 var taxcreditCount = 0;
-var taxadjCount = 0;
-
 function addTaxCreditRow(values) {
   taxcreditCount++;
   var id = 'tc_' + taxcreditCount;
@@ -1197,7 +1181,6 @@ function addTaxCreditRow(values) {
     '<input type="text" data-tc="note" placeholder="유의사항">' +
     '<button type="button" class="del-btn" onclick="this.parentElement.remove(); updatePreview();">×</button>';
   document.getElementById('taxcredit_rows').appendChild(row);
-  // 금액 자동 포맷 + 미리보기 갱신
   row.querySelectorAll('input').forEach(function (inp) {
     if (inp.getAttribute('data-format') === 'num') {
       inp.addEventListener('input', function () { inp.value = formatNum(inp.value); updatePreview(); });
@@ -1218,6 +1201,71 @@ function addTaxCreditRow(values) {
 }
 window.addTaxCreditRow = addTaxCreditRow;
 
+// ===== 의견 (완전 동적) =====
+var opinionSeq = 0;
+var CIRCLED = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮'];
+function getCircled(n) {
+  if (n >= 1 && n <= CIRCLED.length) return CIRCLED[n-1];
+  return '(' + n + ')';
+}
+function renumberOpinions() {
+  var items = document.querySelectorAll('#opinions_list .opinion-item');
+  items.forEach(function (item, idx) {
+    var no = item.querySelector('.opinion-no');
+    if (no) no.textContent = '의견 ' + getCircled(idx + 1);
+  });
+}
+function addOpinion() {
+  opinionSeq++;
+  var oid = 'op_' + opinionSeq;
+  imageStore[oid] = null;
+
+  var item = document.createElement('div');
+  item.className = 'opinion-item';
+  item.dataset.oid = oid;
+  item.innerHTML =
+    '<div class="opinion-head">' +
+      '<span class="opinion-no">의견 ①</span>' +
+      '<button type="button" class="del-op-btn" onclick="removeOpinion(\'' + oid + '\')">×</button>' +
+    '</div>' +
+    '<div class="image-drop" id="img_' + oid + '" tabindex="0" data-image="' + oid + '">' +
+      '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
+      '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + oid + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
+      '<input type="file" id="file_' + oid + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + oid + '\')">' +
+    '</div>' +
+    '<div class="btn-row" id="btnRow_' + oid + '" style="display:none;">' +
+      '<button type="button" class="btn-mini danger" onclick="clearImage(\'' + oid + '\')">🗑 이미지 제거</button>' +
+    '</div>' +
+    '<textarea data-opinion="' + oid + '" placeholder="의견 내용"></textarea>';
+
+  document.getElementById('opinions_list').appendChild(item);
+
+  attachImageDropHandlers(item.querySelector('.image-drop'));
+
+  var ta = item.querySelector('textarea');
+  ta.addEventListener('input', updatePreview);
+  ta.addEventListener('blur', function () {
+    if (ta.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(ta.value)) {
+      ta.value = '';
+      updatePreview();
+    }
+  });
+
+  renumberOpinions();
+  updatePreview();
+}
+function removeOpinion(oid) {
+  var item = document.querySelector('.opinion-item[data-oid="' + oid + '"]');
+  if (item) {
+    item.remove();
+    delete imageStore[oid];
+    renumberOpinions();
+    updatePreview();
+  }
+}
+window.addOpinion = addOpinion;
+window.removeOpinion = removeOpinion;
+
 // ===== 미리보기 갱신 =====
 function setText(id, v) {
   var el = document.getElementById(id);
@@ -1234,11 +1282,10 @@ function toggleSection(secId, show) {
   if (!el) return;
   el.classList.toggle('is-hidden', !show);
 }
-
 function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
 
 function updatePreview() {
-  // ===== Ⅰ. 기본정보 =====
+  // Ⅰ
   setText('rp_name', val('inp_name'));
   setText('rp_rrn', val('inp_rrn'));
   setText('rp_company', val('inp_company'));
@@ -1248,52 +1295,48 @@ function updatePreview() {
   setText('rp_period', val('inp_period'));
   setText('rp_reportdate', val('inp_reportdate'));
 
-  // ===== Ⅱ. 신고시 유의할 사항 =====
-  var cautionImg = imageStore.caution;
-  var cautionOp = val('inp_caution_opinion');
-  var imgEl_c = document.getElementById('rp_caution_img');
-  var opEl_c = document.getElementById('rp_caution_opinion');
-  imgEl_c.innerHTML = cautionImg ? '<img src="' + cautionImg + '" alt="">' : '';
-  imgEl_c.classList.toggle('is-hidden', !cautionImg);
-  opEl_c.textContent = cautionOp || '';
-  opEl_c.classList.toggle('is-hidden', !cautionOp.trim());
-  toggleSection('sec_caution', !!(cautionImg || cautionOp.trim()));
+  // Ⅱ·Ⅲ·Ⅳ
+  ['caution','guide','analysis'].forEach(function (key) {
+    var img = imageStore[key];
+    var op = val('inp_' + key + '_opinion') || '';
+    var imgEl = document.getElementById('rp_' + key + '_img');
+    var opEl = document.getElementById('rp_' + key + '_opinion');
+    if (imgEl) {
+      imgEl.innerHTML = img ? '<img src="' + img + '" alt="">' : '';
+      imgEl.classList.toggle('is-hidden', !img);
+    }
+    if (opEl) {
+      opEl.textContent = op;
+      opEl.classList.toggle('is-hidden', !op.trim());
+    }
+    toggleSection('sec_' + key, !!(img || op.trim()));
+  });
 
-  // ===== Ⅲ. 신고 안내자료 =====
-  var guideImg = imageStore.guide;
-  var guideOp = val('inp_guide_opinion');
-  var imgEl_g = document.getElementById('rp_guide_img');
-  var opEl_g = document.getElementById('rp_guide_opinion');
-  imgEl_g.innerHTML = guideImg ? '<img src="' + guideImg + '" alt="">' : '';
-  imgEl_g.classList.toggle('is-hidden', !guideImg);
-  opEl_g.textContent = guideOp || '';
-  opEl_g.classList.toggle('is-hidden', !guideOp.trim());
-  toggleSection('sec_guide', !!(guideImg || guideOp.trim()));
-
-  // ===== Ⅳ. 신고상황 종합분석 =====
-  var analysisImg = imageStore.analysis;
-  var analysisOp = val('inp_analysis_opinion');
-  var imgEl_a = document.getElementById('rp_analysis_img');
-  var opEl_a = document.getElementById('rp_analysis_opinion');
-  imgEl_a.innerHTML = analysisImg ? '<img src="' + analysisImg + '" alt="">' : '';
-  imgEl_a.classList.toggle('is-hidden', !analysisImg);
-  opEl_a.textContent = analysisOp || '';
-  opEl_a.classList.toggle('is-hidden', !analysisOp.trim());
-  toggleSection('sec_analysis', !!(analysisImg || analysisOp.trim()));
-
-  // ===== Ⅴ. 매출·소득 요약 =====
+  // Ⅴ
   var incomeAfter = parseNum(val('inp_income_after')) || 0;
   var cost1 = parseNum(val('inp_cost1')) || 0;
   var cost2 = parseNum(val('inp_cost2')) || 0;
-  var incomeBeforeInput = parseNum(val('inp_income_before'));
-  var incomeBefore = incomeBeforeInput != null ? incomeBeforeInput : (incomeAfter + cost1 + cost2);
+  var autoSum = incomeAfter + cost1 + cost2;
+  var inpBefore = document.getElementById('inp_income_before');
+  var incomeBefore;
+  if (userEditedIncomeBefore) {
+    incomeBefore = parseNum(inpBefore.value) || 0;
+  } else {
+    if (autoSum > 0) {
+      inpBefore.value = formatNum(autoSum);
+      inpBefore.classList.add('auto-filled');
+    } else {
+      inpBefore.value = '';
+      inpBefore.classList.remove('auto-filled');
+    }
+    incomeBefore = autoSum;
+  }
 
   setNum('rp_income_after', incomeAfter || '');
   setNum('rp_cost1', cost1 || '');
   setNum('rp_cost2', cost2 || '');
   setNum('rp_income_before', incomeBefore || '');
 
-  // 산출세액
   var taxBefore = incomeBefore > 0 ? calcTax(incomeBefore) : 0;
   var taxAfter = incomeAfter > 0 ? calcTax(incomeAfter) : 0;
   var saveNat = Math.max(0, taxBefore - taxAfter);
@@ -1308,12 +1351,10 @@ function updatePreview() {
   setNum('rp_save_loc', saveLoc || '');
   setNum('rp_save_hi', saveHi || '');
 
-  // 적용세율 표기 갱신
   var rateBefore = getRate(incomeBefore);
   var rateAfter = getRate(incomeAfter);
   var rateLoc = rateBefore != null ? (rateBefore * 0.1) : null;
   var fmtPct = function (r) { return r == null ? '38%' : (Number.isInteger(r) ? r + '%' : r.toFixed(1) + '%'); };
-
   function rewriteLab(id, main, subText) {
     var el = document.getElementById(id);
     if (!el) return;
@@ -1329,7 +1370,7 @@ function updatePreview() {
     rewriteLab('rp_tax_after_lab', '조정 후 산출세액', fmtPct(rateAfter));
   }
 
-  // ===== Ⅵ. 세액공제·감면 상세표 =====
+  // Ⅵ
   var tcRows = document.querySelectorAll('#taxcredit_rows .dyn-row');
   var tcBody = document.getElementById('rp_taxcredit_body');
   tcBody.innerHTML = '';
@@ -1357,14 +1398,30 @@ function updatePreview() {
   });
   toggleSection('sec_taxcredit', tcShown > 0);
 
-  // ===== Ⅶ. 종합 검토의견 =====
-  var op1 = val('inp_op1').trim();
-  var op2 = val('inp_op2').trim();
-  var op3 = val('inp_op3').trim();
-  setOpinion('rp_op1', 'rp_op1_text', op1);
-  setOpinion('rp_op2', 'rp_op2_text', op2);
-  setOpinion('rp_op3', 'rp_op3_text', op3);
-  toggleSection('sec_opinions', !!(op1 || op2 || op3));
+  // Ⅶ (동적 렌더링)
+  var opItems = document.querySelectorAll('#opinions_list .opinion-item');
+  var rpOpBody = document.getElementById('rp_opinions_body');
+  rpOpBody.innerHTML = '';
+  var opShown = 0;
+  opItems.forEach(function (item, idx) {
+    var oid = item.dataset.oid;
+    var img = imageStore[oid];
+    var txt = (item.querySelector('textarea').value || '').trim();
+    if (!img && !txt) return;
+    opShown++;
+    var no = getCircled(idx + 1);
+    var html = '';
+    if (img) {
+      html += '<div class="rp-op-img"><img src="' + img + '" alt=""></div>';
+    }
+    if (txt) {
+      html += '<div class="rp-opinion"><span class="rp-opinion-label">의견 ' + no + '</span>' + escapeHtml(txt) + '</div>';
+    } else {
+      html += '<div class="rp-opinion"><span class="rp-opinion-label">의견 ' + no + '</span></div>';
+    }
+    rpOpBody.insertAdjacentHTML('beforeend', html);
+  });
+  toggleSection('sec_opinions', opShown > 0);
 }
 
 function buildDistrHTML(text) {
@@ -1373,22 +1430,15 @@ function buildDistrHTML(text) {
   return '<div class="rp-dist">' + spans + '</div>';
 }
 
-function setOpinion(boxId, textId, txt) {
-  var box = document.getElementById(boxId);
-  var t = document.getElementById(textId);
-  t.textContent = txt;
-  box.classList.toggle('is-hidden', !txt);
-}
-
 function escapeHtml(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // ===== 초기 렌더 =====
+addOpinion(); // 기본 의견 ① 1개 자동 생성
 updatePreview();
 
-// ===== 첫 포커스 (성함) =====
 window.addEventListener('load', function () {
   setTimeout(function () {
     var first = document.getElementById('inp_name');
