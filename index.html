@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-20 17:21 -->
+<!-- BUILD_DATE: 2026-05-20 17:43 -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -143,8 +143,18 @@ body {
   font-weight: 600;
 }
 .slot-current .status {
-  color: #888;
   font-size: 11.5px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.slot-current .status.saved {
+  color: #0F6E56;
+  background: #E1F5EE;
+}
+.slot-current .status.modified {
+  color: #854F0B;
+  background: #FAEEDA;
 }
 .slot-actions {
   display: flex;
@@ -383,8 +393,11 @@ textarea {
 .modal-box .modal-title {
   font-size: 14px;
   font-weight: 700;
-  color: #c0392b;
+  color: #1a2c5b;
   margin: 0 0 8px;
+}
+.modal-box .modal-title.danger {
+  color: #c0392b;
 }
 .modal-box .modal-body {
   font-size: 12.5px;
@@ -714,7 +727,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-20 17:21</span>
+    <span class="build-date">업데이트 2026-05-20 17:43</span>
   </div>
 </header>
 
@@ -738,6 +751,7 @@ textarea {
         <select id="slot_select" onchange="onSlotSelect(this.value)">
           <option value="">─ 슬롯 선택 ─</option>
         </select>
+        <button type="button" class="btn-slot-primary" onclick="saveNow()">💾 저장</button>
         <button type="button" class="btn-slot-primary" onclick="newSlot()">＋ 새 작업</button>
         <button type="button" class="btn-slot-danger" onclick="deleteCurrentSlot()">🗑 삭제</button>
         <button type="button" class="btn-slot-outline" onclick="exportCurrentSlot()">📥 내보내기</button>
@@ -745,9 +759,12 @@ textarea {
         <input type="file" id="slot_import_file" accept=".json,application/json" style="display:none;" onchange="importSlotFile(event)">
       </div>
       <div class="help-text">
-        ※ 입력 중 자동 저장됩니다. 주민등록번호 13자리가 입력되면 그 주민번호로 슬롯이 식별됩니다.<br>
+        ※ 「💾 저장」 버튼을 누르거나, 입력 후 약 1초 뒤 자동으로 저장됩니다.<br>
+        ※ <strong>자동 저장 위치</strong>: 이 브라우저(Chrome/Edge)의 내부 저장소. <strong>다른 PC·다른 브라우저에서는 보이지 않습니다.</strong><br>
+        ※ <strong>내보내기 파일 저장 위치</strong>: 브라우저 기본 다운로드 폴더(보통 <code>C:\Users\[사용자명]\Downloads\</code>). 파일 탐색기(Windows 키 + E)로 「내 PC → 다운로드」에서 확인.<br>
         ※ 다른 직원 PC로 작업을 넘길 때는 「📥 내보내기」로 .json 파일을 받아 전달하고, 받는 쪽은 「📤 불러오기」를 사용하세요.<br>
-        ※ 거래처에 인쇄·PDF 전달이 끝난 슬롯은 정리해 주세요(용량 절감).
+        ※ ⚠ 브라우저 「인터넷 사용 기록 삭제」 시 자동 저장된 슬롯도 함께 삭제됩니다. 중요한 작업은 「📥 내보내기」로 .json 파일을 별도 보관해 두세요.<br>
+        ※ 거래처에 인쇄·PDF 전달이 끝난 슬롯은 「🗑 삭제」로 정리해 주세요(용량 절감).
       </div>
     </section>
 
@@ -1818,7 +1835,7 @@ function saveCurrentSlot() {
       rrn: data.meta.rrn,
       updated: data.meta.updated
     });
-    showSaveStatus('자동 저장됨');
+    markSaved();
     updateSlotUI();
   } catch (e) {
     handleStorageError(e);
@@ -1826,9 +1843,16 @@ function saveCurrentSlot() {
 }
 function scheduleAutoSave() {
   if (isApplyingSlot) return;
+  markModified();
   clearTimeout(autoSaveTimer);
   autoSaveTimer = setTimeout(saveCurrentSlot, 1000);
 }
+function saveNow() {
+  if (isApplyingSlot) return;
+  clearTimeout(autoSaveTimer);
+  saveCurrentSlot();
+}
+window.saveNow = saveNow;
 
 // --- 주민번호 변경 처리 ---
 function handleRRNChange() {
@@ -1846,7 +1870,7 @@ function handleRRNChange() {
       var data = JSON.parse(existing);
       applySlotState(data);
       currentSlotKey = newKey;
-      showSaveStatus('슬롯 전환됨');
+      markSaved();
       updateSlotUI();
     } catch (e) {}
   } else {
@@ -1889,7 +1913,7 @@ function onSlotSelect(key) {
     var data = JSON.parse(raw);
     applySlotState(data);
     currentSlotKey = key;
-    showSaveStatus('슬롯 전환됨');
+    markSaved();
     updateSlotUI();
   } catch (e) {
     showModal('슬롯 로드 실패', '슬롯 데이터를 읽을 수 없습니다.', []);
@@ -1905,7 +1929,7 @@ function newSlot() {
     localStorage.removeItem(SLOT_PREFIX + DRAFT_KEY);
     removeSlotFromIndex(DRAFT_KEY);
   } catch (e) {}
-  showSaveStatus('새 작업 시작');
+  clearSaveStatus();
   updateSlotUI();
 }
 
@@ -1922,7 +1946,7 @@ function deleteCurrentSlot() {
         } catch (e) {}
         clearAllInputs();
         currentSlotKey = DRAFT_KEY;
-        showSaveStatus('슬롯 삭제됨');
+        clearSaveStatus();
         updateSlotUI();
       }}
     ]);
@@ -2045,15 +2069,30 @@ function updateSlotUI() {
   qEl.innerHTML = label;
 }
 
-var saveStatusTimer = null;
-function showSaveStatus(text) {
+var lastSavedAt = null;
+function fmtTime(d) {
+  var h = String(d.getHours()).padStart(2, '0');
+  var m = String(d.getMinutes()).padStart(2, '0');
+  return h + ':' + m;
+}
+function markSaved() {
   var el = document.getElementById('slot_save_status');
   if (!el) return;
-  el.textContent = '· ' + text;
-  clearTimeout(saveStatusTimer);
-  saveStatusTimer = setTimeout(function () {
-    el.textContent = '';
-  }, 2500);
+  lastSavedAt = new Date();
+  el.className = 'status saved';
+  el.textContent = '✓ 저장됨 ' + fmtTime(lastSavedAt);
+}
+function markModified() {
+  var el = document.getElementById('slot_save_status');
+  if (!el) return;
+  el.className = 'status modified';
+  el.textContent = '● 수정됨 (저장 대기 중)';
+}
+function clearSaveStatus() {
+  var el = document.getElementById('slot_save_status');
+  if (!el) return;
+  el.className = 'status';
+  el.textContent = '';
 }
 
 // --- 저장 실패 처리 ---
@@ -2070,7 +2109,7 @@ function handleStorageError(e) {
 }
 
 // --- 모달 ---
-function showModal(title, body, actions) {
+function showModal(title, body, actions, isDanger) {
   var root = document.getElementById('modal_root');
   root.innerHTML = '';
   var overlay = document.createElement('div');
@@ -2078,7 +2117,9 @@ function showModal(title, body, actions) {
   var box = document.createElement('div');
   box.className = 'modal-box';
   var t = document.createElement('p');
-  t.className = 'modal-title';
+  var dangerKeywords = ['실패', '용량 초과', '삭제', '오류', '찾을 수 없음', '잘못된', '읽기 실패'];
+  var autoDanger = dangerKeywords.some(function (k) { return title.indexOf(k) >= 0; });
+  t.className = 'modal-title' + ((isDanger || autoDanger) ? ' danger' : '');
   t.textContent = title;
   var b = document.createElement('p');
   b.className = 'modal-body';
@@ -2121,7 +2162,10 @@ function exportCurrentSlot() {
   a.click();
   document.body.removeChild(a);
   setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-  showSaveStatus('내보내기 완료');
+  markSaved();
+  showModal('📥 내보내기 완료',
+    '파일명: ' + fname + '\n\n저장 위치: 브라우저 기본 다운로드 폴더\n(보통 C:\\Users\\[사용자명]\\Downloads\\)\n\n파일 탐색기(Windows 키 + E)로 「내 PC → 다운로드」에서 확인하실 수 있습니다.',
+    [{ text: '확인', cls: 'primary' }]);
 }
 window.exportCurrentSlot = exportCurrentSlot;
 
@@ -2153,7 +2197,7 @@ function importSlotFile(ev) {
           });
           applySlotState(saveData);
           currentSlotKey = data.key;
-          showSaveStatus('불러오기 완료');
+          markSaved();
           updateSlotUI();
         } catch (err) { handleStorageError(err); }
       };
@@ -2188,6 +2232,7 @@ addOpinion(); // 기본 의견 ① 1개 자동 생성
 // 마지막 작업 슬롯 자동 복원
 (function autoRestoreLastSlot() {
   var arr = loadSlotIndex();
+  var restoredMeta = null;
   if (arr.length > 0) {
     var last = arr[0]; // 최신 정렬
     var raw = localStorage.getItem(SLOT_PREFIX + last.key);
@@ -2196,6 +2241,7 @@ addOpinion(); // 기본 의견 ① 1개 자동 생성
         var data = JSON.parse(raw);
         applySlotState(data);
         currentSlotKey = last.key;
+        restoredMeta = last;
       } catch (e) {}
     }
   } else {
@@ -2206,8 +2252,19 @@ addOpinion(); // 기본 의견 ① 1개 자동 생성
         var dd = JSON.parse(draft);
         applySlotState(dd);
         currentSlotKey = DRAFT_KEY;
+        restoredMeta = { updated: dd.meta && dd.meta.updated };
       } catch (e) {}
     }
+  }
+  if (restoredMeta && restoredMeta.updated) {
+    try {
+      lastSavedAt = new Date(restoredMeta.updated);
+      var el = document.getElementById('slot_save_status');
+      if (el) {
+        el.className = 'status saved';
+        el.textContent = '✓ 저장됨 ' + fmtTime(lastSavedAt);
+      }
+    } catch (e) {}
   }
   updateSlotUI();
 })();
