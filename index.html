@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-20 17:43 -->
+<!-- BUILD_DATE: 2026-05-20 18:02 -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -298,6 +298,23 @@ textarea {
   font-size: 11.5px;
   color: #888;
   margin-bottom: 6px;
+}
+.image-drop-guide {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #d8dde6;
+}
+.image-drop-guide-title {
+  font-size: 12.5px;
+  color: #1a2c5b;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.image-drop-guide-sub {
+  font-size: 11px;
+  color: #666;
+  margin-top: 3px;
+  line-height: 1.5;
 }
 .btn-row {
   display: flex;
@@ -727,7 +744,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-20 17:43</span>
+    <span class="build-date">업데이트 2026-05-20 18:02</span>
   </div>
 </header>
 
@@ -796,10 +813,16 @@ textarea {
     </section>
 
     <section class="input-section">
-      <h3>2. 신고시 유의할 사항</h3>
+      <h3>2. 종합소득세 신고도움서비스 개별안내</h3>
       <div class="input-block">
         <span class="blk-label">이미지 첨부 (클릭, Ctrl+V 붙여넣기, 드래그앤드롭)</span>
-        <div class="image-drop" id="img_caution" tabindex="0" data-image="caution">
+        <div class="image-drop" id="img_caution" tabindex="0" data-image="caution"
+             data-guide-title="※ 소득세 개별분석자료: 사전 성실신고지원 안내대상자"
+             data-guide-sub="하단 문구가 있는 고객만 입력">
+          <div class="image-drop-guide">
+            <div class="image-drop-guide-title">※ 소득세 개별분석자료: 사전 성실신고지원 안내대상자</div>
+            <div class="image-drop-guide-sub">하단 문구가 있는 고객만 입력</div>
+          </div>
           <div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>
           <button type="button" class="btn-mini" onclick="document.getElementById('file_caution').click(); event.stopPropagation();">📁 파일에서 선택</button>
           <input type="file" id="file_caution" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'caution')">
@@ -815,10 +838,16 @@ textarea {
     </section>
 
     <section class="input-section">
-      <h3>3. 신고 안내자료</h3>
+      <h3>3. 사업장별 수입금액 및 합산대상 자료유무</h3>
       <div class="input-block">
         <span class="blk-label">이미지 첨부</span>
-        <div class="image-drop" id="img_guide" tabindex="0" data-image="guide">
+        <div class="image-drop" id="img_guide" tabindex="0" data-image="guide"
+             data-guide-title="사업장별 수입금액 이미지 붙여넣기"
+             data-guide-sub="타소득(합산대상)자료 있는 고객은 함께 캡쳐하여 붙여넣기">
+          <div class="image-drop-guide">
+            <div class="image-drop-guide-title">사업장별 수입금액 이미지 붙여넣기</div>
+            <div class="image-drop-guide-sub">타소득(합산대상)자료 있는 고객은 함께 캡쳐하여 붙여넣기</div>
+          </div>
           <div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>
           <button type="button" class="btn-mini" onclick="document.getElementById('file_guide').click(); event.stopPropagation();">📁 파일에서 선택</button>
           <input type="file" id="file_guide" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'guide')">
@@ -834,10 +863,15 @@ textarea {
     </section>
 
     <section class="input-section">
-      <h3>4. 신고상황 종합분석</h3>
+      <h3>4. 최근 3년간 종합소득세 신고상황</h3>
       <div class="input-block">
         <span class="blk-label">이미지 첨부</span>
-        <div class="image-drop" id="img_analysis" tabindex="0" data-image="analysis">
+        <div class="image-drop" id="img_analysis" tabindex="0" data-image="analysis"
+             data-guide-title="※ 최근 3년간 신고소득률 이미지 캡쳐"
+             data-guide-sub="">
+          <div class="image-drop-guide">
+            <div class="image-drop-guide-title">※ 최근 3년간 신고소득률 이미지 캡쳐</div>
+          </div>
           <div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>
           <button type="button" class="btn-mini" onclick="document.getElementById('file_analysis').click(); event.stopPropagation();">📁 파일에서 선택</button>
           <input type="file" id="file_analysis" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'analysis')">
@@ -940,19 +974,19 @@ textarea {
         </section>
 
         <section id="sec_caution" class="is-hidden">
-          <h2 class="rp-title">Ⅱ. 신고시 유의할 사항</h2>
+          <h2 class="rp-title">Ⅱ. 종합소득세 신고도움서비스 개별안내</h2>
           <div class="rp-image" id="rp_caution_img"></div>
           <div class="rp-opinion" id="rp_caution_opinion"></div>
         </section>
 
         <section id="sec_guide" class="is-hidden">
-          <h2 class="rp-title">Ⅲ. 신고 안내자료</h2>
+          <h2 class="rp-title">Ⅲ. 사업장별 수입금액 및 합산대상 자료유무</h2>
           <div class="rp-image" id="rp_guide_img"></div>
           <div class="rp-opinion" id="rp_guide_opinion"></div>
         </section>
 
         <section id="sec_analysis" class="is-hidden">
-          <h2 class="rp-title">Ⅳ. 신고상황 종합분석</h2>
+          <h2 class="rp-title">Ⅳ. 최근 3년간 종합소득세 신고상황</h2>
           <div class="rp-image" id="rp_analysis_img"></div>
           <div class="rp-opinion" id="rp_analysis_opinion"></div>
         </section>
@@ -1283,7 +1317,16 @@ function clearImage(key) {
   var dropEl = document.getElementById('img_' + key);
   if (!dropEl) return;
   dropEl.classList.remove('has-image');
-  dropEl.innerHTML =
+  var guideTitle = dropEl.getAttribute('data-guide-title') || '';
+  var guideSub = dropEl.getAttribute('data-guide-sub') || '';
+  var guideHtml = '';
+  if (guideTitle) {
+    guideHtml = '<div class="image-drop-guide">' +
+                '<div class="image-drop-guide-title">' + escapeHtml(guideTitle) + '</div>' +
+                (guideSub ? '<div class="image-drop-guide-sub">' + escapeHtml(guideSub) + '</div>' : '') +
+                '</div>';
+  }
+  dropEl.innerHTML = guideHtml +
     '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
     '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + key + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
     '<input type="file" id="file_' + key + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + key + '\')">';
@@ -1815,7 +1858,16 @@ function clearImageSilent(key) {
   var dropEl = document.getElementById('img_' + key);
   if (!dropEl) return;
   dropEl.classList.remove('has-image');
-  dropEl.innerHTML =
+  var guideTitle = dropEl.getAttribute('data-guide-title') || '';
+  var guideSub = dropEl.getAttribute('data-guide-sub') || '';
+  var guideHtml = '';
+  if (guideTitle) {
+    guideHtml = '<div class="image-drop-guide">' +
+                '<div class="image-drop-guide-title">' + escapeHtml(guideTitle) + '</div>' +
+                (guideSub ? '<div class="image-drop-guide-sub">' + escapeHtml(guideSub) + '</div>' : '') +
+                '</div>';
+  }
+  dropEl.innerHTML = guideHtml +
     '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
     '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + key + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
     '<input type="file" id="file_' + key + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + key + '\')">';
