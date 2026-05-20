@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-18 16:53 -->
+<!-- BUILD_DATE: 2026-05-20 17:21 -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -99,6 +99,92 @@ body {
   padding-bottom: 7px;
   border-bottom: 1px solid #e0e0e0;
 }
+
+/* ===== 작업 관리 박스 ===== */
+.slot-panel .slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 12px;
+}
+.slot-panel .slot-header h3 {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+.slot-quota {
+  font-size: 11.5px;
+  color: #555;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.slot-quota strong { color: #1a2c5b; font-weight: 600; }
+.slot-quota.warn { color: #854F0B; background: #FAEEDA; font-weight: 600; }
+.slot-quota.danger { color: #791F1F; background: #FCEBEB; font-weight: 600; }
+.slot-current {
+  font-size: 12.5px;
+  margin-bottom: 10px;
+  line-height: 1.7;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.slot-current .lbl {
+  color: #555;
+  font-weight: 600;
+  width: 78px;
+  display: inline-block;
+}
+.slot-current .name {
+  color: #1a2c5b;
+  font-weight: 600;
+}
+.slot-current .status {
+  color: #888;
+  font-size: 11.5px;
+}
+.slot-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.slot-actions label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #444;
+  width: 78px;
+  flex-shrink: 0;
+}
+.slot-actions select {
+  flex: 1;
+  min-width: 220px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12.5px;
+  background: #fff;
+  font-family: inherit;
+}
+.slot-actions button {
+  padding: 6px 11px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.btn-slot-primary { background: #1a2c5b; color: #fff; border-color: #1a2c5b; }
+.btn-slot-primary:hover { background: #0d1b3d; }
+.btn-slot-outline { background: #fff; color: #1a2c5b; border-color: #1a2c5b; }
+.btn-slot-outline:hover { background: #f0f4fa; }
+.btn-slot-danger { background: #fff; color: #c0392b; border-color: #c0392b; }
+.btn-slot-danger:hover { background: #c0392b; color: #fff; }
+
 .input-row {
   display: flex;
   align-items: center;
@@ -198,19 +284,6 @@ textarea {
   max-height: 200px;
   display: inline-block;
 }
-.image-drop-guide {
-  font-size: 13px;
-  color: #1a2c5b;
-  font-weight: 700;
-  margin-bottom: 4px;
-  line-height: 1.5;
-}
-.image-drop-guide-sub {
-  font-size: 11.5px;
-  color: #666;
-  margin-bottom: 10px;
-  line-height: 1.5;
-}
 .image-drop-info {
   font-size: 11.5px;
   color: #888;
@@ -285,6 +358,59 @@ textarea {
   color: #888;
   margin-top: 4px;
   line-height: 1.5;
+}
+
+/* ===== 모달 ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-box {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 18px 20px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+}
+.modal-box .modal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #c0392b;
+  margin: 0 0 8px;
+}
+.modal-box .modal-body {
+  font-size: 12.5px;
+  color: #444;
+  line-height: 1.65;
+  margin: 0 0 14px;
+  white-space: pre-wrap;
+}
+.modal-box .modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.modal-box button {
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+.modal-box button.primary {
+  background: #1a2c5b;
+  color: #fff;
+  border-color: #1a2c5b;
 }
 
 /* ===== 보고서 페이지 ===== */
@@ -548,7 +674,9 @@ textarea {
   .input-panel,
   .sync-info,
   .refresh-btn,
-  .build-date { display: none !important; }
+  .build-date,
+  .slot-panel,
+  .modal-overlay { display: none !important; }
   .layout { display: block; height: auto; }
   .preview-area {
     width: 100%;
@@ -586,13 +714,42 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-18 16:53</span>
+    <span class="build-date">업데이트 2026-05-20 17:21</span>
   </div>
 </header>
 
 <div class="layout">
 
   <aside class="input-panel">
+
+    <!-- ====== 작업 관리 ====== -->
+    <section class="input-section slot-panel" id="slot_panel">
+      <div class="slot-header">
+        <h3>작업 관리</h3>
+        <span class="slot-quota" id="slot_quota">용량 <strong>0.0</strong> / 약 10 MB</span>
+      </div>
+      <div class="slot-current">
+        <span class="lbl">현재 작업</span>
+        <span class="name" id="slot_current_name">임시 작업</span>
+        <span class="status" id="slot_save_status"></span>
+      </div>
+      <div class="slot-actions">
+        <label>불러오기</label>
+        <select id="slot_select" onchange="onSlotSelect(this.value)">
+          <option value="">─ 슬롯 선택 ─</option>
+        </select>
+        <button type="button" class="btn-slot-primary" onclick="newSlot()">＋ 새 작업</button>
+        <button type="button" class="btn-slot-danger" onclick="deleteCurrentSlot()">🗑 삭제</button>
+        <button type="button" class="btn-slot-outline" onclick="exportCurrentSlot()">📥 내보내기</button>
+        <button type="button" class="btn-slot-outline" onclick="document.getElementById('slot_import_file').click()">📤 불러오기</button>
+        <input type="file" id="slot_import_file" accept=".json,application/json" style="display:none;" onchange="importSlotFile(event)">
+      </div>
+      <div class="help-text">
+        ※ 입력 중 자동 저장됩니다. 주민등록번호 13자리가 입력되면 그 주민번호로 슬롯이 식별됩니다.<br>
+        ※ 다른 직원 PC로 작업을 넘길 때는 「📥 내보내기」로 .json 파일을 받아 전달하고, 받는 쪽은 「📤 불러오기」를 사용하세요.<br>
+        ※ 거래처에 인쇄·PDF 전달이 끝난 슬롯은 정리해 주세요(용량 절감).
+      </div>
+    </section>
 
     <section class="input-section">
       <h3>1. 기본정보</h3>
@@ -622,14 +779,10 @@ textarea {
     </section>
 
     <section class="input-section">
-      <h3>2. 종합소득세 신고도움서비스 개별안내</h3>
+      <h3>2. 신고시 유의할 사항</h3>
       <div class="input-block">
         <span class="blk-label">이미지 첨부 (클릭, Ctrl+V 붙여넣기, 드래그앤드롭)</span>
-        <div class="image-drop" id="img_caution" tabindex="0" data-image="caution"
-             data-guide-title="※ 소득세 개별분석자료: 사전 성실신고지원 안내대상자"
-             data-guide-sub="하단 문구가 있는 고객만 입력">
-          <div class="image-drop-guide">※ 소득세 개별분석자료: 사전 성실신고지원 안내대상자</div>
-          <div class="image-drop-guide-sub">하단 문구가 있는 고객만 입력</div>
+        <div class="image-drop" id="img_caution" tabindex="0" data-image="caution">
           <div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>
           <button type="button" class="btn-mini" onclick="document.getElementById('file_caution').click(); event.stopPropagation();">📁 파일에서 선택</button>
           <input type="file" id="file_caution" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'caution')">
@@ -645,14 +798,10 @@ textarea {
     </section>
 
     <section class="input-section">
-      <h3>3. 사업장별 수입금액 및 합산대상 자료유무</h3>
+      <h3>3. 신고 안내자료</h3>
       <div class="input-block">
         <span class="blk-label">이미지 첨부</span>
-        <div class="image-drop" id="img_guide" tabindex="0" data-image="guide"
-             data-guide-title="사업장별 수입금액 이미지 붙여넣기"
-             data-guide-sub="타소득(합산대상)자료 있는 고객은 함께 캡쳐하여 붙여넣기">
-          <div class="image-drop-guide">사업장별 수입금액 이미지 붙여넣기</div>
-          <div class="image-drop-guide-sub">타소득(합산대상)자료 있는 고객은 함께 캡쳐하여 붙여넣기</div>
+        <div class="image-drop" id="img_guide" tabindex="0" data-image="guide">
           <div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>
           <button type="button" class="btn-mini" onclick="document.getElementById('file_guide').click(); event.stopPropagation();">📁 파일에서 선택</button>
           <input type="file" id="file_guide" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'guide')">
@@ -668,13 +817,10 @@ textarea {
     </section>
 
     <section class="input-section">
-      <h3>4. 최근 3년간 종합소득세 신고상황</h3>
+      <h3>4. 신고상황 종합분석</h3>
       <div class="input-block">
         <span class="blk-label">이미지 첨부</span>
-        <div class="image-drop" id="img_analysis" tabindex="0" data-image="analysis"
-             data-guide-title="※ 최근 3년간 신고소득률 이미지 캡쳐"
-             data-guide-sub="">
-          <div class="image-drop-guide">※ 최근 3년간 신고소득률 이미지 캡쳐</div>
+        <div class="image-drop" id="img_analysis" tabindex="0" data-image="analysis">
           <div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>
           <button type="button" class="btn-mini" onclick="document.getElementById('file_analysis').click(); event.stopPropagation();">📁 파일에서 선택</button>
           <input type="file" id="file_analysis" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'analysis')">
@@ -777,19 +923,19 @@ textarea {
         </section>
 
         <section id="sec_caution" class="is-hidden">
-          <h2 class="rp-title">Ⅱ. 종합소득세 신고도움서비스 개별안내</h2>
+          <h2 class="rp-title">Ⅱ. 신고시 유의할 사항</h2>
           <div class="rp-image" id="rp_caution_img"></div>
           <div class="rp-opinion" id="rp_caution_opinion"></div>
         </section>
 
         <section id="sec_guide" class="is-hidden">
-          <h2 class="rp-title">Ⅲ. 사업장별 수입금액 및 합산대상 자료유무</h2>
+          <h2 class="rp-title">Ⅲ. 신고 안내자료</h2>
           <div class="rp-image" id="rp_guide_img"></div>
           <div class="rp-opinion" id="rp_guide_opinion"></div>
         </section>
 
         <section id="sec_analysis" class="is-hidden">
-          <h2 class="rp-title">Ⅳ. 최근 3년간 종합소득세 신고상황</h2>
+          <h2 class="rp-title">Ⅳ. 신고상황 종합분석</h2>
           <div class="rp-image" id="rp_analysis_img"></div>
           <div class="rp-opinion" id="rp_analysis_opinion"></div>
         </section>
@@ -900,6 +1046,8 @@ textarea {
   </main>
 
 </div>
+
+<div id="modal_root"></div>
 
 <script>
 'use strict';
@@ -1012,30 +1160,35 @@ document.querySelectorAll('input[data-format]').forEach(function (inp) {
       inp.value = formatNum(v);
     } else if (fmt === 'rrn') {
       inp.value = formatRRN(v);
+      handleRRNChange();
     } else if (fmt === 'brn') {
       inp.value = formatBRN(v);
     }
     updatePreview();
+    scheduleAutoSave();
   });
   inp.addEventListener('blur', function () {
     if (fmt === 'reportdate') {
       inp.value = formatReportDate(inp.value);
       updatePreview();
+      scheduleAutoSave();
     }
     if (inp.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(inp.value)) {
       inp.value = '';
       updatePreview();
+      scheduleAutoSave();
     }
   });
 });
 
 document.querySelectorAll('input[data-field], select[data-field], textarea[data-field]').forEach(function (el) {
-  el.addEventListener('input', updatePreview);
-  el.addEventListener('change', updatePreview);
+  el.addEventListener('input', function () { updatePreview(); scheduleAutoSave(); });
+  el.addEventListener('change', function () { updatePreview(); scheduleAutoSave(); });
   el.addEventListener('blur', function () {
     if (el.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(el.value)) {
       el.value = '';
       updatePreview();
+      scheduleAutoSave();
     }
   });
 });
@@ -1052,6 +1205,7 @@ var userEditedIncomeBefore = false;
     }
     inp.classList.remove('auto-filled');
     updatePreview();
+    scheduleAutoSave();
   });
 })();
 
@@ -1064,11 +1218,16 @@ var userEditedIncomeBefore = false;
 // ===== 키보드 네비게이션 =====
 function getFocusableInputs() {
   return Array.from(document.querySelectorAll('.input-panel input, .input-panel textarea, .input-panel select'))
-    .filter(function (el) { return el.offsetParent !== null && !el.disabled; });
+    .filter(function (el) {
+      if (el.offsetParent === null || el.disabled) return false;
+      if (el.closest('.slot-panel')) return false; // 작업 관리 박스 제외
+      return true;
+    });
 }
 document.addEventListener('keydown', function (e) {
   var target = e.target;
   if (!target.matches || !target.matches('.input-panel input, .input-panel textarea, .input-panel select')) return;
+  if (target.closest('.slot-panel')) return;
   var all = getFocusableInputs();
   var idx = all.indexOf(target);
   if (idx < 0) return;
@@ -1088,17 +1247,8 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-// ===== 이미지 첨부 (정적·동적 통합) =====
+// ===== 이미지 첨부 =====
 var imageStore = {};
-
-function buildGuideHTML(dropEl) {
-  var title = dropEl.getAttribute('data-guide-title') || '';
-  var sub = dropEl.getAttribute('data-guide-sub') || '';
-  var html = '';
-  if (title) html += '<div class="image-drop-guide">' + escapeHtml(title) + '</div>';
-  if (sub) html += '<div class="image-drop-guide-sub">' + escapeHtml(sub) + '</div>';
-  return html;
-}
 
 function setImage(key, dataUrl) {
   imageStore[key] = dataUrl;
@@ -1109,6 +1259,7 @@ function setImage(key, dataUrl) {
   var btnRow = document.getElementById('btnRow_' + key);
   if (btnRow) btnRow.style.display = 'flex';
   updatePreview();
+  scheduleAutoSave();
 }
 function clearImage(key) {
   imageStore[key] = null;
@@ -1116,13 +1267,13 @@ function clearImage(key) {
   if (!dropEl) return;
   dropEl.classList.remove('has-image');
   dropEl.innerHTML =
-    buildGuideHTML(dropEl) +
     '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
     '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + key + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
     '<input type="file" id="file_' + key + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + key + '\')">';
   var btnRow = document.getElementById('btnRow_' + key);
   if (btnRow) btnRow.style.display = 'none';
   updatePreview();
+  scheduleAutoSave();
 }
 function handleFileSelect(ev, key) {
   var f = ev.target.files && ev.target.files[0];
@@ -1217,13 +1368,13 @@ function addTaxCreditRow(values) {
     '<input type="text" data-tc="rate" placeholder="50%">' +
     '<input type="text" data-tc="end" placeholder="2029">' +
     '<input type="text" data-tc="note" placeholder="유의사항">' +
-    '<button type="button" class="del-btn" onclick="this.parentElement.remove(); updatePreview();">×</button>';
+    '<button type="button" class="del-btn" onclick="this.parentElement.remove(); updatePreview(); scheduleAutoSave();">×</button>';
   document.getElementById('taxcredit_rows').appendChild(row);
   row.querySelectorAll('input').forEach(function (inp) {
     if (inp.getAttribute('data-format') === 'num') {
-      inp.addEventListener('input', function () { inp.value = formatNum(inp.value); updatePreview(); });
+      inp.addEventListener('input', function () { inp.value = formatNum(inp.value); updatePreview(); scheduleAutoSave(); });
     } else {
-      inp.addEventListener('input', updatePreview);
+      inp.addEventListener('input', function () { updatePreview(); scheduleAutoSave(); });
     }
   });
   if (values) {
@@ -1253,7 +1404,7 @@ function renumberOpinions() {
     if (no) no.textContent = '의견 ' + getCircled(idx + 1);
   });
 }
-function addOpinion() {
+function addOpinion(values) {
   opinionSeq++;
   var oid = 'op_' + opinionSeq;
   imageStore[oid] = null;
@@ -1266,7 +1417,7 @@ function addOpinion() {
       '<span class="opinion-no">의견 ①</span>' +
       '<button type="button" class="del-op-btn" onclick="removeOpinion(\'' + oid + '\')">×</button>' +
     '</div>' +
-    '<div class="image-drop" id="img_' + oid + '" tabindex="0" data-image="' + oid + '" data-guide-title="" data-guide-sub="">' +
+    '<div class="image-drop" id="img_' + oid + '" tabindex="0" data-image="' + oid + '">' +
       '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
       '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + oid + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
       '<input type="file" id="file_' + oid + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + oid + '\')">' +
@@ -1281,16 +1432,23 @@ function addOpinion() {
   attachImageDropHandlers(item.querySelector('.image-drop'));
 
   var ta = item.querySelector('textarea');
-  ta.addEventListener('input', updatePreview);
+  ta.addEventListener('input', function () { updatePreview(); scheduleAutoSave(); });
   ta.addEventListener('blur', function () {
     if (ta.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(ta.value)) {
       ta.value = '';
       updatePreview();
+      scheduleAutoSave();
     }
   });
 
+  if (values) {
+    if (values.text) ta.value = values.text;
+    if (values.image) setImage(oid, values.image);
+  }
+
   renumberOpinions();
   updatePreview();
+  return oid;
 }
 function removeOpinion(oid) {
   var item = document.querySelector('.opinion-item[data-oid="' + oid + '"]');
@@ -1299,6 +1457,7 @@ function removeOpinion(oid) {
     delete imageStore[oid];
     renumberOpinions();
     updatePreview();
+    scheduleAutoSave();
   }
 }
 window.addOpinion = addOpinion;
@@ -1436,7 +1595,7 @@ function updatePreview() {
   });
   toggleSection('sec_taxcredit', tcShown > 0);
 
-  // Ⅶ (동적 렌더링)
+  // Ⅶ
   var opItems = document.querySelectorAll('#opinions_list .opinion-item');
   var rpOpBody = document.getElementById('rp_opinions_body');
   rpOpBody.innerHTML = '';
@@ -1473,8 +1632,586 @@ function escapeHtml(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// ============================================================
+// ===== 작업 관리 (슬롯 시스템 + JSON 내보내기/불러오기) =====
+// ============================================================
+var SLOT_PREFIX = 'jongso:slot:';
+var SLOT_INDEX_KEY = 'jongso:slots:index';
+var DRAFT_KEY = '_draft';
+var QUOTA_BUDGET_BYTES = 10 * 1024 * 1024; // 약 10 MB
+var currentSlotKey = DRAFT_KEY;
+var autoSaveTimer = null;
+var isApplyingSlot = false; // 슬롯 로드 중 자동 저장 차단
+
+// --- 슬롯 인덱스 ---
+function loadSlotIndex() {
+  try {
+    var raw = localStorage.getItem(SLOT_INDEX_KEY);
+    if (!raw) return [];
+    var arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+function saveSlotIndex(arr) {
+  try { localStorage.setItem(SLOT_INDEX_KEY, JSON.stringify(arr)); }
+  catch (e) { handleStorageError(e); }
+}
+function upsertSlotInIndex(meta) {
+  var arr = loadSlotIndex();
+  var idx = arr.findIndex(function (m) { return m.key === meta.key; });
+  if (idx >= 0) arr[idx] = meta; else arr.push(meta);
+  arr.sort(function (a, b) { return (b.updated || '').localeCompare(a.updated || ''); });
+  saveSlotIndex(arr);
+}
+function removeSlotFromIndex(key) {
+  var arr = loadSlotIndex().filter(function (m) { return m.key !== key; });
+  saveSlotIndex(arr);
+}
+
+// --- 직렬화 ---
+function serializeCurrentState() {
+  var opItems = document.querySelectorAll('#opinions_list .opinion-item');
+  var opinions = Array.from(opItems).map(function (item) {
+    var oid = item.dataset.oid;
+    var ta = item.querySelector('textarea');
+    return { text: ta ? ta.value : '', image: imageStore[oid] || null };
+  });
+  var tcRows = document.querySelectorAll('#taxcredit_rows .dyn-row');
+  var taxcredit = Array.from(tcRows).map(function (row) {
+    return {
+      item: row.querySelector('[data-tc="item"]').value,
+      amt: row.querySelector('[data-tc="amt"]').value,
+      firstyear: row.querySelector('[data-tc="firstyear"]').value,
+      period: row.querySelector('[data-tc="period"]').value,
+      rate: row.querySelector('[data-tc="rate"]').value,
+      end: row.querySelector('[data-tc="end"]').value,
+      note: row.querySelector('[data-tc="note"]').value
+    };
+  });
+  return {
+    version: 1,
+    key: currentSlotKey,
+    meta: {
+      name: val('inp_name'),
+      rrn: val('inp_rrn'),
+      updated: new Date().toISOString()
+    },
+    fields: {
+      name: val('inp_name'),
+      rrn: val('inp_rrn'),
+      company: val('inp_company'),
+      brn: val('inp_brn'),
+      industry: val('inp_industry'),
+      booktype: val('inp_booktype'),
+      period: val('inp_period'),
+      reportdate: val('inp_reportdate'),
+      income_after: val('inp_income_after'),
+      cost1: val('inp_cost1'),
+      cost2: val('inp_cost2'),
+      income_before: val('inp_income_before'),
+      caution_opinion: val('inp_caution_opinion'),
+      guide_opinion: val('inp_guide_opinion'),
+      analysis_opinion: val('inp_analysis_opinion')
+    },
+    images: {
+      caution: imageStore.caution || null,
+      guide: imageStore.guide || null,
+      analysis: imageStore.analysis || null
+    },
+    income_before_user_edited: userEditedIncomeBefore,
+    taxcredit: taxcredit,
+    opinions: opinions
+  };
+}
+
+// --- 역직렬화 (슬롯 → 화면) ---
+function applySlotState(data) {
+  isApplyingSlot = true;
+  try {
+    // 1) 동적 항목 초기화
+    document.getElementById('opinions_list').innerHTML = '';
+    document.getElementById('taxcredit_rows').innerHTML = '';
+    Object.keys(imageStore).forEach(function (k) { delete imageStore[k]; });
+
+    // 2) 정적 이미지 초기화
+    ['caution','guide','analysis'].forEach(function (key) {
+      clearImageSilent(key);
+    });
+
+    // 3) 필드 채우기
+    var f = data.fields || {};
+    var setVal = function (id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; };
+    setVal('inp_name', f.name);
+    setVal('inp_rrn', f.rrn);
+    setVal('inp_company', f.company);
+    setVal('inp_brn', f.brn);
+    setVal('inp_industry', f.industry);
+    setVal('inp_booktype', f.booktype);
+    setVal('inp_period', f.period || '2025.01.01. ~ 2025.12.31.');
+    setVal('inp_reportdate', f.reportdate || formatReportDate('0531'));
+    setVal('inp_income_after', f.income_after);
+    setVal('inp_cost1', f.cost1);
+    setVal('inp_cost2', f.cost2);
+    setVal('inp_income_before', f.income_before);
+    setVal('inp_caution_opinion', f.caution_opinion);
+    setVal('inp_guide_opinion', f.guide_opinion);
+    setVal('inp_analysis_opinion', f.analysis_opinion);
+
+    userEditedIncomeBefore = !!data.income_before_user_edited;
+
+    // 4) 정적 이미지 채우기
+    var imgs = data.images || {};
+    ['caution','guide','analysis'].forEach(function (key) {
+      if (imgs[key]) setImageSilent(key, imgs[key]);
+    });
+
+    // 5) 세액공제 행 복원
+    (data.taxcredit || []).forEach(function (v) { addTaxCreditRow(v); });
+
+    // 6) 의견 박스 복원 (최소 1개 유지)
+    var ops = data.opinions || [];
+    if (ops.length === 0) {
+      addOpinion();
+    } else {
+      ops.forEach(function (op) { addOpinion(op); });
+    }
+
+    currentSlotKey = data.key || DRAFT_KEY;
+    updatePreview();
+  } finally {
+    isApplyingSlot = false;
+  }
+}
+
+// 자동 저장 없이 이미지 set/clear (슬롯 로드 시 사용)
+function setImageSilent(key, dataUrl) {
+  imageStore[key] = dataUrl;
+  var dropEl = document.getElementById('img_' + key);
+  if (!dropEl) return;
+  dropEl.classList.add('has-image');
+  dropEl.innerHTML = '<img src="' + dataUrl + '" alt="">';
+  var btnRow = document.getElementById('btnRow_' + key);
+  if (btnRow) btnRow.style.display = 'flex';
+}
+function clearImageSilent(key) {
+  imageStore[key] = null;
+  var dropEl = document.getElementById('img_' + key);
+  if (!dropEl) return;
+  dropEl.classList.remove('has-image');
+  dropEl.innerHTML =
+    '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
+    '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + key + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
+    '<input type="file" id="file_' + key + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + key + '\')">';
+  var btnRow = document.getElementById('btnRow_' + key);
+  if (btnRow) btnRow.style.display = 'none';
+}
+
+// --- 저장 ---
+function saveCurrentSlot() {
+  if (isApplyingSlot) return;
+  var data = serializeCurrentState();
+  try {
+    localStorage.setItem(SLOT_PREFIX + currentSlotKey, JSON.stringify(data));
+    upsertSlotInIndex({
+      key: currentSlotKey,
+      name: data.meta.name,
+      rrn: data.meta.rrn,
+      updated: data.meta.updated
+    });
+    showSaveStatus('자동 저장됨');
+    updateSlotUI();
+  } catch (e) {
+    handleStorageError(e);
+  }
+}
+function scheduleAutoSave() {
+  if (isApplyingSlot) return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(saveCurrentSlot, 1000);
+}
+
+// --- 주민번호 변경 처리 ---
+function handleRRNChange() {
+  if (isApplyingSlot) return;
+  var rrnDigits = (val('inp_rrn') || '').replace(/[^\d]/g, '');
+  if (rrnDigits.length !== 13) return; // 미완성은 무시
+  var newKey = rrnDigits;
+  if (newKey === currentSlotKey) return;
+
+  // 일치 슬롯 조회
+  var existing = localStorage.getItem(SLOT_PREFIX + newKey);
+  if (existing) {
+    // 일치 슬롯 → 직전 슬롯의 자동 저장은 이미 수행됨, 그 슬롯 로드
+    try {
+      var data = JSON.parse(existing);
+      applySlotState(data);
+      currentSlotKey = newKey;
+      showSaveStatus('슬롯 전환됨');
+      updateSlotUI();
+    } catch (e) {}
+  } else {
+    // 일치 슬롯 없음 → 키만 갱신 (rename)
+    var oldKey = currentSlotKey;
+    try {
+      var stateData = serializeCurrentState();
+      stateData.key = newKey;
+      localStorage.setItem(SLOT_PREFIX + newKey, JSON.stringify(stateData));
+      if (oldKey !== newKey) {
+        localStorage.removeItem(SLOT_PREFIX + oldKey);
+        removeSlotFromIndex(oldKey);
+      }
+      upsertSlotInIndex({
+        key: newKey,
+        name: stateData.meta.name,
+        rrn: stateData.meta.rrn,
+        updated: stateData.meta.updated
+      });
+      currentSlotKey = newKey;
+      updateSlotUI();
+    } catch (e) {
+      handleStorageError(e);
+    }
+  }
+}
+
+// --- 슬롯 선택 / 새 작업 / 삭제 ---
+function onSlotSelect(key) {
+  if (!key) return;
+  if (key === currentSlotKey) { updateSlotUI(); return; }
+  // 현재 작업은 이미 자동 저장됨 → 안전하게 전환
+  var raw = localStorage.getItem(SLOT_PREFIX + key);
+  if (!raw) {
+    showModal('슬롯을 찾을 수 없음', '선택한 슬롯이 존재하지 않습니다.', []);
+    updateSlotUI();
+    return;
+  }
+  try {
+    var data = JSON.parse(raw);
+    applySlotState(data);
+    currentSlotKey = key;
+    showSaveStatus('슬롯 전환됨');
+    updateSlotUI();
+  } catch (e) {
+    showModal('슬롯 로드 실패', '슬롯 데이터를 읽을 수 없습니다.', []);
+  }
+}
+
+function newSlot() {
+  // 현재 작업은 자동 저장된 상태로 보존 (드롭다운에서 다시 복귀 가능)
+  clearAllInputs();
+  currentSlotKey = DRAFT_KEY;
+  // 기존 _draft 슬롯은 새 입력으로 덮어쓰기 됨 → 사전 정리
+  try {
+    localStorage.removeItem(SLOT_PREFIX + DRAFT_KEY);
+    removeSlotFromIndex(DRAFT_KEY);
+  } catch (e) {}
+  showSaveStatus('새 작업 시작');
+  updateSlotUI();
+}
+
+function deleteCurrentSlot() {
+  var label = currentSlotKey === DRAFT_KEY ? '임시 작업' : getSlotLabel(currentSlotKey);
+  showModal('슬롯 삭제',
+    '"' + label + '" 슬롯을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.',
+    [
+      { text: '취소', cls: '' },
+      { text: '삭제', cls: 'primary', action: function () {
+        try {
+          localStorage.removeItem(SLOT_PREFIX + currentSlotKey);
+          removeSlotFromIndex(currentSlotKey);
+        } catch (e) {}
+        clearAllInputs();
+        currentSlotKey = DRAFT_KEY;
+        showSaveStatus('슬롯 삭제됨');
+        updateSlotUI();
+      }}
+    ]);
+}
+
+function clearAllInputs() {
+  isApplyingSlot = true;
+  try {
+    var ids = ['inp_name','inp_rrn','inp_company','inp_brn','inp_industry','inp_booktype',
+               'inp_income_after','inp_cost1','inp_cost2','inp_income_before',
+               'inp_caution_opinion','inp_guide_opinion','inp_analysis_opinion'];
+    ids.forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('inp_period').value = '2025.01.01. ~ 2025.12.31.';
+    document.getElementById('inp_reportdate').value = formatReportDate('0531');
+
+    ['caution','guide','analysis'].forEach(function (k) { clearImageSilent(k); });
+    Object.keys(imageStore).forEach(function (k) { delete imageStore[k]; });
+
+    document.getElementById('opinions_list').innerHTML = '';
+    document.getElementById('taxcredit_rows').innerHTML = '';
+
+    userEditedIncomeBefore = false;
+    addOpinion(); // 기본 의견 1개
+    updatePreview();
+  } finally {
+    isApplyingSlot = false;
+  }
+}
+
+// --- 라벨 ---
+function getSlotLabel(key) {
+  if (key === DRAFT_KEY) return '임시 작업';
+  var arr = loadSlotIndex();
+  var meta = arr.find(function (m) { return m.key === key; });
+  if (!meta) return key;
+  var name = meta.name || '(이름 미입력)';
+  var rrn = meta.rrn || '';
+  var rrnShort = rrn ? maskRRN(rrn) : '';
+  return name + (rrnShort ? ' (' + rrnShort + ')' : '');
+}
+function maskRRN(rrn) {
+  var d = rrn.replace(/[^\d]/g, '');
+  if (d.length < 7) return rrn;
+  return d.slice(0, 6) + '-' + d.charAt(6) + '******';
+}
+function formatUpdated(iso) {
+  if (!iso) return '';
+  try {
+    var d = new Date(iso);
+    var m = d.getMonth() + 1;
+    var dd = d.getDate();
+    var hh = String(d.getHours()).padStart(2, '0');
+    var mm = String(d.getMinutes()).padStart(2, '0');
+    return m + '/' + dd + ' ' + hh + ':' + mm;
+  } catch (e) { return ''; }
+}
+
+// --- 용량 ---
+function getStorageUsageBytes() {
+  var total = 0;
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (!k) continue;
+      if (k === SLOT_INDEX_KEY || k.indexOf(SLOT_PREFIX) === 0) {
+        var v = localStorage.getItem(k);
+        total += (k.length + (v ? v.length : 0)) * 2;
+      }
+    }
+  } catch (e) {}
+  return total;
+}
+
+// --- UI 갱신 ---
+function updateSlotUI() {
+  var sel = document.getElementById('slot_select');
+  var arr = loadSlotIndex();
+  // 임시 작업이 인덱스에 없을 수 있음 → 별도 추가
+  var draftEntry = arr.find(function (m) { return m.key === DRAFT_KEY; });
+  var hasDraftData = !!localStorage.getItem(SLOT_PREFIX + DRAFT_KEY);
+  var items = arr.slice();
+  if (!draftEntry && hasDraftData) {
+    items.unshift({ key: DRAFT_KEY, name: '', rrn: '', updated: '' });
+  }
+  // 옵션 렌더
+  sel.innerHTML = '<option value="">─ 슬롯 선택 ─</option>';
+  items.forEach(function (m) {
+    var label = (m.key === DRAFT_KEY ? '임시 작업 (주민번호 미입력)' : getSlotLabel(m.key));
+    var up = formatUpdated(m.updated);
+    var mark = (m.key === currentSlotKey) ? ' ← 현재' : '';
+    var opt = document.createElement('option');
+    opt.value = m.key;
+    opt.textContent = label + (up ? ' · ' + up : '') + mark;
+    if (m.key === currentSlotKey) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  // 현재 작업 표시
+  var nameEl = document.getElementById('slot_current_name');
+  if (currentSlotKey === DRAFT_KEY) {
+    nameEl.textContent = '임시 작업';
+  } else {
+    nameEl.textContent = getSlotLabel(currentSlotKey);
+  }
+
+  // 용량 표시
+  var bytes = getStorageUsageBytes();
+  var mb = bytes / 1024 / 1024;
+  var pct = (bytes / QUOTA_BUDGET_BYTES) * 100;
+  var qEl = document.getElementById('slot_quota');
+  qEl.classList.remove('warn','danger');
+  var label = '용량 <strong>' + mb.toFixed(1) + '</strong> / 약 10 MB';
+  if (pct >= 95) {
+    qEl.classList.add('danger');
+    label = '⚠ 용량 ' + mb.toFixed(1) + ' / 10 MB (' + Math.round(pct) + '%)';
+  } else if (pct >= 80) {
+    qEl.classList.add('warn');
+    label = '⚠ 용량 ' + mb.toFixed(1) + ' / 10 MB (' + Math.round(pct) + '%)';
+  }
+  qEl.innerHTML = label;
+}
+
+var saveStatusTimer = null;
+function showSaveStatus(text) {
+  var el = document.getElementById('slot_save_status');
+  if (!el) return;
+  el.textContent = '· ' + text;
+  clearTimeout(saveStatusTimer);
+  saveStatusTimer = setTimeout(function () {
+    el.textContent = '';
+  }, 2500);
+}
+
+// --- 저장 실패 처리 ---
+function handleStorageError(e) {
+  console.error('Storage error:', e);
+  var isQuota = (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014));
+  if (isQuota) {
+    showModal('저장 용량 초과',
+      '브라우저 저장 용량이 부족합니다.\n사용하지 않는 슬롯을 삭제하거나 첨부 이미지를 줄여 주세요.\n\n진행 중인 작업은 「📥 내보내기」로 .json 파일로 받아 두실 수 있습니다.',
+      [{ text: '확인', cls: 'primary' }]);
+  } else {
+    showModal('저장 실패', '데이터를 저장하지 못했습니다. 브라우저 콘솔을 확인하세요.', [{ text: '확인', cls: 'primary' }]);
+  }
+}
+
+// --- 모달 ---
+function showModal(title, body, actions) {
+  var root = document.getElementById('modal_root');
+  root.innerHTML = '';
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  var box = document.createElement('div');
+  box.className = 'modal-box';
+  var t = document.createElement('p');
+  t.className = 'modal-title';
+  t.textContent = title;
+  var b = document.createElement('p');
+  b.className = 'modal-body';
+  b.textContent = body;
+  var actWrap = document.createElement('div');
+  actWrap.className = 'modal-actions';
+  (actions || [{ text: '확인', cls: 'primary' }]).forEach(function (a) {
+    var btn = document.createElement('button');
+    btn.textContent = a.text;
+    if (a.cls) btn.className = a.cls;
+    btn.addEventListener('click', function () {
+      root.innerHTML = '';
+      if (typeof a.action === 'function') a.action();
+    });
+    actWrap.appendChild(btn);
+  });
+  box.appendChild(t);
+  box.appendChild(b);
+  box.appendChild(actWrap);
+  overlay.appendChild(box);
+  root.appendChild(overlay);
+}
+
+// --- 내보내기 ---
+function exportCurrentSlot() {
+  var data = serializeCurrentState();
+  var name = (val('inp_name') || '임시작업').replace(/[\\\/:*?"<>|]/g, '');
+  var rrnDigits = (val('inp_rrn') || '').replace(/[^\d]/g, '');
+  var rrn6 = rrnDigits.length >= 6 ? rrnDigits.slice(0, 6) : '주민번호미입력';
+  var today = new Date();
+  var ds = today.getFullYear() + String(today.getMonth() + 1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+  var fname = name + '_' + rrn6 + '_종합소득세_' + ds + '.json';
+
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  showSaveStatus('내보내기 완료');
+}
+window.exportCurrentSlot = exportCurrentSlot;
+
+// --- 불러오기 ---
+function importSlotFile(ev) {
+  var f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!data || !data.fields || !data.key) {
+        showModal('잘못된 파일', '이 파일은 본 도구에서 만든 슬롯 파일이 아닙니다.', [{ text: '확인', cls: 'primary' }]);
+        ev.target.value = '';
+        return;
+      }
+      var existing = localStorage.getItem(SLOT_PREFIX + data.key);
+      var importNow = function () {
+        try {
+          var saveData = Object.assign({}, data);
+          saveData.meta = saveData.meta || {};
+          saveData.meta.updated = new Date().toISOString();
+          localStorage.setItem(SLOT_PREFIX + data.key, JSON.stringify(saveData));
+          upsertSlotInIndex({
+            key: data.key,
+            name: saveData.meta.name || '',
+            rrn: saveData.meta.rrn || '',
+            updated: saveData.meta.updated
+          });
+          applySlotState(saveData);
+          currentSlotKey = data.key;
+          showSaveStatus('불러오기 완료');
+          updateSlotUI();
+        } catch (err) { handleStorageError(err); }
+      };
+      if (existing) {
+        var lbl = getSlotLabel(data.key);
+        showModal('슬롯 덮어쓰기',
+          '"' + lbl + '" 슬롯이 이미 있습니다.\n현재 슬롯을 덮어쓸까요?',
+          [
+            { text: '취소', cls: '' },
+            { text: '덮어쓰기', cls: 'primary', action: importNow }
+          ]);
+      } else {
+        importNow();
+      }
+    } catch (err) {
+      showModal('파일 읽기 실패', '파일 형식이 올바르지 않습니다.', [{ text: '확인', cls: 'primary' }]);
+    }
+    ev.target.value = '';
+  };
+  reader.readAsText(f, 'utf-8');
+}
+window.importSlotFile = importSlotFile;
+window.onSlotSelect = onSlotSelect;
+window.newSlot = newSlot;
+window.deleteCurrentSlot = deleteCurrentSlot;
+
+// ============================================================
 // ===== 초기 렌더 =====
+// ============================================================
 addOpinion(); // 기본 의견 ① 1개 자동 생성
+
+// 마지막 작업 슬롯 자동 복원
+(function autoRestoreLastSlot() {
+  var arr = loadSlotIndex();
+  if (arr.length > 0) {
+    var last = arr[0]; // 최신 정렬
+    var raw = localStorage.getItem(SLOT_PREFIX + last.key);
+    if (raw) {
+      try {
+        var data = JSON.parse(raw);
+        applySlotState(data);
+        currentSlotKey = last.key;
+      } catch (e) {}
+    }
+  } else {
+    // 임시 슬롯 자동 복원
+    var draft = localStorage.getItem(SLOT_PREFIX + DRAFT_KEY);
+    if (draft) {
+      try {
+        var dd = JSON.parse(draft);
+        applySlotState(dd);
+        currentSlotKey = DRAFT_KEY;
+      } catch (e) {}
+    }
+  }
+  updateSlotUI();
+})();
+
 updatePreview();
 
 window.addEventListener('load', function () {
