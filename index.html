@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-21 13:23 -->
+<!-- BUILD_DATE: 2026-05-21 15:02 -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -447,6 +447,7 @@ textarea {
 .report-page {
   background: #fff;
   width: 210mm;
+  page: samho;
   min-height: 297mm;
   margin: 0 auto;
   padding: 22mm 20mm;
@@ -776,7 +777,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-21 13:23</span>
+    <span class="build-date">업데이트 2026-05-21 15:02</span>
   </div>
 </header>
 
@@ -2368,6 +2369,19 @@ addOpinion(); // 기본 의견 ① 1개 자동 생성
 })();
 
 updatePreview();
+
+// ===== 인쇄 시 헤더 우상단에 오늘 날짜 자동 표시 =====
+window.addEventListener('beforeprint', function () {
+  var d = new Date();
+  var ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  var el = document.getElementById('print-date-style');
+  if (!el) {
+    el = document.createElement('style');
+    el.id = 'print-date-style';
+    document.head.appendChild(el);
+  }
+  el.textContent = '@media print { @page samho { @top-right { content: "' + ds + '"; } } }';
+});
 
 window.addEventListener('load', function () {
   setTimeout(function () {
