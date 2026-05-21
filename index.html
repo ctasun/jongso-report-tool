@@ -1666,7 +1666,7 @@ function updatePreview() {
     tcShown++;
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td class="lab">' + buildDistrHTML(item) + '</td>' +
+      '<td class="lab item-cell">' + (item ? escapeHtml(item) : '-') + '</td>' +
       '<td class="num">' + (amt || '-') + '</td>' +
       '<td class="ctr">' + (firstyear || '-') + '</td>' +
       '<td class="ctr">' + (period || '-') + '</td>' +
