@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-21 15:28 -->
+<!-- BUILD_DATE: 2026-05-21 15:41 -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -778,7 +778,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-21 15:28</span>
+    <span class="build-date">업데이트 2026-05-21 15:41</span>
   </div>
 </header>
 
@@ -962,7 +962,7 @@ textarea {
     </section>
 
     <div style="text-align:center; margin: 12px 0 20px;">
-      <button class="btn-add" style="background:#c0392b; padding:8px 20px; font-size:13px;" onclick="window.print()">🖨 인쇄 / PDF 저장</button>
+      <button class="btn-add" style="background:#c0392b; padding:8px 20px; font-size:13px;" onclick="setTitleAndPrint()">🖨 인쇄 / PDF 저장</button>
     </div>
 
   </aside>
@@ -2370,6 +2370,19 @@ addOpinion(); // 기본 의견 ① 1개 자동 생성
 })();
 
 updatePreview();
+
+// ===== 인쇄 버튼 트리거 (title 선제 변경 후 인쇄) =====
+function setTitleAndPrint() {
+  if (!window._origTitle) window._origTitle = document.title;
+  var name = (document.getElementById('inp_name').value || '').trim();
+  var company = (document.getElementById('inp_company').value || '').trim();
+  var fname = '종합소득세 신고보고서';
+  if (company) fname += '_' + company;
+  if (name) fname += '_' + name + ' 대표님';
+  document.title = fname;
+  setTimeout(function () { window.print(); }, 50);
+}
+window.setTitleAndPrint = setTitleAndPrint;
 
 // ===== 인쇄 시 헤더 우상단에 오늘 날짜 자동 표시 =====
 window.addEventListener('beforeprint', function () {
