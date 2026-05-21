@@ -1439,11 +1439,17 @@ function addTaxCreditRow(values) {
     '<input type="text" data-tc="period" placeholder="1기/5기">' +
     '<input type="text" data-tc="rate" placeholder="50%">' +
     '<input type="text" data-tc="end" placeholder="2029">' +
-    '<input type="text" data-tc="note" placeholder="유의사항">' +
+    '<textarea data-tc="note" placeholder="유의사항" rows="1" style="resize:none; overflow:hidden; min-height:26px; line-height:1.5;"></textarea>' +
     '<button type="button" class="del-btn" onclick="this.parentElement.remove(); updatePreview(); scheduleAutoSave();">×</button>';
   document.getElementById('taxcredit_rows').appendChild(row);
-  row.querySelectorAll('input').forEach(function (inp) {
-    if (inp.getAttribute('data-format') === 'num') {
+  row.querySelectorAll('input, textarea').forEach(function (inp) {
+    if (inp.tagName === 'TEXTAREA') {
+      inp.addEventListener('input', function () {
+        autoResizeTextarea(inp);
+        updatePreview();
+        scheduleAutoSave();
+      });
+    } else if (inp.getAttribute('data-format') === 'num') {
       inp.addEventListener('input', function () { inp.value = formatNum(inp.value); updatePreview(); scheduleAutoSave(); });
     } else {
       inp.addEventListener('input', function () { updatePreview(); scheduleAutoSave(); });
@@ -1457,10 +1463,14 @@ function addTaxCreditRow(values) {
     row.querySelector('[data-tc="rate"]').value = values.rate || '';
     row.querySelector('[data-tc="end"]').value = values.end || '';
     row.querySelector('[data-tc="note"]').value = values.note || '';
+    var noteTa = row.querySelector('[data-tc="note"]');
+    if (noteTa && values.note) {
+      setTimeout(function () { autoResizeTextarea(noteTa); }, 0);
+    }
   }
   updatePreview();
 }
-window.addTaxCreditRow = addTaxCreditRow;
+  window.addTaxCreditRow = addTaxCreditRow;
 
 // ===== 의견 (완전 동적) =====
 var opinionSeq = 0;
