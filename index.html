@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-21 15:41 -->
+<!-- BUILD_DATE: 2026-05-21 18:08 -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -265,6 +265,7 @@ textarea {
   resize: vertical;
   min-height: 72px;
   background: #fff;
+  overflow-y: hidden;
 }
 .image-drop {
   border: 2px dashed #ccc;
@@ -778,7 +779,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-21 15:41</span>
+    <span class="build-date">업데이트 2026-05-21 18:08</span>
   </div>
 </header>
 
@@ -1450,7 +1451,12 @@ function getRate(income) {
 function autoResizeTextarea(ta) {
   ta.style.height = 'auto';
   ta.style.height = ta.scrollHeight + 'px';
-}  
+}
+document.addEventListener('input', function (e) {
+  if (e.target && e.target.tagName === 'TEXTAREA') {
+    autoResizeTextarea(e.target);
+  }
+});
 var taxcreditCount = 0;
 function addTaxCreditRow(values) {
   taxcreditCount++;
@@ -1886,6 +1892,9 @@ function applySlotState(data) {
 
     currentSlotKey = data.key || DRAFT_KEY;
     updatePreview();
+    setTimeout(function () {
+      document.querySelectorAll('textarea').forEach(autoResizeTextarea);
+    }, 0);
   } finally {
     isApplyingSlot = false;
   }
@@ -2401,6 +2410,7 @@ window.addEventListener('load', function () {
   setTimeout(function () {
     var first = document.getElementById('inp_name');
     if (first) try { first.focus(); } catch (e) {}
+    document.querySelectorAll('textarea').forEach(autoResizeTextarea);
   }, 100);
 });
 </script>
