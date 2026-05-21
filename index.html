@@ -738,8 +738,32 @@ textarea {
   .rp-opinion { page-break-inside: avoid; }
   .rp-op-img { page-break-inside: avoid; }
   .rp-footer { page-break-inside: avoid; margin-top: 60px; margin-bottom: 8mm; }
-  @page { size: A4; margin: 18mm 16mm 8mm 16mm; }
-}
+@page samho {
+      size: A4;
+      margin: 22mm 16mm 12mm 16mm;
+      @top-left {
+        content: "세무법인삼호 남부지점";
+        font-size: 11px;
+        font-weight: 700;
+        color: #1a2c5b;
+        font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+        padding-bottom: 4px;
+      }
+      @top-right {
+        content: "";
+        font-size: 10.5px;
+        color: #555;
+        font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+        padding-bottom: 4px;
+      }
+      @bottom-right {
+        content: counter(page) "/" counter(pages);
+        font-size: 10.5px;
+        color: #555;
+        font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+      }
+    }
+  }
 </style>
 </head>
 <body>
