@@ -2673,7 +2673,7 @@ window.addEventListener('load', function () {
     var crops = {};
     crops.guide = await pdfxCrop(pages, { startKeys: ['사업장별수입금액', '※'], end: { type: 'top', keys: ['종교인'] } });
     crops.analysis = await pdfxCrop(pages, { startKeys: ['신고소득률', '※'], end: { type: 'rowbottom', keys: ['소득률', '당해업체'] } });
-    crops.caution = await pdfxCrop(pages, { startKeys: ['개별분석자료'], startLast: true, end: { type: 'pagebottom' } });
+    crops.caution = await pdfxCrop(pages, { startKeys: ['소득세개별분석자료', '사전성실신고지원안내대상자'], end: { type: 'pagebottom' } });
     return { info: info, crops: crops };
   }
 
