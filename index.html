@@ -2930,16 +2930,35 @@ async function pdfxCropCautionOnly(pages) {
   return out.toDataURL('image/png');
 }  
   // ---------- 기본정보 추출 ----------
-  function pdfxExtractIndustry(all) {
-    var m = all.match(/업\s*종\s*업\s*종\s*코드\s*신고\s*시\s*유의할\s*사항\s*([가-힣\s]+?)\s*\d{6}/);
+function pdfxExtractIndustry(all) {
+  var s = String(all == null ? '' : all);
 
-    if (!m) return '';
+  // PDF 텍스트 추출 시 글자 사이 공백, 줄바꿈이 섞이므로 전부 제거해서 판단
+  var compact = s.replace(/\s+/g, '');
 
-    return m[1]
-      .replace(/및/g, ' 및 ')
-      .replace(/\s+/g, ' ')
-      .trim();
+  // 반드시 "업종별 유의사항" 표에서만 찾는다.
+  var start = compact.indexOf('업종별유의사항');
+  if (start < 0) return '';
+
+  // 업종별 유의사항 표 주변만 검사
+  var tail = compact.slice(start, start + 1500);
+
+  // 표 구조:
+  // 업종별유의사항 / 업종 / 업종코드 / 신고시유의할사항 / 금융및보험업 / 671202
+  var m = tail.match(/신고시유의할사항([가-힣]+?)(\d{6})/);
+
+  if (!m) {
+    // 일부 PDF에서 "신고시 유의할 사항" 헤더가 깨질 경우 보조 패턴
+    m = tail.match(/업종코드(?:신고시유의할사항)?([가-힣]+?)(\d{6})/);
   }
+
+  if (!m) return '';
+
+  return m[1]
+    .replace(/및/g, ' 및 ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
   function pdfxExtractInfo(p1, all) {
     var info = { name: '', birth6: '', company: '', brn: '', industry: '', booktype: '' };
     var m;
