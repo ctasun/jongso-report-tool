@@ -1644,7 +1644,7 @@ function updatePreview() {
   // Ⅰ
   setText('rp_name', val('inp_name'));
   var rrnFront = String(val('inp_rrn')).replace(/[^\d]/g, '').slice(0, 6);
-  setText('rp_rrn', rrnFront ? rrnFront + ' - *******' : '');;
+  setText('rp_rrn', rrnFront ? rrnFront + ' - *******' : '');
   setText('rp_company', val('inp_company'));
   setText('rp_brn', val('inp_brn'));
   setText('rp_industry', val('inp_industry'));
@@ -2835,7 +2835,7 @@ window.addEventListener('load', function () {
       if (m) info.brn = m[1];
     }
     m = all.match(/업\s*종\s*업\s*종\s*코드\s*신고\s*시\s*유의할\s*사항\s*([가-힣\s]+?)\s*(\d{6})/);
-    if (m) info.industry = m[1].replace(/\s+/g, ' ').trim();
+    if (m) info.industry = m[1].replace(/및/g, ' 및 ').replace(/\s+/g, ' ').trim();
     return info;
   }
 
