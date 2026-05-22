@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-22 19:46 -->
+<!-- BUILD_DATE: 2026-05-22 21:40 -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -804,7 +804,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-22 19:46</span>
+    <span class="build-date">업데이트 2026-05-22 21:40</span>
   </div>
 </header>
 
@@ -2701,7 +2701,7 @@ window.addEventListener('load', function () {
     var all = pdfxNorm(pages.map(function (p) {
       return p.lines.map(function (l) { return l.rawtext; }).join(' ');
     }).join(' \n '));
-    var info = pdfxExtractInfo(p1, all);
+    var info = pdfxExtractInfo(p1, all, pages);
     var crops = {};
     crops.guide = await pdfxCrop(pages, { startKeys: ['사업장별수입금액', '※'], end: { type: 'top', keys: ['종교인'] } });
     crops.analysis = await pdfxCrop(pages, { startKeys: ['신고소득률', '※'], end: { type: 'rowbottom', keys: ['소득률', '당해업체'] } });
@@ -2962,35 +2962,98 @@ async function pdfxCropCautionOnly(pages) {
   return out.toDataURL('image/png');
 }  
   // ---------- 기본정보 추출 ----------
+function pdfxFormatIndustryName(raw) {
+  var t = String(raw == null ? '' : raw);
+  if (!t) return '';
+
+  // 코드·구분기호 제거 후, PDF 글자 단위 공백을 우선 제거한다.
+  t = t.replace(/\d{6}.*$/, '');
+  t = t.replace(/[|:：]/g, ' ');
+  t = t.replace(/\s+/g, '');
+
+  // 업종명에 끼어들 수 있는 표 머리글 잔여값 제거
+  t = t.replace(/^업종/, '');
+  t = t.replace(/^업종코드/, '');
+  t = t.replace(/^신고시유의할사항/, '');
+
+  // 한국어 업종명에 필요한 최소 문장부호만 보정
+  t = t.replace(/,/g, ', ');
+  t = t.replace(/및/g, ' 및 ');
+  t = t.replace(/\s+/g, ' ').trim();
+  return t;
+}
+
+function pdfxExtractIndustryFromPages(pages) {
+  if (!pages || !pages.length) return '';
+
+  var found = [];
+  var seen = {};
+
+  for (var pi = 0; pi < pages.length; pi++) {
+    var lines = pages[pi].lines || [];
+    var startIndex = -1;
+
+    for (var li = 0; li < lines.length; li++) {
+      if ((lines[li].text || '').indexOf('업종별유의사항') >= 0) {
+        startIndex = li;
+        break;
+      }
+    }
+
+    if (startIndex < 0) continue;
+
+    for (var k = startIndex + 1; k < lines.length; k++) {
+      var L = lines[k];
+      var t = L.text || '';
+      if (!t) continue;
+
+      // 다음 큰 섹션이 나오면 중단
+      if (k > startIndex + 1 && t.indexOf('※') >= 0 && t.indexOf('업종별유의사항') < 0) break;
+
+      // 표 머리글 또는 우측 유의사항 본문은 제외
+      if (t.indexOf('업종코드') >= 0 || t.indexOf('신고시유의') >= 0) continue;
+      if (t.indexOf('○') >= 0) continue;
+
+      // 업종별 유의사항 표의 좌측 셀: 업종명 + 6자리 업종코드
+      var m = t.match(/^([가-힣A-Za-z,&/·ㆍ().\-]{2,80}?)(\d{6})(?!\d)/);
+      if (!m) continue;
+
+      var name = pdfxFormatIndustryName(m[1]);
+      if (!name || !/[가-힣]/.test(name)) continue;
+
+      // 과도하게 긴 유의사항 문장이 우연히 잡히는 경우 방지
+      if (name.length > 35) continue;
+
+      if (!seen[name]) {
+        seen[name] = true;
+        found.push(name);
+      }
+    }
+
+    if (found.length) break;
+  }
+
+  return found.join(' / ');
+}
+
 function pdfxExtractIndustry(all) {
   var s = String(all == null ? '' : all);
-
-  // PDF 텍스트의 줄바꿈·글자 사이 공백을 제거해서 안정적으로 검색
   var compact = s.replace(/\s+/g, '');
 
-  // 반드시 "업종별 유의사항" 표 안에서만 업종 추출
   var start = compact.indexOf('업종별유의사항');
   if (start < 0) return '';
 
-  var tail = compact.slice(start, start + 2000);
-
-  // 구조 예:
-  // 업종별유의사항업종업종코드신고시유의할사항금융및보험업671202...
-  var m = tail.match(/업종코드신고시유의할사항([가-힣]+?)(\d{6})/);
-
-  if (!m) {
-    // 보조 패턴
-    m = tail.match(/신고시유의할사항([가-힣]+?)(\d{6})/);
-  }
-
+  var tail = compact.slice(start, start + 4000);
+  var m = tail.match(/업종업종코드신고시유의할사항([가-힣A-Za-z,&/·ㆍ().\-]{2,80}?)(\d{6})(?!\d)/);
+  if (!m) m = tail.match(/업종코드신고시유의할사항([가-힣A-Za-z,&/·ㆍ().\-]{2,80}?)(\d{6})(?!\d)/);
+  if (!m) m = tail.match(/신고시유의할사항([가-힣A-Za-z,&/·ㆍ().\-]{2,80}?)(\d{6})(?!\d)/);
   if (!m) return '';
 
-  return m[1]
-    .replace(/및/g, ' 및 ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  var name = pdfxFormatIndustryName(m[1]);
+  return (name && name.length <= 35) ? name : '';
 }
-  function pdfxExtractInfo(p1, all) {
+
+  function pdfxExtractInfo(p1, all, pages) {
     var info = { name: '', birth6: '', company: '', brn: '', industry: '', booktype: '' };
     var m;
     m = p1.match(/성\s*명\s*([가-힣]{2,4})/);
@@ -3008,7 +3071,7 @@ function pdfxExtractIndustry(all) {
       m = p1.match(/(\d{3}-\d{2}-\d{5})/);
       if (m) info.brn = m[1];
     }
-    info.industry = pdfxExtractIndustry(all);
+    info.industry = pdfxExtractIndustryFromPages(pages) || pdfxExtractIndustry(all);
     return info;
   }
 
@@ -3030,7 +3093,7 @@ function pdfxExtractIndustry(all) {
     pdfxSetField('inp_rrn', formatRRN(info.birth6));   // 주민등록번호 앞 6자리 + 마스킹
     pdfxSetField('inp_company', info.company);
     pdfxSetField('inp_brn', info.brn);
-    pdfxSetField('inp_industry', info.industry);
+    if (info.industry) pdfxSetField('inp_industry', info.industry);
     if (info.booktype) pdfxSetField('inp_booktype', info.booktype);
 
     if (setImg && clrImg) {
@@ -3044,6 +3107,8 @@ function pdfxExtractIndustry(all) {
     if (!crops.guide) miss.push('Ⅲ');
     if (!crops.analysis) miss.push('Ⅳ');
     var msg = '「' + c.name + '」 자동 입력 완료.';
+    if (info.industry) msg += ' 업종: ' + info.industry + '.';
+    else msg += ' 업종은 자동 추출되지 않았습니다.';
     if (miss.length) msg += ' (자동 추출이 안 된 칸: ' + miss.join('·') + ' — 해당 이미지칸에 직접 붙여넣기)';
     pdfxStatus('ok', msg);
   }
