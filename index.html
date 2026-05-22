@@ -2673,7 +2673,7 @@ window.addEventListener('load', function () {
     var crops = {};
     crops.guide = await pdfxCrop(pages, { startKeys: ['사업장별수입금액', '※'], end: { type: 'top', keys: ['종교인'] } });
     crops.analysis = await pdfxCrop(pages, { startKeys: ['신고소득률', '※'], end: { type: 'rowbottom', keys: ['소득률', '당해업체'] } });
-    crops.caution = await pdfxCrop(pages, { startKeys: ['소득세개별분석자료', '사전성실신고지원안내대상자'], end: { type: 'pagebottom' } });
+    crops.caution = await pdfxCropCautionOnly(pages);
     return { info: info, crops: crops };
   }
 
@@ -2815,7 +2815,120 @@ window.addEventListener('load', function () {
     out.getContext('2d').drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
     return out.toDataURL('image/png');
   }
+async function pdfxCropCautionOnly(pages) {
+  var startLine = null, startPage = null;
+  var pi, li, k;
 
+  // "소득세 개별분석자료" 중에서
+  // 바로 아래에 "항목 / 항목설명" 표가 있는 블록만 찾는다.
+  // "업종별 유의사항" 블록은 제외한다.
+  for (pi = 0; pi < pages.length; pi++) {
+    var lines = pages[pi].lines;
+
+    for (li = 0; li < lines.length; li++) {
+      var t = lines[li].text || '';
+
+      if (
+        t.indexOf('소득세개별분석자료') >= 0 &&
+        t.indexOf('사전성실신고지원안내대상자') >= 0
+      ) {
+        var hasItemTable = false;
+        var hasIndustryCaution = false;
+
+        for (k = li + 1; k < Math.min(lines.length, li + 8); k++) {
+          var nt = lines[k].text || '';
+
+          if (nt.indexOf('업종별유의사항') >= 0) {
+            hasIndustryCaution = true;
+            break;
+          }
+
+          if (nt.indexOf('항목') >= 0 && nt.indexOf('항목설명') >= 0) {
+            hasItemTable = true;
+            break;
+          }
+        }
+
+        if (hasItemTable && !hasIndustryCaution) {
+          startLine = lines[li];
+          startPage = pages[pi];
+          break;
+        }
+      }
+    }
+
+    if (startLine) break;
+  }
+
+  if (!startLine) return null;
+
+  var lines2 = startPage.lines;
+  var topY = Math.max(0, startLine.top - 8);
+
+  // 시작 줄 이후 연속 블록만 자른다.
+  var below = lines2.filter(function (L) {
+    return L.top > startLine.top + 2;
+  }).sort(function (a, b) {
+    return a.top - b.top;
+  });
+
+  var gaps = [];
+  var srt = lines2.slice().sort(function (a, b) {
+    return a.yBase - b.yBase;
+  });
+
+  for (k = 1; k < srt.length; k++) {
+    var g = srt[k].yBase - srt[k - 1].yBase;
+    if (g > 2 && g < 260) gaps.push(g);
+  }
+
+  gaps.sort(function (a, b) { return a - b; });
+
+  var med = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 20;
+  var lastBottom = startLine.bottom;
+
+  for (k = 0; k < below.length; k++) {
+    if (below[k].top - lastBottom > med * 4) break;
+    if (below[k].bottom > lastBottom) lastBottom = below[k].bottom;
+  }
+
+  var botY = Math.min(lastBottom + med * 0.9, startPage.vp.height);
+  if (botY <= topY + 10) return null;
+
+  var xL = 1e9;
+  var xR = -1e9;
+
+  for (k = 0; k < lines2.length; k++) {
+    var L = lines2[k];
+    if (L.bottom >= topY && L.top <= botY) {
+      if (L.left < xL) xL = L.left;
+      if (L.right > xR) xR = L.right;
+    }
+  }
+
+  if (xL > xR) {
+    xL = 0;
+    xR = startPage.vp.width;
+  }
+
+  xL = Math.max(0, xL - 14);
+  xR = Math.min(startPage.vp.width, xR + 14);
+
+  var canvas = await pdfxRenderPage(startPage);
+  var sx = Math.max(0, Math.floor(xL));
+  var sy = Math.max(0, Math.floor(topY));
+  var sw = Math.min(Math.ceil(xR - xL), canvas.width - sx);
+  var sh = Math.min(Math.ceil(botY - topY), canvas.height - sy);
+
+  if (sw <= 0 || sh <= 0) return null;
+
+  var out = document.createElement('canvas');
+  out.width = sw;
+  out.height = sh;
+  out.getContext('2d').drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+
+  return out.toDataURL('image/png');
+}  
   // ---------- 기본정보 추출 ----------
   function pdfxExtractIndustry(all) {
     var m = all.match(/업\s*종\s*업\s*종\s*코드\s*신고\s*시\s*유의할\s*사항\s*([가-힣\s]+?)\s*\d{6}/);
@@ -2880,7 +2993,7 @@ window.addEventListener('load', function () {
     if (!crops.caution) miss.push('Ⅱ');
     if (!crops.guide) miss.push('Ⅲ');
     if (!crops.analysis) miss.push('Ⅳ');
-    var msg = '「' + c.name + '」 자동 입력 완료. 주민등록번호 뒷자리는 직접 입력해 주세요.';
+    var msg = '「' + c.name + '」 자동 입력 완료.';
     if (miss.length) msg += ' (자동 추출이 안 된 칸: ' + miss.join('·') + ' — 해당 이미지칸에 직접 붙여넣기)';
     pdfxStatus('ok', msg);
   }
