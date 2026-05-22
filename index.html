@@ -861,7 +861,7 @@ textarea {
       <div class="help-text">
         ※ 「2025년귀속분종합소득세」처럼 거래처 폴더들이 모인 상위 폴더를 한 번만 지정하면 다음부터 자동으로 기억됩니다(Chrome·Edge 전용).<br>
         ※ 각 거래처 폴더에서 파일명에 "안내문"이 포함된 PDF만 읽어 「1. 기본정보」와 Ⅱ·Ⅲ·Ⅳ 이미지칸을 자동으로 채웁니다.<br>
-        ※ 주민등록번호 뒷자리는 안내문에 없으므로 직접 입력해야 합니다. 자동 추출이 어긋난 칸은 기존처럼 이미지칸에 직접 붙여넣기(Ctrl+V) 하세요.
+        ※ 주민등록번호는 안내문 생년월일 기준으로 앞 6자리와 마스킹값(- *******)이 자동 표시됩니다. 자동 추출이 어긋난 칸은 기존처럼 이미지칸에 직접 붙여넣기(Ctrl+V) 하세요.
       </div>
     </section>
 
@@ -869,7 +869,7 @@ textarea {
       <h3>1. 기본정보</h3>
       <div class="input-row col-half">
         <div class="field"><label>대표자명</label><input type="text" id="inp_name" data-field="name" autofocus></div>
-        <div class="field"><label>주민등록번호</label><input type="text" id="inp_rrn" data-field="rrn" data-format="rrn" maxlength="14"></div>
+        <div class="field"><label>주민등록번호</label><input type="text" id="inp_rrn" data-field="rrn" data-format="rrn" maxlength="16"></div>
       </div>
       <div class="input-row col-half">
         <div class="field"><label>상호</label><input type="text" id="inp_company" data-field="company"></div>
@@ -1261,8 +1261,9 @@ function formatNum(v) {
 }
 function formatRRN(v) {
   var d = String(v).replace(/[^\d]/g, '');
-  if (d.length <= 6) return d;
-  return d.slice(0, 6) + '-' + d.slice(6, 13);
+  if (!d) return '';
+  if (d.length < 6) return d;
+  return d.slice(0, 6) + ' - *******';
 }
 function formatBRN(v) {
   var d = String(v).replace(/[^\d]/g, '');
@@ -2816,6 +2817,16 @@ window.addEventListener('load', function () {
   }
 
   // ---------- 기본정보 추출 ----------
+  function pdfxExtractIndustry(all) {
+    var m = all.match(/업\s*종\s*업\s*종\s*코드\s*신고\s*시\s*유의할\s*사항\s*([가-힣\s]+?)\s*\d{6}/);
+
+    if (!m) return '';
+
+    return m[1]
+      .replace(/및/g, ' 및 ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
   function pdfxExtractInfo(p1, all) {
     var info = { name: '', birth6: '', company: '', brn: '', industry: '', booktype: '' };
     var m;
@@ -2834,8 +2845,7 @@ window.addEventListener('load', function () {
       m = p1.match(/(\d{3}-\d{2}-\d{5})/);
       if (m) info.brn = m[1];
     }
-    m = all.match(/업\s*종\s*업\s*종\s*코드\s*신고\s*시\s*유의할\s*사항\s*([가-힣\s]+?)\s*(\d{6})/);
-    if (m) info.industry = m[1].replace(/및/g, ' 및 ').replace(/\s+/g, ' ').trim();
+    info.industry = pdfxExtractIndustry(all);
     return info;
   }
 
@@ -2854,7 +2864,7 @@ window.addEventListener('load', function () {
     var clrImg = (typeof window.clearImage === 'function') ? window.clearImage : null;
 
     pdfxSetField('inp_name', info.name);
-    pdfxSetField('inp_rrn', info.birth6);   // 주민등록번호 앞 6자리(생년월일)
+    pdfxSetField('inp_rrn', formatRRN(info.birth6));   // 주민등록번호 앞 6자리 + 마스킹
     pdfxSetField('inp_company', info.company);
     pdfxSetField('inp_brn', info.brn);
     pdfxSetField('inp_industry', info.industry);
