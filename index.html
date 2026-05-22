@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-21 18:08 -->
+<!-- BUILD_DATE: 2026-05-22 19:46 -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -768,6 +768,31 @@ textarea {
     }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+/* ===== [PDF 자동 불러오기] 추가 스타일 — 기존 스타일 미변경, 신규 클래스만 추가 ===== */
+.pdfx-folder-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.pdfx-btn-main { padding:6px 13px; background:#1a2c5b; color:#fff; border:1px solid #1a2c5b; border-radius:4px; cursor:pointer; font-size:12.5px; font-family:inherit; white-space:nowrap; }
+.pdfx-btn-main:hover { background:#0d1b3d; }
+.pdfx-btn-main:disabled { background:#9aa3b8; border-color:#9aa3b8; cursor:default; }
+.pdfx-folder-info { font-size:11.5px; color:#555; }
+.pdfx-folder-info strong { color:#1a2c5b; }
+.pdfx-search-wrap { margin-bottom:8px; }
+.pdfx-search { width:100%; padding:6px 10px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-family:inherit; background:#fff; }
+.pdfx-search:focus { outline:none; border-color:#1a2c5b; box-shadow:0 0 0 2px rgba(26,44,91,0.08); }
+.pdfx-list { border:1px solid #ddd; border-radius:4px; max-height:240px; overflow-y:auto; margin-bottom:8px; background:#fff; }
+.pdfx-row { display:flex; justify-content:space-between; align-items:center; padding:7px 11px; font-size:12.5px; cursor:pointer; border-top:1px solid #eee; }
+.pdfx-row:first-child { border-top:none; }
+.pdfx-row:hover { background:#f0f4fa; }
+.pdfx-row.pdfx-active { background:#f0f4fa; }
+.pdfx-row .pdfx-name { font-weight:600; color:#1a2c5b; }
+.pdfx-row .pdfx-birth { color:#888; font-size:11.5px; }
+.pdfx-empty { padding:14px; text-align:center; color:#999; font-size:12px; }
+.pdfx-status { font-size:12px; padding:8px 11px; border-radius:4px; margin-bottom:6px; line-height:1.6; }
+.pdfx-status.pdfx-loading { background:#FAEEDA; color:#854F0B; }
+.pdfx-status.pdfx-ok { background:#E1F5EE; color:#0F6E56; }
+.pdfx-status.pdfx-warn { background:#FCEBEB; color:#791F1F; }
+</style>
 </head>
 <body>
 
@@ -779,7 +804,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-21 18:08</span>
+    <span class="build-date">업데이트 2026-05-22 19:46</span>
   </div>
 </header>
 
@@ -817,6 +842,26 @@ textarea {
         ※ 다른 직원 PC로 작업을 넘길 때는 「📥 내보내기」로 .json 파일을 받아 전달하고, 받는 쪽은 「📤 불러오기」를 사용하세요.<br>
         ※ ⚠ 브라우저 「인터넷 사용 기록 삭제」 시 자동 저장된 슬롯도 함께 삭제됩니다. 중요한 작업은 「📥 내보내기」로 .json 파일을 별도 보관해 두세요.<br>
         ※ 거래처에 인쇄·PDF 전달이 끝난 슬롯은 「🗑 삭제」로 정리해 주세요(용량 절감).
+      </div>
+    </section>
+
+    <!-- ====== 0. PDF 자동 불러오기 (추가 기능) ====== -->
+    <section class="input-section" id="pdfx_panel">
+      <h3>0. PDF 자동 불러오기</h3>
+      <div class="pdfx-folder-row">
+        <button type="button" class="pdfx-btn-main" id="pdfx_open" style="display:none;">📂 기억된 폴더 열기</button>
+        <button type="button" class="pdfx-btn-main" id="pdfx_pick">📁 거래처 폴더 선택</button>
+        <span class="pdfx-folder-info" id="pdfx_folder_info">거래처 폴더가 아직 지정되지 않았습니다.</span>
+      </div>
+      <div class="pdfx-search-wrap" id="pdfx_search_wrap" style="display:none;">
+        <input type="text" id="pdfx_search" class="pdfx-search" placeholder="거래처 이름 검색…" autocomplete="off">
+      </div>
+      <div class="pdfx-list" id="pdfx_list" style="display:none;"></div>
+      <div class="pdfx-status" id="pdfx_status" style="display:none;"></div>
+      <div class="help-text">
+        ※ 「2025년귀속분종합소득세」처럼 거래처 폴더들이 모인 상위 폴더를 한 번만 지정하면 다음부터 자동으로 기억됩니다(Chrome·Edge 전용).<br>
+        ※ 각 거래처 폴더에서 파일명에 "안내문"이 포함된 PDF만 읽어 「1. 기본정보」와 Ⅱ·Ⅲ·Ⅳ 이미지칸을 자동으로 채웁니다.<br>
+        ※ 주민등록번호 뒷자리는 안내문에 없으므로 직접 입력해야 합니다. 자동 추출이 어긋난 칸은 기존처럼 이미지칸에 직접 붙여넣기(Ctrl+V) 하세요.
       </div>
     </section>
 
@@ -1598,7 +1643,8 @@ function val(id) { var el = document.getElementById(id); return el ? el.value : 
 function updatePreview() {
   // Ⅰ
   setText('rp_name', val('inp_name'));
-  setText('rp_rrn', val('inp_rrn'));
+  var rrnFront = String(val('inp_rrn')).replace(/[^\d]/g, '').slice(0, 6);
+  setText('rp_rrn', rrnFront ? rrnFront + ' - *******' : '');;
   setText('rp_company', val('inp_company'));
   setText('rp_brn', val('inp_brn'));
   setText('rp_industry', val('inp_industry'));
@@ -2413,6 +2459,453 @@ window.addEventListener('load', function () {
     document.querySelectorAll('textarea').forEach(autoResizeTextarea);
   }, 100);
 });
+</script>
+
+<script>
+/* ===== [PDF 자동 불러오기] 추가 스크립트 — 기존 코드 미변경, 신규 기능만 추가 ===== */
+(function () {
+  'use strict';
+
+  var PDFX_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  var PDFX_SCALE = 2.4;
+
+  var pdfxDir = null;
+  var pdfxClients = [];
+  var pdfxActiveRow = null;
+
+  function $(id) { return document.getElementById(id); }
+  function pdfxEsc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function pdfxStatus(kind, msg) {
+    var el = $('pdfx_status');
+    if (!el) return;
+    el.style.display = 'block';
+    el.className = 'pdfx-status pdfx-' + kind;
+    el.textContent = msg;
+  }
+  function pdfxHideStatus() {
+    var el = $('pdfx_status');
+    if (el) el.style.display = 'none';
+  }
+
+  // ---------- IndexedDB: 폴더 핸들 기억 ----------
+  function pdfxOpenDb() {
+    return new Promise(function (res, rej) {
+      var r = indexedDB.open('pdfx_folder_db', 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore('handles'); };
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+    });
+  }
+  async function pdfxSaveHandle(h) {
+    try {
+      var db = await pdfxOpenDb();
+      await new Promise(function (res, rej) {
+        var t = db.transaction('handles', 'readwrite');
+        t.objectStore('handles').put(h, 'dir');
+        t.oncomplete = function () { res(); };
+        t.onerror = function () { rej(t.error); };
+      });
+    } catch (e) { /* 기억 실패는 치명적이지 않음 */ }
+  }
+  async function pdfxLoadHandle() {
+    try {
+      var db = await pdfxOpenDb();
+      return await new Promise(function (res) {
+        var t = db.transaction('handles', 'readonly');
+        var rq = t.objectStore('handles').get('dir');
+        rq.onsuccess = function () { res(rq.result || null); };
+        rq.onerror = function () { res(null); };
+      });
+    } catch (e) { return null; }
+  }
+
+  function pdfxSupported() { return (typeof window.showDirectoryPicker === 'function'); }
+
+  // ---------- 폴더 선택 ----------
+  async function pdfxPickFolder() {
+    if (!pdfxSupported()) {
+      pdfxStatus('warn', '이 브라우저는 폴더 열기를 지원하지 않습니다. Chrome 또는 Edge에서 사용해 주세요.');
+      return;
+    }
+    var handle;
+    try {
+      handle = await window.showDirectoryPicker();
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+      pdfxStatus('warn', '폴더를 열 수 없습니다: ' + (e && e.message || e));
+      return;
+    }
+    pdfxDir = handle;
+    await pdfxSaveHandle(handle);
+    await pdfxScan();
+  }
+
+  async function pdfxOpenRemembered() {
+    if (!pdfxDir) return;
+    try {
+      var perm = await pdfxDir.requestPermission({ mode: 'read' });
+      if (perm !== 'granted') {
+        pdfxStatus('warn', '폴더 접근 권한이 거부되었습니다. 「거래처 폴더 선택」으로 다시 지정해 주세요.');
+        return;
+      }
+    } catch (e) {
+      pdfxStatus('warn', '기억된 폴더를 열 수 없습니다. 「거래처 폴더 선택」으로 다시 지정해 주세요.');
+      return;
+    }
+    await pdfxScan();
+  }
+
+  // ---------- 거래처 폴더 스캔 ----------
+  async function pdfxScan() {
+    pdfxStatus('loading', '거래처 폴더를 읽는 중입니다…');
+    pdfxClients = [];
+    try {
+      for await (const entry of pdfxDir.values()) {
+        if (entry.kind !== 'directory') continue;
+        var m = entry.name.match(/^(.+?)\s*_\s*(\d{6})(?:\D|$)/);
+        if (!m) continue;
+        pdfxClients.push({ folder: entry.name, name: m[1].trim(), birth: m[2], handle: entry });
+      }
+    } catch (e) {
+      pdfxStatus('warn', '폴더를 읽는 중 오류가 발생했습니다: ' + (e && e.message || e));
+      return;
+    }
+    pdfxClients.sort(function (a, b) { return a.name.localeCompare(b.name, 'ko'); });
+    $('pdfx_folder_info').innerHTML = '지정된 폴더: <strong>' + pdfxEsc(pdfxDir.name) + '</strong> · 거래처 ' + pdfxClients.length + '곳';
+    $('pdfx_open').style.display = 'none';
+    $('pdfx_pick').textContent = '📁 폴더 다시 선택';
+    $('pdfx_search_wrap').style.display = 'block';
+    $('pdfx_list').style.display = 'block';
+    $('pdfx_search').value = '';
+    pdfxRenderList();
+    if (pdfxClients.length === 0) {
+      pdfxStatus('warn', '「이름 _ 생년월일6자리」 형식의 거래처 폴더를 찾지 못했습니다. 상위 폴더를 다시 확인해 주세요.');
+    } else {
+      pdfxHideStatus();
+    }
+  }
+
+  function pdfxRenderList() {
+    var q = ($('pdfx_search').value || '').replace(/\s+/g, '').toLowerCase();
+    var list = $('pdfx_list');
+    var rows = pdfxClients.filter(function (c) {
+      if (!q) return true;
+      return (c.name + c.birth).replace(/\s+/g, '').toLowerCase().indexOf(q) >= 0;
+    });
+    list.innerHTML = '';
+    pdfxActiveRow = null;
+    if (rows.length === 0) {
+      list.innerHTML = '<div class="pdfx-empty">' +
+        (pdfxClients.length === 0 ? '거래처 폴더가 없습니다.' : '검색 결과가 없습니다.') + '</div>';
+      return;
+    }
+    rows.forEach(function (c) {
+      var div = document.createElement('div');
+      div.className = 'pdfx-row';
+      div.innerHTML = '<span class="pdfx-name">' + pdfxEsc(c.name) + '</span>' +
+        '<span class="pdfx-birth">생년월일 ' + pdfxEsc(c.birth) + '</span>';
+      div.addEventListener('click', function () {
+        if (pdfxActiveRow) pdfxActiveRow.classList.remove('pdfx-active');
+        div.classList.add('pdfx-active');
+        pdfxActiveRow = div;
+        pdfxLoadClient(c);
+      });
+      list.appendChild(div);
+    });
+  }
+
+  // ---------- 거래처 클릭 → 안내문 처리 ----------
+  async function pdfxLoadClient(c) {
+    if (typeof window.pdfjsLib === 'undefined') {
+      pdfxStatus('warn', 'PDF 라이브러리를 불러오지 못했습니다. 인터넷에 연결한 뒤 새로고침해 주세요.');
+      return;
+    }
+    var nameEl = document.getElementById('inp_name');
+    if (nameEl && nameEl.value.trim()) {
+      if (!window.confirm('현재 입력 내용을 「' + c.name + '」 안내문 자동입력 값으로 바꿀까요?')) return;
+    }
+    pdfxStatus('loading', '「' + c.name + '」 폴더에서 안내문 PDF를 찾는 중입니다…');
+    try {
+      var file = await pdfxFindAnnounce(c.handle);
+      if (!file) {
+        pdfxStatus('warn', '「' + c.name + '」 폴더에서 "안내문" PDF를 찾지 못했습니다. 파일명에 "안내문"이 포함되어야 합니다.');
+        return;
+      }
+      pdfxStatus('loading', '「' + c.name + '」 안내문을 분석하는 중입니다…');
+      var buf = await file.arrayBuffer();
+      var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+      var result = await pdfxProcess(pdf);
+      pdfxApplyResult(c, result);
+    } catch (e) {
+      pdfxStatus('warn', '처리 중 오류가 발생했습니다: ' + (e && e.message || e));
+    }
+  }
+
+  async function pdfxFindAnnounce(dirHandle) {
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file' && /안내문/.test(entry.name) && /\.pdf$/i.test(entry.name)) {
+        return await entry.getFile();
+      }
+    }
+    return null;
+  }
+
+  // ---------- PDF 분석 ----------
+  async function pdfxProcess(pdf) {
+    var pages = [];
+    for (var i = 1; i <= pdf.numPages; i++) {
+      var page = await pdf.getPage(i);
+      var vp = page.getViewport({ scale: PDFX_SCALE });
+      var tc = await page.getTextContent();
+      pages.push({ num: i, page: page, vp: vp, lines: pdfxLines(tc, vp), canvas: null });
+    }
+    var pdfxNorm = function (s) {
+      return String(s == null ? '' : s).replace(/(\S) (?=\S)/g, '$1');
+    };
+    var p1 = pages[0] ? pdfxNorm(pages[0].lines.map(function (l) { return l.rawtext; }).join(' ')) : '';
+    var all = pdfxNorm(pages.map(function (p) {
+      return p.lines.map(function (l) { return l.rawtext; }).join(' ');
+    }).join(' \n '));
+    var info = pdfxExtractInfo(p1, all);
+    var crops = {};
+    crops.guide = await pdfxCrop(pages, { startKeys: ['사업장별수입금액', '※'], end: { type: 'top', keys: ['종교인'] } });
+    crops.analysis = await pdfxCrop(pages, { startKeys: ['신고소득률', '※'], end: { type: 'rowbottom', keys: ['소득률', '당해업체'] } });
+    crops.caution = await pdfxCrop(pages, { startKeys: ['개별분석자료'], startLast: true, end: { type: 'pagebottom' } });
+    return { info: info, crops: crops };
+  }
+
+  function pdfxLines(tc, vp) {
+    var arr = [];
+    (tc.items || []).forEach(function (it) {
+      if (!it.str || !it.transform) return;
+      var pt = vp.convertToViewportPoint(it.transform[4], it.transform[5]);
+      var h = (it.height || 8) * vp.scale;
+      var w = (it.width || 0) * vp.scale;
+      arr.push({ str: it.str, x: pt[0], yBase: pt[1], h: h, top: pt[1] - h, bottom: pt[1] + h * 0.3, right: pt[0] + w });
+    });
+    arr.sort(function (a, b) { return (a.yBase - b.yBase) || (a.x - b.x); });
+    var lines = [];
+    arr.forEach(function (r) {
+      var ln = null, i;
+      for (i = 0; i < lines.length; i++) {
+        if (Math.abs(lines[i].yBase - r.yBase) < Math.max(4, r.h * 0.5)) { ln = lines[i]; break; }
+      }
+      if (!ln) {
+        ln = { yBase: r.yBase, top: r.top, bottom: r.bottom, left: r.x, right: r.right, items: [] };
+        lines.push(ln);
+      }
+      ln.items.push(r);
+      ln.top = Math.min(ln.top, r.top);
+      ln.bottom = Math.max(ln.bottom, r.bottom);
+      ln.left = Math.min(ln.left, r.x);
+      ln.right = Math.max(ln.right, r.right);
+    });
+    lines.forEach(function (L) {
+      L.items.sort(function (a, b) { return a.x - b.x; });
+      L.rawtext = L.items.map(function (i) { return i.str; }).join(' ');
+      L.text = L.items.map(function (i) { return i.str; }).join('').replace(/\s+/g, '');
+    });
+    lines.sort(function (a, b) { return a.top - b.top; });
+    return lines;
+  }
+
+  function pdfxHas(line, keys) {
+    for (var i = 0; i < keys.length; i++) {
+      if (line.text.indexOf(keys[i]) < 0) return false;
+    }
+    return true;
+  }
+
+  async function pdfxRenderPage(p) {
+    if (p.canvas) return p.canvas;
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.ceil(p.vp.width));
+    c.height = Math.max(1, Math.ceil(p.vp.height));
+    await p.page.render({ canvasContext: c.getContext('2d'), viewport: p.vp }).promise;
+    p.canvas = c;
+    return c;
+  }
+
+  async function pdfxCrop(pages, spec) {
+    // --- 시작 줄 ---
+    var startLine = null, startPage = null, pi, li;
+    for (pi = 0; pi < pages.length; pi++) {
+      for (li = 0; li < pages[pi].lines.length; li++) {
+        if (pdfxHas(pages[pi].lines[li], spec.startKeys)) {
+          startLine = pages[pi].lines[li];
+          startPage = pages[pi];
+          if (!spec.startLast) break;
+        }
+      }
+      if (startLine && !spec.startLast) break;
+    }
+    if (!startLine) return null;
+
+    var lines = startPage.lines;
+    var topY = Math.max(0, startLine.top - 8);
+    var botY = null;
+    var k;
+
+    if (spec.end.type === 'top') {
+      var endLine = null;
+      for (k = 0; k < lines.length; k++) {
+        if (lines[k].top > startLine.top + 2 && pdfxHas(lines[k], spec.end.keys)) { endLine = lines[k]; break; }
+      }
+      botY = endLine ? (endLine.top - 4) : startPage.vp.height;
+    } else if (spec.end.type === 'rowbottom') {
+      var rowLine = null;
+      for (k = 0; k < lines.length; k++) {
+        if (lines[k].top > startLine.top + 2 && pdfxHas(lines[k], spec.end.keys)) rowLine = lines[k];
+      }
+      if (!rowLine) return null;
+      var prev = null;
+      for (k = 0; k < lines.length; k++) {
+        if (lines[k].yBase < rowLine.yBase - 2 && (!prev || lines[k].yBase > prev.yBase)) prev = lines[k];
+      }
+      var rowGap = prev ? (rowLine.yBase - prev.yBase) : (rowLine.bottom - rowLine.top) * 1.8;
+      botY = rowLine.yBase + rowGap * 0.6;
+    } else { // pagebottom — 시작 줄 이후 연속 블록만
+      var below = lines.filter(function (L) { return L.top > startLine.top + 2; })
+        .sort(function (a, b) { return a.top - b.top; });
+      var gaps = [];
+      var srt = lines.slice().sort(function (a, b) { return a.yBase - b.yBase; });
+      for (k = 1; k < srt.length; k++) {
+        var g = srt[k].yBase - srt[k - 1].yBase;
+        if (g > 2 && g < 260) gaps.push(g);
+      }
+      gaps.sort(function (a, b) { return a - b; });
+      var med = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 20;
+      var lastBottom = startLine.bottom;
+      for (k = 0; k < below.length; k++) {
+        if (below[k].top - lastBottom > med * 4) break; // 표 이후 큰 공백(푸터 등) → 중단
+        if (below[k].bottom > lastBottom) lastBottom = below[k].bottom;
+      }
+      botY = lastBottom + med * 0.9;
+    }
+
+    botY = Math.min(botY, startPage.vp.height);
+    if (botY <= topY + 10) return null;
+
+    // --- x 범위 ---
+    var xL = 1e9, xR = -1e9;
+    for (k = 0; k < lines.length; k++) {
+      var L = lines[k];
+      if (L.bottom >= topY && L.top <= botY) {
+        if (L.left < xL) xL = L.left;
+        if (L.right > xR) xR = L.right;
+      }
+    }
+    if (xL > xR) { xL = 0; xR = startPage.vp.width; }
+    xL = Math.max(0, xL - 14);
+    xR = Math.min(startPage.vp.width, xR + 14);
+
+    var canvas = await pdfxRenderPage(startPage);
+    var sx = Math.max(0, Math.floor(xL));
+    var sy = Math.max(0, Math.floor(topY));
+    var sw = Math.min(Math.ceil(xR - xL), canvas.width - sx);
+    var sh = Math.min(Math.ceil(botY - topY), canvas.height - sy);
+    if (sw <= 0 || sh <= 0) return null;
+
+    var out = document.createElement('canvas');
+    out.width = sw;
+    out.height = sh;
+    out.getContext('2d').drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+    return out.toDataURL('image/png');
+  }
+
+  // ---------- 기본정보 추출 ----------
+  function pdfxExtractInfo(p1, all) {
+    var info = { name: '', birth6: '', company: '', brn: '', industry: '', booktype: '' };
+    var m;
+    m = p1.match(/성\s*명\s*([가-힣]{2,4})/);
+    if (m) info.name = m[1];
+    m = p1.match(/(\d{2})\s*[.\-]\s*(\d{2})\s*[.\-]\s*(\d{2})/);
+    if (m) info.birth6 = m[1] + m[2] + m[3];
+    if (/복식부기/.test(p1)) info.booktype = '복식부기';
+    else if (/간편장부/.test(p1)) info.booktype = '간편장부';
+    m = all.match(/상\s*호\s*(.{1,40}?)\s*사업자등록번호\s*(\d{3}-\d{2}-\d{5})/);
+    if (m) {
+      info.company = m[1].trim()
+        .replace(/\s*\(\s*/g, '(').replace(/\s*\)\s*/g, ')').replace(/\s{2,}/g, ' ');
+      info.brn = m[2];
+    } else {
+      m = p1.match(/(\d{3}-\d{2}-\d{5})/);
+      if (m) info.brn = m[1];
+    }
+    m = all.match(/업\s*종\s*업\s*종\s*코드\s*신고\s*시\s*유의할\s*사항\s*([가-힣\s]+?)\s*(\d{6})/);
+    if (m) info.industry = m[1].replace(/\s+/g, ' ').trim();
+    return info;
+  }
+
+  // ---------- 결과 반영 ----------
+  function pdfxSetField(id, val) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.value = (val == null ? '' : val);
+    try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+  }
+
+  function pdfxApplyResult(c, result) {
+    var info = result.info, crops = result.crops;
+    var setImg = (typeof window.setImage === 'function') ? window.setImage : null;
+    var clrImg = (typeof window.clearImage === 'function') ? window.clearImage : null;
+
+    pdfxSetField('inp_name', info.name);
+    pdfxSetField('inp_rrn', info.birth6);   // 주민등록번호 앞 6자리(생년월일)
+    pdfxSetField('inp_company', info.company);
+    pdfxSetField('inp_brn', info.brn);
+    pdfxSetField('inp_industry', info.industry);
+    if (info.booktype) pdfxSetField('inp_booktype', info.booktype);
+
+    if (setImg && clrImg) {
+      crops.caution ? setImg('caution', crops.caution) : clrImg('caution');
+      crops.guide ? setImg('guide', crops.guide) : clrImg('guide');
+      crops.analysis ? setImg('analysis', crops.analysis) : clrImg('analysis');
+    }
+
+    var miss = [];
+    if (!crops.caution) miss.push('Ⅱ');
+    if (!crops.guide) miss.push('Ⅲ');
+    if (!crops.analysis) miss.push('Ⅳ');
+    var msg = '「' + c.name + '」 자동 입력 완료. 주민등록번호 뒷자리는 직접 입력해 주세요.';
+    if (miss.length) msg += ' (자동 추출이 안 된 칸: ' + miss.join('·') + ' — 해당 이미지칸에 직접 붙여넣기)';
+    pdfxStatus('ok', msg);
+  }
+
+  // ---------- 초기화 ----------
+  async function pdfxInit() {
+    var pick = $('pdfx_pick'), open = $('pdfx_open'), search = $('pdfx_search');
+    if (pick) pick.addEventListener('click', pdfxPickFolder);
+    if (open) open.addEventListener('click', pdfxOpenRemembered);
+    if (search) {
+      search.addEventListener('input', pdfxRenderList);
+      search.addEventListener('keydown', function (e) { e.stopPropagation(); }); // 기존 키보드 이동과 분리
+    }
+    if (typeof window.pdfjsLib !== 'undefined') {
+      try { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFX_WORKER; } catch (e) {}
+    }
+    if (!pdfxSupported()) {
+      $('pdfx_folder_info').textContent = '이 브라우저는 폴더 열기를 지원하지 않습니다 (Chrome·Edge에서 사용해 주세요).';
+      if (pick) pick.disabled = true;
+      return;
+    }
+    var h = await pdfxLoadHandle();
+    if (h) {
+      pdfxDir = h;
+      $('pdfx_folder_info').innerHTML = '기억된 폴더: <strong>' + pdfxEsc(h.name) + '</strong> — 「기억된 폴더 열기」를 눌러 주세요.';
+      if (open) open.style.display = 'inline-block';
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', pdfxInit);
+  } else {
+    pdfxInit();
+  }
+})();
 </script>
 
 </body>
