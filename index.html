@@ -1641,6 +1641,36 @@ function toggleSection(secId, show) {
 }
 function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
 
+function toRoman(num) {
+  var arr = ['', 'Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ', 'Ⅶ', 'Ⅷ', 'Ⅸ', 'Ⅹ'];
+  return arr[num] || String(num);
+}
+
+function renumberReportSections() {
+  var sections = [
+    { id: 'sec_basic', title: '기본정보' },
+    { id: 'sec_caution', title: '종합소득세 신고도움서비스 개별안내' },
+    { id: 'sec_guide', title: '사업장별 수입금액 및 합산대상 자료유무' },
+    { id: 'sec_analysis', title: '최근 3년간 종합소득세 신고상황' },
+    { id: 'sec_income', title: '매출·소득 요약 및 절세효과', unit: '<span class="unit">(단위: 원)</span>' },
+    { id: 'sec_taxcredit', title: '세액공제·감면 상세표', unit: '<span class="unit">(단위: 원)</span>' },
+    { id: 'sec_opinions', title: '종합 검토의견' }
+  ];
+
+  var no = 1;
+
+  sections.forEach(function (s) {
+    var sec = document.getElementById(s.id);
+    if (!sec || sec.classList.contains('is-hidden')) return;
+
+    var h = sec.querySelector('.rp-title');
+    if (!h) return;
+
+    h.innerHTML = toRoman(no) + '. ' + s.title + (s.unit || '');
+    no++;
+  });
+}  
+  
 function updatePreview() {
   // Ⅰ
   setText('rp_name', val('inp_name'));
@@ -1780,6 +1810,8 @@ function updatePreview() {
     rpOpBody.insertAdjacentHTML('beforeend', html);
   });
   toggleSection('sec_opinions', opShown > 0);
+
+  renumberReportSections();
 }
 
 function buildDistrHTML(text) {
@@ -2933,23 +2965,22 @@ async function pdfxCropCautionOnly(pages) {
 function pdfxExtractIndustry(all) {
   var s = String(all == null ? '' : all);
 
-  // PDF 텍스트 추출 시 글자 사이 공백, 줄바꿈이 섞이므로 전부 제거해서 판단
+  // PDF 텍스트의 줄바꿈·글자 사이 공백을 제거해서 안정적으로 검색
   var compact = s.replace(/\s+/g, '');
 
-  // 반드시 "업종별 유의사항" 표에서만 찾는다.
+  // 반드시 "업종별 유의사항" 표 안에서만 업종 추출
   var start = compact.indexOf('업종별유의사항');
   if (start < 0) return '';
 
-  // 업종별 유의사항 표 주변만 검사
-  var tail = compact.slice(start, start + 1500);
+  var tail = compact.slice(start, start + 2000);
 
-  // 표 구조:
-  // 업종별유의사항 / 업종 / 업종코드 / 신고시유의할사항 / 금융및보험업 / 671202
-  var m = tail.match(/신고시유의할사항([가-힣]+?)(\d{6})/);
+  // 구조 예:
+  // 업종별유의사항업종업종코드신고시유의할사항금융및보험업671202...
+  var m = tail.match(/업종코드신고시유의할사항([가-힣]+?)(\d{6})/);
 
   if (!m) {
-    // 일부 PDF에서 "신고시 유의할 사항" 헤더가 깨질 경우 보조 패턴
-    m = tail.match(/업종코드(?:신고시유의할사항)?([가-힣]+?)(\d{6})/);
+    // 보조 패턴
+    m = tail.match(/신고시유의할사항([가-힣]+?)(\d{6})/);
   }
 
   if (!m) return '';
