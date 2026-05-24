@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-24 13:46 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
+<!-- BUILD_DATE: 2026-05-24 11:09 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -914,6 +914,7 @@ textarea {
 }
 
 #quote_panel .q-writedate-field .q-date-part {
+  position: relative; 
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -924,6 +925,20 @@ textarea {
   font-weight: 600;
   font-size: 13px;
   white-space: nowrap;
+}
+#quote_panel .q-writedate-field .q-date-part.q-date-active::after {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 15px;
+  margin-left: 2px;
+  background: #14264f;
+  animation: qDateCaretBlink 0.9s steps(1) infinite;
+}
+
+@keyframes qDateCaretBlink {
+  0%, 45% { opacity: 1; }
+  46%, 100% { opacity: 0; }
 }
 
 #quote_panel .q-writedate-field #q_writedate {
@@ -1644,7 +1659,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-24 13:46</span>
+    <span class="build-date">업데이트 2026-05-24 11:09</span>
   </div>
 </header>
 
@@ -4432,24 +4447,44 @@ function quoteUpdateWriteDateDisplay() {
   if (el.value !== d) el.value = d;
 
   if (mmEl) {
-    if (d.length >= 2) {
-      var mm = parseInt(d.slice(0, 2), 10);
-      mmEl.textContent = (mm >= 1 && mm <= 12) ? String(mm) : '';
+    if (d.length >= 1) {
+      mmEl.textContent = d.slice(0, 2);
     } else {
       mmEl.innerHTML = '&nbsp;';
     }
   }
 
   if (ddEl) {
-    if (d.length >= 4) {
-      var dd = parseInt(d.slice(2, 4), 10);
-      ddEl.textContent = (dd >= 1 && dd <= 31) ? String(dd) : '';
+    if (d.length >= 3) {
+      ddEl.textContent = d.slice(2, 4);
     } else {
       ddEl.innerHTML = '&nbsp;';
     }
   }
+
+  if (mmEl) mmEl.classList.remove('q-date-active');
+  if (ddEl) ddEl.classList.remove('q-date-active');
+
+  if (document.activeElement === el) {
+    if (d.length < 2 && mmEl) {
+      mmEl.classList.add('q-date-active');
+    } else if (ddEl) {
+      ddEl.classList.add('q-date-active');
+    }
+  }
 }
 
+  if (mmEl) mmEl.classList.remove('q-date-active');
+  if (ddEl) ddEl.classList.remove('q-date-active');
+
+  if (document.activeElement === el) {
+    if (d.length < 2 && mmEl) {
+      mmEl.classList.add('q-date-active');
+    } else if (ddEl) {
+      ddEl.classList.add('q-date-active');
+    }
+  }
+}
 function quoteFormatWriteDate(v) {
   var d = quoteNormalizeWriteDateInput(v);
   if (!/^\d{4}$/.test(d)) return '';
@@ -4470,6 +4505,10 @@ function bindQuoteWriteDateFormat() {
 
   el.dataset.boundWriteDate = '1';
 
+  el.addEventListener('focus', function () {
+    quoteUpdateWriteDateDisplay();
+  });
+
   el.addEventListener('input', function () {
     quoteUpdateWriteDateDisplay();
 
@@ -4480,6 +4519,9 @@ function bindQuoteWriteDateFormat() {
   el.addEventListener('blur', function () {
     el.value = quoteNormalizeWriteDateInput(el.value);
     quoteUpdateWriteDateDisplay();
+
+    if ($('q_writedate_mm')) $('q_writedate_mm').classList.remove('q-date-active');
+    if ($('q_writedate_dd')) $('q_writedate_dd').classList.remove('q-date-active');
 
     if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
     if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
