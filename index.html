@@ -885,14 +885,6 @@ textarea {
   white-space: nowrap;
   border-left: 1px solid #e5e8ef;
 }
-#quote_panel .q-recipient-field .q-recipient-suffix {
-  padding: 0 10px 0 4px;
-  color: #14264f;
-  font-weight: 600;
-  font-size: 13px;
-  white-space: nowrap;
-  border-left: 1px solid #e5e8ef;
-}
 
 /* PATCH: 견적서 작성일자 입력칸 — 2026년/월/일은 고정, 입력값은 MMDD 숫자 4자리만 */
 #quote_panel .q-writedate-field .q-writedate-edit {
@@ -4383,25 +4375,77 @@ function quoteNormalizeRecipient(v) {
     .replace(/\s*대표님\s*$/, '')
     .trim();
 }
-// ----- 견적서 작성일자: 4자리 숫자 입력 시 2026년 M월 D일로 변환 -----
-function quoteFormatWriteDate(v) {
+
+function quoteAutoRecipientValue() {
+  var compV = (($('inp_company') || {}).value || '').trim();
+  var nameV = (($('inp_name') || {}).value || '').trim();
+  return quoteNormalizeRecipient((compV + ' ' + nameV).trim());
+}
+
+// ----- 견적서 작성일자: 입력값은 MMDD 숫자 4자리만, 화면은 2026년 M월 D일 형태로 분리 표시 -----
+function quoteNormalizeWriteDateInput(v) {
   var s = String(v == null ? '' : v).trim();
   if (!s) return '';
 
-  // 연속 4자리 숫자만 입력한 경우: 0524 → 2026년 5월 24일
-  if (/^\d{4}$/.test(s)) {
-    var mm = parseInt(s.slice(0, 2), 10);
-    var dd = parseInt(s.slice(2, 4), 10);
+  // 기존 저장값이 "2026년 5월 24일" 형태로 남아 있는 경우 0524로 복구
+  var old = s.match(/^\s*2026\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일\s*$/);
+  if (old) {
+    var oldMm = parseInt(old[1], 10);
+    var oldDd = parseInt(old[2], 10);
 
-    if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
-      return '2026년 ' + mm + '월 ' + dd + '일';
+    if (oldMm >= 1 && oldMm <= 12 && oldDd >= 1 && oldDd <= 31) {
+      return ('0' + oldMm).slice(-2) + ('0' + oldDd).slice(-2);
     }
 
-    return s;
+    return '';
   }
 
-  // 그 외는 입력한 그대로 출력
-  return s;
+  // "2026년   월   일" 같은 기존 기본문구는 입력값으로 보지 않음
+  if (/[년월일]/.test(s)) return '';
+
+  return s.replace(/[^0-9]/g, '').slice(0, 4);
+}
+
+function quoteUpdateWriteDateDisplay() {
+  var el = $('q_writedate');
+  var mmEl = $('q_writedate_mm');
+  var ddEl = $('q_writedate_dd');
+  if (!el) return;
+
+  var d = quoteNormalizeWriteDateInput(el.value);
+  if (el.value !== d) el.value = d;
+
+  if (mmEl) {
+    if (d.length >= 2) {
+      var mm = parseInt(d.slice(0, 2), 10);
+      mmEl.textContent = (mm >= 1 && mm <= 12) ? String(mm) : '';
+    } else {
+      mmEl.innerHTML = '&nbsp;';
+    }
+  }
+
+  if (ddEl) {
+    if (d.length >= 4) {
+      var dd = parseInt(d.slice(2, 4), 10);
+      ddEl.textContent = (dd >= 1 && dd <= 31) ? String(dd) : '';
+    } else {
+      ddEl.innerHTML = '&nbsp;';
+    }
+  }
+}
+
+function quoteFormatWriteDate(v) {
+  var d = quoteNormalizeWriteDateInput(v);
+  if (!/^\d{4}$/.test(d)) return '';
+
+  var mm = parseInt(d.slice(0, 2), 10);
+  var dd = parseInt(d.slice(2, 4), 10);
+
+  if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
+    return '2026년 ' + mm + '월 ' + dd + '일';
+  }
+
+  return '';
 }
 
 function bindQuoteWriteDateFormat() {
@@ -4411,24 +4455,22 @@ function bindQuoteWriteDateFormat() {
   el.dataset.boundWriteDate = '1';
 
   el.addEventListener('input', function () {
+    quoteUpdateWriteDateDisplay();
+
     if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
     if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
   });
 
   el.addEventListener('blur', function () {
-    el.value = quoteFormatWriteDate(el.value);
+    el.value = quoteNormalizeWriteDateInput(el.value);
+    quoteUpdateWriteDateDisplay();
 
     if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
     if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
   });
-}
 
-function quoteAutoRecipientValue() {
-  var compV = (($('inp_company') || {}).value || '').trim();
-  var nameV = (($('inp_name') || {}).value || '').trim();
-  return quoteNormalizeRecipient((compV + ' ' + nameV).trim());
+  quoteUpdateWriteDateDisplay();
 }
-
 function setQuoteRecipientValue(v, userEdited) {
   var el = $('q_recipient');
   if (!el) return;
@@ -4887,7 +4929,8 @@ function bindQuoteRecipientSync() {
     if ($('q_enable')) $('q_enable').checked = (q.enable === undefined ? true : !!q.enable);
     if ($('q_print_quote_only')) $('q_print_quote_only').checked = !!q.print_quote_only;
     setQuoteRecipientValue(q.recipient, q.recipient_user_edited);
-    sv('q_writedate', q.writedate);
+    sv('q_writedate', quoteNormalizeWriteDateInput(q.writedate));
+    quoteUpdateWriteDateDisplay();
 
     // 제목은 기본값 고정. 사용자가 직접 수정한 경우에만 저장된 수정 제목을 복원한다.
     // 구버전 슬롯/자동저장에 남은 비정상 제목값은 기본 제목으로 되돌린다.
@@ -4925,7 +4968,7 @@ function bindQuoteRecipientSync() {
       print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
       recipient: recipientEdited ? recipientRaw : '',
       recipient_user_edited: recipientEdited,
-      writedate: gv('q_writedate'),
+      writedate: quoteNormalizeWriteDateInput(gv('q_writedate')),
       title: titleEdited ? titleRaw : '',
       title_user_edited: titleEdited,
       cmsdate: gv('q_cmsdate'),
