@@ -10,7 +10,4841 @@
 html, body { height: 100%; }
 body {
   font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+  background: #d9dee5;<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
+<!-- BUILD_DATE: 2026-05-24 11:09 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
   background: #d9dee5;
+  color: #000;
+  font-size: 13.5px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== 도구 헤더 ===== */
+.tool-header {
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.tool-header .tool-title h1 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a2c5b;
+  margin: 0;
+}
+.tool-header .tool-title .subtitle {
+  font-size: 11.5px;
+  color: #555;
+  margin-top: 2px;
+}
+.tool-header .sync-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: #888;
+}
+.refresh-btn {
+  padding: 5px 11px;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11.5px;
+  color: #333;
+  font-family: inherit;
+}
+.refresh-btn:hover { background: #e8e8e8; }
+.build-date { color: #999; }
+
+/* ===== 레이아웃 ===== */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 58px);
+}
+.input-panel {
+  width: 100%;
+  background: #f8f9fb;
+  border-bottom: 1px solid #ccc;
+  padding: 18px 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.preview-area {
+  width: 100%;
+  background: #d9dee5;
+  padding: 28px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* ===== 입력 패널 ===== */
+.input-section {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.input-section h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a2c5b;
+  margin: 0 0 12px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* ===== 작업 관리 박스 ===== */
+.slot-panel .slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 12px;
+}
+.slot-panel .slot-header h3 {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+.slot-quota {
+  font-size: 11.5px;
+  color: #555;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.slot-quota strong { color: #1a2c5b; font-weight: 600; }
+.slot-quota.warn { color: #854F0B; background: #FAEEDA; font-weight: 600; }
+.slot-quota.danger { color: #791F1F; background: #FCEBEB; font-weight: 600; }
+.slot-current {
+  font-size: 12.5px;
+  margin-bottom: 10px;
+  line-height: 1.7;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.slot-current .lbl {
+  color: #555;
+  font-weight: 600;
+  width: 78px;
+  display: inline-block;
+}
+.slot-current .name {
+  color: #1a2c5b;
+  font-weight: 600;
+}
+.slot-current .status {
+  font-size: 11.5px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.slot-current .status.saved {
+  color: #0F6E56;
+  background: #E1F5EE;
+}
+.slot-current .status.modified {
+  color: #854F0B;
+  background: #FAEEDA;
+}
+.slot-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.slot-actions label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #444;
+  width: 78px;
+  flex-shrink: 0;
+}
+.slot-actions select {
+  flex: 1;
+  min-width: 220px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12.5px;
+  background: #fff;
+  font-family: inherit;
+}
+.slot-actions button {
+  padding: 6px 11px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.btn-slot-primary { background: #1a2c5b; color: #fff; border-color: #1a2c5b; }
+.btn-slot-primary:hover { background: #0d1b3d; }
+.btn-slot-outline { background: #fff; color: #1a2c5b; border-color: #1a2c5b; }
+.btn-slot-outline:hover { background: #f0f4fa; }
+.btn-slot-danger { background: #fff; color: #c0392b; border-color: #c0392b; }
+.btn-slot-danger:hover { background: #c0392b; color: #fff; }
+
+.input-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+.input-row.col-half {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.input-row label {
+  width: 105px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #444;
+  flex-shrink: 0;
+}
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.field label { width: 90px; }
+.field input, .field select {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+.input-row input, .input-row select {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+.input-row input:focus, .field input:focus, .input-row select:focus, .field select:focus, textarea:focus {
+  outline: none;
+  border-color: #1a2c5b;
+  box-shadow: 0 0 0 2px rgba(26,44,91,0.08);
+}
+.input-row.full input { width: 100%; }
+.input-block { margin-bottom: 10px; }
+.input-block .blk-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* ===== 5번 섹션(매출·소득 요약) 라벨 폭 확장 ===== */
+.section-income .field label { width: 150px; }
+
+textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 72px;
+  background: #fff;
+  overflow-y: hidden;
+}
+.image-drop {
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  padding: 16px;
+  text-align: center;
+  color: #888;
+  cursor: pointer;
+  font-size: 12px;
+  background: #fafafa;
+  transition: background 0.15s, border-color 0.15s;
+  margin-bottom: 6px;
+}
+.image-drop:hover, .image-drop:focus, .image-drop.drag-over {
+  background: #f0f4fa;
+  border-color: #1a2c5b;
+  outline: none;
+}
+.image-drop.has-image {
+  padding: 0;
+  border: 1px solid #ccc;
+  background: #fff;
+  text-align: center;
+}
+.image-drop img {
+  max-width: 100%;
+  max-height: 200px;
+  display: inline-block;
+}
+.image-drop-info {
+  font-size: 11.5px;
+  color: #888;
+  margin-bottom: 6px;
+}
+.image-drop-guide {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #d8dde6;
+}
+.image-drop-guide-title {
+  font-size: 12.5px;
+  color: #1a2c5b;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.image-drop-guide-sub {
+  font-size: 11px;
+  color: #666;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+.btn-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 6px;
+}
+.btn-mini {
+  padding: 3px 9px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 11.5px;
+  cursor: pointer;
+  font-family: inherit;
+  color: #333;
+}
+.btn-mini:hover { background: #f0f0f0; }
+.btn-mini.danger { color: #c0392b; }
+
+/* 자동 채움 input (반영전) */
+.auto-filled {
+  background: #f0f4fa !important;
+  border-color: #1a2c5b !important;
+  color: #1a2c5b;
+  font-weight: 600;
+}
+
+/* 의견 박스 (동적) */
+.opinion-item {
+  border: 1px solid #d8dde6;
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background: #fafbfc;
+}
+.opinion-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.opinion-no {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a2c5b;
+}
+.del-op-btn {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  background: #fff;
+  border-radius: 3px;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  font-family: inherit;
+}
+.del-op-btn:hover { background: #c0392b; color: #fff; }
+.opinion-item textarea {
+  min-height: 56px;
+  margin-top: 2px;
+}
+
+.help-text {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+/* ===== 모달 ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-box {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 18px 20px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+}
+.modal-box .modal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a2c5b;
+  margin: 0 0 8px;
+}
+.modal-box .modal-title.danger {
+  color: #c0392b;
+}
+.modal-box .modal-body {
+  font-size: 12.5px;
+  color: #444;
+  line-height: 1.65;
+  margin: 0 0 14px;
+  white-space: pre-wrap;
+}
+.modal-box .modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.modal-box button {
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+.modal-box button.primary {
+  background: #1a2c5b;
+  color: #fff;
+  border-color: #1a2c5b;
+}
+
+/* ===== 보고서 페이지 ===== */
+.report-page {
+  background: #fff;
+  width: 210mm;
+  page: samho;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 22mm 20mm;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+  color: #000;
+  font-size: 13px;
+  line-height: 1.5;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.report-content { flex: 1; }
+
+.rp-main-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a2c5b;
+  padding-bottom: 12px;
+  border-bottom: 3px double #1a2c5b;
+  margin-bottom: 18px;
+  letter-spacing: 2px;
+}
+
+.rp-title {
+  color: #0d1b3d;
+  font-weight: 700;
+  font-size: 16.5px;
+  margin: 22px 0 11px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #1a2c5b;
+}
+.rp-title .unit {
+  font-size: 12.5px;
+  color: #555;
+  font-weight: 400;
+  margin-left: 8px;
+}
+.rp-subtitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a2c5b;
+  margin: 13px 0 5px;
+}
+.rp-subtitle .small {
+  color: #888;
+  font-weight: 400;
+  font-size: 11px;
+}
+
+.rp-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-bottom: 14px;
+}
+.rp-table td, .rp-table th {
+  border: 1px solid #888;
+  font-size: 13px;
+  line-height: 1.4;
+  vertical-align: middle;
+  color: #000;
+  word-break: keep-all;
+}
+.rp-table th {
+  background: #1a2c5b;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12.5px;
+  text-align: center;
+}
+.rp-table td.lab {
+  background: #e8ecf4;
+  color: #1a2c5b;
+  font-weight: 700;
+  text-align: center;
+}
+.rp-table td.lab2 {
+  background: #f1f4fa;
+  color: #1a2c5b;
+  font-weight: 600;
+}
+.rp-table td.num {
+  text-align: right;
+  font-size: 13.5px;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+.rp-table td.num.highlight {
+  background: #fff8e1;
+  color: #c0392b;
+  font-weight: 700;
+  font-size: 14px;
+}
+.rp-table td.lab.highlight {
+  background: #fff8e1;
+  color: #8a6d00;
+}
+.rp-table td.ctr { text-align: center; }
+.rp-table td.txt { padding: 9px 8px; }
+
+.rp-table.compact td, .rp-table.compact th { padding: 9px 4px; }
+.rp-table.compact .rp-dist { padding: 0 4px; }
+
+.rp-table td.item-cell {
+  text-align: center;
+  word-break: break-all;
+  white-space: normal;
+  line-height: 1.45;
+  padding: 8px 4px;
+}
+
+.rp-table.medium td, .rp-table.medium th { padding: 9px 40px; }
+.rp-table.medium .rp-dist { padding: 0 40px; }
+.rp-table.medium td.sub-dist { padding: 9px 10px; }
+.rp-table.medium td.sub-dist .rp-dist { padding: 0 10px; }
+.rp-table.medium td.cost-label { padding: 9px 10px; }
+.rp-table.medium td.cost-label .rp-dist { padding: 0 10px; }
+.rp-table.medium td.num { padding-right: 18px; }
+
+.rp-dist {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  line-height: 1.4;
+}
+.rp-dist + .rp-dist.sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #555;
+  font-weight: 400;
+}
+.rp-table th .rp-dist.sub { color: #cdd5e6; }
+
+.rp-image {
+  width: 100%;
+  margin: 8px 0 12px;
+  text-align: center;
+}
+.rp-image img {
+  max-width: 100%;
+  border: 1px solid #bbb;
+}
+
+.rp-opinion {
+  background: #fafbfc;
+  border: 1px solid #d8dde6;
+  border-left: 3px solid #1a2c5b;
+  padding: 10px 14px;
+  margin: 6px 0 10px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+.rp-opinion-label {
+  font-weight: 700;
+  color: #1a2c5b;
+  margin-right: 6px;
+}
+.rp-op-img {
+  text-align: center;
+  margin: 8px 0;
+}
+.rp-op-img img {
+  max-width: 100%;
+  border: 1px solid #bbb;
+}
+
+.rp-note {
+  color: #555;
+  font-size: 11.5px;
+  margin: 6px 0;
+  line-height: 1.65;
+}
+
+.rp-footer {
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 0.7px solid #999;
+}
+.rp-footer .firm {
+  text-align: right;
+  font-size: 13px;
+  margin: 0 0 10px;
+}
+.rp-footer .note {
+  text-align: center;
+  font-size: 13.5px;
+  margin: 0 0 10px;
+}
+.rp-footer .warn {
+  text-align: center;
+  font-size: 13.5px;
+  margin: 0;
+}
+.rp-footer .warn .red {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.is-hidden { display: none !important; }
+
+.dyn-row {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 6px;
+  align-items: flex-start;
+}
+.dyn-row.taxcredit {
+  grid-template-columns: 1.3fr 0.7fr 0.5fr 0.5fr 0.4fr 0.5fr 1fr 28px;
+}
+.dyn-row input, .dyn-row select {
+  padding: 5px 7px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: inherit;
+  background: #fff;
+  width: 100%;
+}
+.dyn-row .del-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #fff;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.dyn-row .del-btn:hover { background: #c0392b; color: #fff; }
+.dyn-head {
+  display: grid;
+  gap: 6px;
+  font-size: 11px;
+  color: #888;
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding: 0 2px;
+}
+.dyn-head.taxcredit {
+  grid-template-columns: 1.3fr 0.7fr 0.5fr 0.5fr 0.4fr 0.5fr 1fr 28px;
+}
+.btn-add {
+  padding: 5px 12px;
+  background: #1a2c5b;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  margin-top: 4px;
+}
+.btn-add:hover { background: #0d1b3d; }
+
+@media print {
+  body { background: #fff; }
+  .quote-page { width:100%; min-height:auto; box-shadow:none; padding:0; margin:0; display:block; page:quote; page-break-after:always; }
+  .quote-page.is-hidden { display:none !important; }
+  .quote-page .q-page-bottom { margin-top:24px; }
+  .q-tbl-row, .quote-page .feeStd, .quote-page .boxA, .quote-page .boxB { page-break-inside:avoid; }
+  @page quote {
+  size: A4;
+  margin: 14mm;
+
+  @bottom-right {
+    content: counter(page) "/" counter(pages);
+    font-size: 10.5px;
+    color: #555;
+    font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+  }
+}
+
+  body > *:not(.layout) { display: none !important; }
+  .tool-header,
+  .input-panel,
+  .sync-info,
+  .refresh-btn,
+  .build-date,
+  .slot-panel,
+  .modal-overlay { display: none !important; }
+  .layout { display: block; height: auto; }
+  .preview-area {
+    width: 100%;
+    background: #fff;
+    overflow: visible;
+    padding: 0;
+  }
+  .report-page {
+    width: 100%;
+    min-height: auto;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    display: block;
+  }
+  .report-content { flex: none; }
+  .rp-title { page-break-after: avoid; }
+  .rp-subtitle { page-break-after: avoid; }
+  .rp-table { page-break-inside: avoid; }
+  .rp-image { page-break-inside: avoid; }
+  .rp-opinion { page-break-inside: avoid; }
+  .rp-op-img { page-break-inside: avoid; }
+  .rp-footer { page-break-inside: avoid; page-break-before: avoid; margin-top: 16px; margin-bottom: 8mm; }
+@page samho {
+      size: A4;
+      margin: 22mm 16mm 12mm 16mm;
+      @top-left {
+        content: "세무법인삼호 남부지점";
+        font-size: 11px;
+        font-weight: 700;
+        color: #1a2c5b;
+        font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+        padding-bottom: 4px;
+      }
+      @top-right {
+        content: "";
+        font-size: 10.5px;
+        color: #555;
+        font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+        padding-bottom: 4px;
+      }
+      @bottom-right {
+        content: counter(page) "/" counter(pages);
+        font-size: 10.5px;
+        color: #555;
+        font-family: '바탕', Batang, '맑은 고딕', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+      }
+    }
+  }
+</style>
+<style>
+/* ===== [수수료 견적서] 통합 스타일 ===== */
+.quote-page {
+  background:#fff; width:210mm; min-height:297mm;
+  margin:0 auto 40px; padding:16mm 17mm;
+  box-shadow:0 2px 12px rgba(0,0,0,0.15); color:#000;
+  display:flex; flex-direction:column;
+  font-family:'\B9D1\C740 \ACE0\B515','Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  font-size:13px; line-height:1.5;
+  page:quote;
+}
+.quote-page.is-hidden { display:none !important; }
+.q-page-bottom { margin-top:auto; }
+.quote-page .lh-firmtype { font-size:11.5px; font-weight:700; color:#222; letter-spacing:.5px; }
+.quote-page .lh-logo { text-align:center; margin:2px 0 4px; }
+.quote-page .lh-mark { font-family:'Times New Roman',Georgia,serif; font-style:italic; font-weight:700; font-size:30px; color:#111; letter-spacing:1px; }
+.quote-page .lh-cs { font-family:'Times New Roman',Georgia,serif; font-weight:700; font-size:19px; color:#111; margin-left:6px; }
+.quote-page .lh-addr { font-size:10.5px; color:#333; text-align:center; border-bottom:1.5px solid #111; padding-bottom:5px; }
+.quote-page .lh-addr .sep { color:#999; margin:0 3px; }
+.q-band { height:9px; background:#8d8f93; }
+.quote-page .recv-table { width:100%; border-collapse:collapse; }
+.quote-page .recv-table td { border:1px solid #b7b9bd; padding:6px 10px; font-size:12.5px; }
+.quote-page .recv-table .recv-lab { width:184px; background:#ededee; font-weight:700; text-align:center; letter-spacing:1px; color:#222; }
+.q-val { color:#14264f; font-weight:600; }
+.q-val.inc { color:#1a5fb4; }
+.quote-page .body-list { list-style:none; margin:16px 0 14px; padding:0; }
+.quote-page .body-list li { position:relative; padding-left:18px; margin-bottom:13.5px; font-size:12.5px; line-height:1.62; }
+.quote-page .body-list li .bl-no { position:absolute; left:0; top:0; }
+.quote-page .body-list .bl-warn { color:#c0392b; font-weight:700; }
+/* 수수료 견적서 본문 2단: 좌측 보수료 항목 구조는 유지, 우측 보수표 가로폭 확대 */
+.q-tbl-row { display:flex; gap:10px; align-items:flex-start; margin:6px 0 4px; }
+.q-tbl-left { flex:0 0 43%; width:43%; }
+.q-tbl-right { flex:1 1 auto; width:auto; min-width:0; }
+.quote-page .boxA { width:100%; border-collapse:collapse; margin-bottom:12px; }
+.quote-page .boxA td { border:1.4px solid #2f2f2f; padding:10px 9px; }
+.quote-page .boxA .bA-lab { width:52%; text-align:center; font-weight:700; font-size:13px; letter-spacing:1px; line-height:1.55; }
+.quote-page .boxA .bA-val { text-align:right; font-size:14px; }
+.quote-page .boxB { width:100%; border-collapse:collapse; }
+.quote-page .boxB td { border:1px solid #9aa9c6; padding:9px 9px; height:36px; }
+.quote-page .boxB .bB-lab { width:52%; text-align:center; font-weight:600; font-size:12px; background:#fff; color:#1a2c5b; }
+.quote-page .boxB .bB-val { text-align:right; font-size:13px; }
+.quote-page .boxB .bB-sum { background:#c9d6ea !important; font-weight:700; font-size:13px; letter-spacing:2px; color:#14264f; }
+.quote-page .boxB .bB-sumval { background:#c9d6ea; text-align:right; font-weight:700; font-size:13.5px; color:#14264f; }
+.q-dash { color:#555; }
+.quote-page .free-print { margin-top:12px; border:1px solid #9aa9c6; border-radius:2px; padding:8px 10px; font-size:12px; line-height:1.62; color:#14264f; min-height:70px; white-space:pre-wrap; }
+.quote-page .total-box { margin:16px 0 6px; background:#d6e3f1; border:1px solid #9fb6d4; padding:11px 14px; text-align:center; font-weight:700; font-size:15px; letter-spacing:2px; color:#14264f; }
+.quote-page .total-box .total-val { color:#0d6e6e; font-size:17px; letter-spacing:0; border-bottom:1.5px solid #0d6e6e; padding:0 14px 1px; }
+.quote-page .total-box .total-tail { font-size:13px; letter-spacing:0; }
+.q-footer { display:flex; justify-content:space-around; align-items:center; font-size:11.5px; font-weight:700; color:#222; margin:16px 0 8px; letter-spacing:.5px; }
+.q-motto { border:1px solid #777; padding:9px; text-align:center; font-size:13px; font-weight:700; color:#111; }
+/* 견적서 입력 섹션 보조 */
+#quote_panel .q-toggle { font-size:12.5px; font-weight:600; color:#1a2c5b; cursor:pointer; display:inline-flex; align-items:center; }
+#quote_panel .q-toggle input { width:auto; flex:none; margin-right:6px; vertical-align:middle; }
+
+/* 견적서 입력 — 동적 보수료 항목 (UI 시안 반영) */
+#quote_panel .q-topline { display:flex; gap:9px; align-items:stretch; margin-bottom:14px; }
+#quote_panel .q-topline .q-tcell { flex:1; display:flex; flex-direction:column; justify-content:center; }
+#quote_panel .q-topline .q-tcell > label { font-size:11px; font-weight:600; color:#5f6a82; margin-bottom:3px; }
+#quote_panel .q-topline .q-tcell input { width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:4px; font-size:12.5px; font-family:inherit; background:#fff; }
+#quote_panel .q-topline .q-tcell input:focus { outline:none; border-color:#1a2c5b; box-shadow:0 0 0 2px rgba(26,44,91,0.08); }
+#quote_panel .q-auto { flex:1; background:#f1f4fa; border:1px solid #c9d3e6; border-radius:4px; padding:6px 11px; display:flex; flex-direction:column; justify-content:center; }
+#quote_panel .q-auto .q-ak { font-size:10.5px; font-weight:600; color:#5f6a82; margin-bottom:1px; }
+#quote_panel .q-auto .q-ak .q-badge { font-size:9px; background:#d7deec; color:#5f6a82; border-radius:3px; padding:1px 4px; margin-left:3px; font-weight:700; }
+#quote_panel .q-auto .q-av { font-size:15px; font-weight:700; color:#14264f; text-align:right; }
+#quote_panel .q-auto.total .q-av { color:#0d6e6e; font-size:16px; }
+#quote_panel .q-auto .q-won { font-size:10px; color:#888; font-weight:400; }
+#quote_panel .q-cols { display:flex; gap:16px; align-items:stretch; }
+#quote_panel .q-col-left { flex:1.3; display:flex; flex-direction:column; }
+#quote_panel .q-col-right { flex:1; display:flex; flex-direction:column; }
+#quote_panel .q-col-title { font-size:12.5px; font-weight:700; color:#1a2c5b; margin-bottom:7px; }
+#quote_panel .qfee-head { display:flex; gap:7px; font-size:11px; color:#999; font-weight:600; margin-bottom:4px; padding:0 2px; }
+#quote_panel .qfee-head .h1 { flex:1.4; }
+#quote_panel .qfee-head .h2 { width:130px; }
+#quote_panel .qfee-head .h3 { width:26px; }
+#quote_panel .qfee-row { display:flex; gap:7px; margin-bottom:6px; }
+#quote_panel .qfee-row .qf-lbl { flex:1.4; padding:7px 9px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-family:inherit; background:#fff; }
+#quote_panel .qfee-row .qf-amt { width:130px; padding:7px 9px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-family:inherit; background:#fff; text-align:right; font-weight:600; color:#14264f; }
+#quote_panel .qfee-row .qf-lbl:focus, #quote_panel .qfee-row .qf-amt:focus { outline:none; border-color:#1a2c5b; box-shadow:0 0 0 2px rgba(26,44,91,0.08); }
+#quote_panel .qfee-row .qf-del { width:26px; border:1px solid #c0392b; color:#c0392b; background:#fff; border-radius:4px; cursor:pointer; font-size:14px; line-height:1; font-family:inherit; flex-shrink:0; }
+#quote_panel .qfee-row .qf-del:hover { background:#c0392b; color:#fff; }
+#quote_panel .q-col-right textarea { flex:1; width:100%; min-height:150px; resize:vertical; }
+/* 기본보수료 자동계산 바 */
+#quote_panel .qauto-bar { display:flex; align-items:center; gap:9px; flex-wrap:wrap; background:#f1f4fa; border:1px solid #c9d3e6; border-radius:4px; padding:7px 11px; margin-bottom:9px; }
+#quote_panel .qauto-bar .qauto-label { font-size:11.5px; font-weight:600; color:#5f6a82; }
+#quote_panel .qauto-bar .qauto-amt { font-size:13.5px; font-weight:700; color:#14264f; }
+#quote_panel .qauto-bar .qauto-amt #q_basefeeView { font-size:15px; }
+#quote_panel .qauto-bar .qauto-control { display:flex; align-items:center; gap:5px; margin-left:auto; font-size:11.5px; font-weight:600; color:#5f6a82; white-space:nowrap; }
+#quote_panel .qauto-bar .qauto-control + .qauto-control { margin-left:0; }
+#quote_panel .qauto-bar .qauto-control input, #quote_panel .qauto-bar .qauto-control select { width:72px; padding:4px 6px; border:1px solid #c9d3e6; border-radius:4px; font-size:12px; font-family:inherit; background:#fff; text-align:right; }
+#quote_panel .qauto-bar .qauto-formula { flex-basis:100%; font-size:11px; color:#666; line-height:1.45; }
+#quote_panel .qfee-row.qfee-base-row .qf-lbl { background:#f1f4fa; color:#14264f; font-weight:700; }
+#quote_panel .qfee-row.qfee-base-row .qf-del { visibility:hidden; pointer-events:none; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+/* ===== [PDF 자동 불러오기] 추가 스타일 — 기존 스타일 미변경, 신규 클래스만 추가 ===== */
+.pdfx-folder-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.pdfx-btn-main { padding:6px 13px; background:#1a2c5b; color:#fff; border:1px solid #1a2c5b; border-radius:4px; cursor:pointer; font-size:12.5px; font-family:inherit; white-space:nowrap; }
+.pdfx-btn-main:hover { background:#0d1b3d; }
+.pdfx-btn-main:disabled { background:#9aa3b8; border-color:#9aa3b8; cursor:default; }
+.pdfx-folder-info { font-size:11.5px; color:#555; }
+.pdfx-folder-info strong { color:#1a2c5b; }
+.pdfx-search-wrap { margin-bottom:8px; }
+.pdfx-search { width:100%; padding:6px 10px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-family:inherit; background:#fff; }
+.pdfx-search:focus { outline:none; border-color:#1a2c5b; box-shadow:0 0 0 2px rgba(26,44,91,0.08); }
+.pdfx-list { border:1px solid #ddd; border-radius:4px; max-height:240px; overflow-y:auto; margin-bottom:8px; background:#fff; }
+.pdfx-row { display:flex; justify-content:space-between; align-items:center; padding:7px 11px; font-size:12.5px; cursor:pointer; border-top:1px solid #eee; }
+.pdfx-row:first-child { border-top:none; }
+.pdfx-row:hover { background:#f0f4fa; }
+.pdfx-row.pdfx-active { background:#f0f4fa; }
+.pdfx-row .pdfx-name { font-weight:600; color:#1a2c5b; }
+.pdfx-row .pdfx-birth { color:#888; font-size:11.5px; }
+.pdfx-empty { padding:14px; text-align:center; color:#999; font-size:12px; }
+.pdfx-status { font-size:12px; padding:8px 11px; border-radius:4px; margin-bottom:6px; line-height:1.6; }
+.pdfx-status.pdfx-loading { background:#FAEEDA; color:#854F0B; }
+.pdfx-status.pdfx-ok { background:#E1F5EE; color:#0F6E56; }
+.pdfx-status.pdfx-warn { background:#FCEBEB; color:#791F1F; }
+</style>
+
+<style>
+/* ===== 견적서 인쇄 디자인 보정: 샘플 상단부 + 보수표 본문 대비 비율 =====
+   내용/입력값/계산 로직은 변경하지 않고, 수수료 견적서 1페이지의 출력 CSS만 보정합니다. */
+.quote-page {
+  padding: 16mm 17mm;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* 상단 로고·주소 영역: 샘플의 얇고 절제된 인쇄 톤 참고 */
+.quote-page .lh-firmtype {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: .4px;
+  margin-bottom: 2px;
+}
+.quote-page .lh-logo {
+  text-align: center;
+  margin: -2px 0 4px;
+  line-height: 1.05;
+}
+.quote-page .lh-mark {
+  font-family: 'Times New Roman', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 30px;
+  color: #111;
+  letter-spacing: 1px;
+}
+.quote-page .lh-cs {
+  font-family: 'Times New Roman', Georgia, serif;
+  font-weight: 700;
+  font-size: 18.5px;
+  color: #111;
+  margin-left: 6px;
+}
+.quote-page .lh-addr {
+  font-size: 10.2px;
+  color: #333;
+  text-align: center;
+  border-bottom: 1px solid #777;
+  padding-bottom: 5px;
+  margin-bottom: 0;
+  line-height: 1.25;
+}
+.quote-page .lh-addr .sep { color: #777; margin: 0 5px; }
+.quote-page .q-band {
+  height: 8px;
+  background: linear-gradient(90deg, #9a9da2 0%, #b6b8bc 52%, #c9cbd0 100%);
+  margin: 0 0 10px;
+}
+
+/* 수신·작성일자·제목 박스: 내용은 그대로, 인쇄 디자인만 샘플 톤으로 보정 */
+.quote-page .recv-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #b9bcc2;
+  margin-bottom: 16px;
+}
+.quote-page .recv-table td {
+  border: 1px solid #c2c5ca;
+  padding: 5px 10px;
+  height: 26px;
+  font-size: 12.2px;
+  line-height: 1.35;
+  background: linear-gradient(90deg, #ffffff 0%, #f9f9f9 100%);
+  vertical-align: middle;
+}
+.quote-page .recv-table .recv-lab {
+  width: 176px;
+  background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%);
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 2.5px;
+  color: #111;
+}
+
+/* 본문 대비 보수표 크기: 샘플 비율에 맞춰 보수표를 보조표처럼 축소 */
+.quote-page .body-list {
+  margin: 16px 0 14px;
+}
+.quote-page .body-list li {
+  font-size: 12.5px;
+  line-height: 1.62;
+}
+.quote-page .q-tbl-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 6px 0 4px;
+}
+.quote-page .q-tbl-left {
+  flex: 0 0 41.8%;
+  width: 41.8%;
+}
+.quote-page .q-tbl-right {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+@media print {
+  .quote-page {
+    padding: 0;
+  }
+  .quote-page .q-band {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .quote-page .recv-table td,
+  .quote-page .recv-table .recv-lab,
+  .quote-page .feeStd th,
+  .quote-page .feeStd tr.fs-active td {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+</style>
+
+
+<style>
+/* PATCH: 수신·작성일자·제목 좌측 라벨칸 너비 100% 확대(기존 88px → 176px). 내용/계산 로직 변경 없음. */
+.quote-page .recv-table .recv-lab {
+  width: 176px !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 주소줄 블로그 URL 제거 후 간격 유지, 수신/작성일자/제목 박스 다음 본문 한 줄 내림 */
+.quote-page .recv-table + .q-band {
+  margin-bottom: 18px !important;
+}
+.quote-page .recv-table + .q-band + .body-list {
+  margin-top: 0 !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 견적서 인쇄영역 높이 조정 — 수신/작성일자/제목 표와 오른쪽 보수표를 현재 대비 1.5배 높임. 내용/계산 로직 변경 없음. */
+.quote-page .recv-table td {
+  height: 39px !important;
+  padding-top: 7.5px !important;
+  padding-bottom: 7.5px !important;
+}
+.quote-page .recv-table .recv-lab {
+  height: 39px !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 수신/작성일자/제목 표 글자 크기 11pt(=14.67px)로 확대. 굵기 설정은 기존값 유지. */
+.quote-page .recv-table td {
+  font-size: 14.67px !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 견적서 본문 1~4번 문단 글자 크기 16px. 내용/계산 로직 변경 없음. */
+.quote-page .body-list li,
+.quote-page .body-list li .bl-no {
+  font-size: 16px !important;
+}
+.quote-page .body-list li {
+  line-height: 1.55 !important;
+}
+</style>
+
+
+<style>
+.quote-page .recv-table .recv-lab {
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+.quote-page .recv-table .recv-fit {
+  display: inline-flex !important;
+  width: 88px !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+.quote-page .body-list li,
+.quote-page .body-list li .bl-no {
+  line-height: 3.1 !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 수신/작성일자/제목 라벨 균등 배치, 기존 좌우 여백 유지, 본문 1~4번 줄간격 현재의 70%. */
+.quote-page .recv-table .recv-lab {
+  text-align: center !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+}
+.quote-page .recv-table .recv-fit {
+  display: inline-flex !important;
+  width: 88px !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+.quote-page .recv-table .recv-fit span {
+  display: inline-block !important;
+}
+.quote-page .body-list li,
+.quote-page .body-list li .bl-no {
+  line-height: 2.17 !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 견적서 선택 보수표 — 기본보수표 아래 동일 폭 표, 입력값 있을 때만 인쇄 */
+#quote_panel .qextra-wrap {
+  margin-top: 12px;
+  border-top: 1px dashed #d8dde6;
+  padding-top: 10px;
+}
+#quote_panel .qextra-head {
+  display: flex;
+  gap: 7px;
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding: 0 2px;
+}
+#quote_panel .qextra-head .h1 { flex: 1.4; }
+#quote_panel .qextra-head .h2 { width: 130px; }
+#quote_panel .qextra-head .h3 { width: 26px; }
+#quote_panel .qextra-row {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+#quote_panel .qextra-row input {
+  padding: 7px 9px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+#quote_panel .qextra-row .qx-lbl { flex: 1.4; }
+#quote_panel .qextra-row .qx-amt { width: 130px; text-align: right; font-weight: 600; color: #14264f; }
+#quote_panel .qextra-row .qx-del {
+  width: 26px;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+#quote_panel .qextra-row .qx-del:hover { background: #c0392b; color: #fff; }
+#quote_panel .qextra-row.qextra-default-row .qx-del { visibility: hidden; pointer-events: none; }
+#quote_panel .qextra-sum {
+  margin-top: 4px;
+  padding: 7px 10px;
+  background: #f1f4fa;
+  border: 1px solid #c9d3e6;
+  border-radius: 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #14264f;
+  text-align: right;
+}
+.quote-page .extraStd {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-top: 7px;
+}
+.quote-page .extraStd th,
+.quote-page .extraStd td {
+  border: 1px solid #9c9c9c;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.quote-page .extraStd th {
+  height: 31.5px;
+  padding: 3.75px 3px;
+  font-size: 5px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: 0;
+  background: #ededee;
+}
+.quote-page .extraStd td {
+  height: 27px;
+  padding: 2.1px 0.8px;
+  font-size: 4px;
+  line-height: 1.12;
+  letter-spacing: -0.22px;
+  word-spacing: -0.9px;
+  color: #000;
+  font-weight: 400;
+}
+.quote-page .extraStd .qx-lab-print { text-align: left; padding-left: 8px; }
+.quote-page .extraStd .qx-amt-print { text-align: right; padding-right: 4px; }
+.quote-page .extraStd .qx-sum-lab,
+.quote-page .extraStd .qx-sum-val {
+  background: #ededee;
+  font-weight: 700;
+}
+@media print {
+  .quote-page .extraStd th,
+  .quote-page .extraStd .qx-sum-lab,
+  .quote-page .extraStd .qx-sum-val {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+</style>
+
+<style>
+/* PATCH: 견적서만 출력 모드 — 인쇄 시 보고서 페이지를 제외하고 견적서 1장만 출력. */
+@media print {
+  body.print-quote-only .report-page {
+    display: none !important;
+  }
+  body.print-quote-only .quote-page {
+    display: block !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+}
+</style>
+
+
+<style>
+/* PATCH: 별도표 입력 구성 — 기본 보수료 항목과 동일하게 항목명/금액 2열만 사용 */
+#quote_panel .qextra-head .h1 { flex: 1.4 !important; }
+#quote_panel .qextra-head .h2 { width: 130px !important; }
+#quote_panel .qextra-head .h3 { width: 26px !important; }
+#quote_panel .qextra-row .qx-lbl { flex: 1.4 !important; }
+#quote_panel .qextra-row .qx-amt { width: 130px !important; }
+.quote-page .extraStd col:nth-child(1) { width: 52% !important; }
+.quote-page .extraStd col:nth-child(2) { width: 48% !important; }
+</style>
+
+
+<style>
+/* PATCH: 별도표 위치/출력 보정 — 오른쪽 보수기준표가 아니라 왼쪽 기본보수료 표 하단에 표시.
+   입력값이 없으면 미리보기·인쇄 모두 미출력. 표 크기와 톤은 기본보수료 표(boxB)와 맞춤. */
+.quote-page .q-tbl-left .extraStd {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  table-layout: fixed !important;
+  margin-top: 8px !important;
+  margin-bottom: 12px !important;
+}
+.quote-page .q-tbl-left .extraStd th,
+.quote-page .q-tbl-left .extraStd td {
+  border: 1px solid #9aa9c6 !important;
+  height: 36px !important;
+  padding: 9px 9px !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+}
+.quote-page .q-tbl-left .extraStd th {
+  background: #fff !important;
+  color: #1a2c5b !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+}
+.quote-page .q-tbl-left .extraStd .qx-lab-print {
+  text-align: center !important;
+  color: #1a2c5b !important;
+  font-weight: 600 !important;
+  padding-left: 9px !important;
+}
+.quote-page .q-tbl-left .extraStd .qx-amt-print {
+  text-align: right !important;
+  font-size: 13px !important;
+  color: #000 !important;
+  padding-right: 9px !important;
+}
+.quote-page .q-tbl-left .extraStd .qx-sum-lab {
+  background: #c9d6ea !important;
+  color: #14264f !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  letter-spacing: 2px !important;
+}
+.quote-page .q-tbl-left .extraStd .qx-sum-val {
+  background: #c9d6ea !important;
+  color: #14264f !important;
+  font-weight: 700 !important;
+  text-align: right !important;
+  font-size: 13.5px !important;
+  padding-right: 9px !important;
+}
+@media print {
+  .quote-page .q-tbl-left .extraStd th,
+  .quote-page .q-tbl-left .extraStd .qx-sum-lab,
+  .quote-page .q-tbl-left .extraStd .qx-sum-val {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+</style>
+
+
+<style id="feeStd-unified">
+/* 보수표(feeStd) 통합 최종 스타일
+   - 수정 범위: 견적서 오른쪽 보수표(feeStd)만
+   - 보수표 행높이 고정: 헤더 34px / 본문 31px
+   - 헤더 글자: 기존 2px 유지
+   - 본문 글자: 기존 2px 기준 시각 크기 70%(scale 0.7) 적용
+   - 보수기준열 정렬: 금액 / + / 초과액 문구 / *세율 구역 분리
+   - 좌우 여백 균일, 구역 사이 간격 확보
+   - 오른쪽 보수표 전체 너비: 기존 대비 90% 수준으로 축소
+   - 축소분은 왼쪽 2025년 수입금액표·기본보수료표 영역으로 이전
+   - 보수기준열 내부 구역 간격은 축소 폭에 맞춰 재배분
+   - 계산 로직 변경 없음
+*/
+
+.quote-page .q-tbl-row {
+  gap: 14px !important;
+  align-items: flex-start !important;
+  margin: 24px 0 6px !important;
+}
+
+.quote-page .q-tbl-left {
+  flex: 0 0 46% !important;
+  width: 46% !important;
+  max-width: 46% !important;
+}
+
+.quote-page .q-tbl-right {
+  flex: 0 0 calc(54% - 14px) !important;
+  width: calc(54% - 14px) !important;
+  max-width: calc(54% - 14px) !important;
+  min-width: 0 !important;
+}
+
+.quote-page .feeStd {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  table-layout: fixed !important;
+  border: 0.4px solid #9c9c9c !important;
+}
+
+.quote-page .feeStd col:nth-child(1) { width: 23% !important; }
+.quote-page .feeStd col:nth-child(2) { width: 23% !important; }
+.quote-page .feeStd col:nth-child(3) { width: 54% !important; }
+
+.quote-page .feeStd thead tr {
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+}
+
+.quote-page .feeStd tbody tr {
+  height: 31px !important;
+  min-height: 31px !important;
+  max-height: 31px !important;
+}
+
+.quote-page .feeStd th,
+.quote-page .feeStd td,
+.quote-page .feeStd th *,
+.quote-page .feeStd td * {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.quote-page .feeStd th,
+.quote-page .feeStd td {
+  border: 0.4px solid #9c9c9c !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+.quote-page .feeStd thead th {
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 !important;
+  background: #ededee !important;
+  font-size: 2px !important;
+  line-height: 1 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.05px !important;
+  word-spacing: 0 !important;
+}
+
+.quote-page .feeStd thead th * {
+  font-size: 2px !important;
+  line-height: 1 !important;
+  font-weight: 700 !important;
+}
+
+.quote-page .feeStd tbody td {
+  height: 31px !important;
+  min-height: 31px !important;
+  max-height: 31px !important;
+  background: #fff !important;
+  padding: 0 2px !important;
+  color: #000 !important;
+  font-weight: 400 !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+}
+
+.quote-page .feeStd tbody tr.fs-active td,
+.quote-page .feeStd tbody tr.fs-active td * {
+  background: #fff !important;
+  color: #000 !important;
+  font-weight: 400 !important;
+}
+
+.quote-page .feeStd tbody .fs-rng,
+.quote-page .feeStd tbody td:nth-child(1),
+.quote-page .feeStd tbody td:nth-child(2) {
+  text-align: right !important;
+  vertical-align: middle !important;
+  padding-right: 4px !important;
+}
+
+.quote-page .feeStd tbody .fs-txt,
+.quote-page .feeStd tbody .fs-line > span {
+  display: inline-block !important;
+  font-size: 2px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.08px !important;
+  word-spacing: 0 !important;
+  color: #000 !important;
+  font-weight: 400 !important;
+  transform: scale(0.7) !important;
+  transform-origin: center center !important;
+}
+
+.quote-page .feeStd tbody .fs-rategrp > span {
+  display: inline-block !important;
+  font-size: 2px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.08px !important;
+  word-spacing: 0 !important;
+  color: #000 !important;
+  font-weight: 400 !important;
+  transform: none !important;
+  transform-origin: center center !important;
+}
+
+.quote-page .feeStd tbody .fs-rng .fs-txt {
+  transform-origin: right center !important;
+}
+
+.quote-page .feeStd tbody .fs-std {
+  text-align: left !important;
+  vertical-align: middle !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+.quote-page .feeStd tbody .fs-std.fs-single {
+  text-align: left !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+.quote-page .feeStd tbody .fs-line {
+  display: grid !important;
+  width: 100% !important;
+  height: 31px !important;
+  grid-template-columns: 27% 7% 43% 23% !important;
+  align-items: center !important;
+  column-gap: 0 !important;
+}
+
+.quote-page .feeStd tbody .fs-line.fs-line-single {
+  display: inline-flex !important;
+  width: auto !important;
+  height: 31px !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+.quote-page .feeStd tbody .fs-amt { justify-self: start !important; text-align: left !important; }
+.quote-page .feeStd tbody .fs-plus { justify-self: center !important; text-align: center !important; }
+.quote-page .feeStd tbody .fs-base { justify-self: center !important; text-align: center !important; }
+.quote-page .feeStd tbody .fs-rategrp {
+  justify-self: end !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.8px !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+}
+.quote-page .feeStd tbody .fs-rategrp .fs-mul { transform-origin: right center !important; }
+.quote-page .feeStd tbody .fs-rategrp .fs-rate { transform-origin: left center !important; }
+</style>
+
+<style id="total-service-fee-gap-half">
+/* PATCH: 총용역수수료와 보수표 사이 세로 여백 1/2 축소
+   - 수정 범위: 견적서 출력의 q-page-bottom / total-box 상단 여백만
+   - 보수표 폭·행높이·글자크기·계산 로직 변경 없음 */
+.quote-page .q-page-bottom {
+  margin-top: 0 !important;
+}
+.quote-page .total-box {
+  margin-top: 8px !important;
+}
+</style>
+</head>
+<body>
+
+<header class="tool-header">
+  <div class="tool-title">
+    <h1>수수료 견적서 · 종합소득세 신고보고서 작성 도구</h1>
+    <div class="subtitle">2025년 귀속 기준 · 세무법인삼호 남부지점 김선영 세무사</div>
+  </div>
+  <div class="sync-info">
+    <span id="syncTime"></span>
+    <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
+    <span class="build-date">업데이트 2026-05-24 11:09</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="input-panel">
+
+    <!-- ====== 작업 관리 ====== -->
+    <section class="input-section slot-panel" id="slot_panel">
+      <div class="slot-header">
+        <h3>작업 관리</h3>
+        <span class="slot-quota" id="slot_quota">용량 <strong>0.0</strong> / 약 10 MB</span>
+      </div>
+      <div class="slot-current">
+        <span class="lbl">현재 작업</span>
+        <span class="name" id="slot_current_name">임시 작업</span>
+        <span class="status" id="slot_save_status"></span>
+      </div>
+      <div class="slot-actions">
+        <label>불러오기</label>
+        <select id="slot_select" onchange="onSlotSelect(this.value)">
+          <option value="">─ 슬롯 선택 ─</option>
+        </select>
+        <button type="button" class="btn-slot-primary" onclick="saveNow()">💾 저장</button>
+        <button type="button" class="btn-slot-primary" onclick="newSlot()">＋ 새 작업</button>
+        <button type="button" class="btn-slot-danger" onclick="deleteCurrentSlot()">🗑 삭제</button>
+        <button type="button" class="btn-slot-outline" onclick="exportCurrentSlot()">📥 내보내기</button>
+        <button type="button" class="btn-slot-outline" onclick="document.getElementById('slot_import_file').click()">📤 불러오기</button>
+        <input type="file" id="slot_import_file" accept=".json,application/json" style="display:none;" onchange="importSlotFile(event)">
+      </div>
+      <div class="help-text">
+        ※ 「💾 저장」 버튼을 누르거나, 입력 후 약 1초 뒤 자동으로 저장됩니다.<br>
+        ※ <strong>자동 저장 위치</strong>: 이 브라우저(Chrome/Edge)의 내부 저장소. <strong>다른 PC·다른 브라우저에서는 보이지 않습니다.</strong><br>
+        ※ <strong>내보내기 파일 저장 위치</strong>: 브라우저 기본 다운로드 폴더(보통 <code>C:\Users\[사용자명]\Downloads\</code>). 파일 탐색기(Windows 키 + E)로 「내 PC → 다운로드」에서 확인.<br>
+        ※ 다른 직원 PC로 작업을 넘길 때는 「📥 내보내기」로 .json 파일을 받아 전달하고, 받는 쪽은 「📤 불러오기」를 사용하세요.<br>
+        ※ ⚠ 브라우저 「인터넷 사용 기록 삭제」 시 자동 저장된 슬롯도 함께 삭제됩니다. 중요한 작업은 「📥 내보내기」로 .json 파일을 별도 보관해 두세요.<br>
+        ※ 거래처에 인쇄·PDF 전달이 끝난 슬롯은 「🗑 삭제」로 정리해 주세요(용량 절감).
+      </div>
+    </section>
+
+    <!-- ====== 0. PDF 자동 불러오기 (추가 기능) ====== -->
+    <section class="input-section" id="pdfx_panel">
+      <h3>0. PDF 자동 불러오기</h3>
+      <div class="pdfx-folder-row">
+        <button type="button" class="pdfx-btn-main" id="pdfx_open" style="display:none;">📂 기억된 폴더 열기</button>
+        <button type="button" class="pdfx-btn-main" id="pdfx_pick">📁 거래처 폴더 선택</button>
+        <span class="pdfx-folder-info" id="pdfx_folder_info">거래처 폴더가 아직 지정되지 않았습니다.</span>
+      </div>
+      <div class="pdfx-search-wrap" id="pdfx_search_wrap" style="display:none;">
+        <input type="text" id="pdfx_search" class="pdfx-search" placeholder="거래처 이름 검색…" autocomplete="off">
+      </div>
+      <div class="pdfx-list" id="pdfx_list" style="display:none;"></div>
+      <div class="pdfx-status" id="pdfx_status" style="display:none;"></div>
+      <div class="help-text">
+        ※ 「2025년귀속분종합소득세」처럼 거래처 폴더들이 모인 상위 폴더를 한 번만 지정하면 다음부터 자동으로 기억됩니다(Chrome·Edge 전용).<br>
+        ※ 각 거래처 폴더에서 파일명에 "안내문"이 포함된 PDF만 읽어 「1. 기본정보」와 Ⅱ·Ⅲ·Ⅳ 이미지칸을 자동으로 채웁니다.<br>
+        ※ 주민등록번호는 안내문 생년월일 기준으로 앞 6자리와 마스킹값(- *******)이 자동 표시됩니다. 자동 추출이 어긋난 칸은 기존처럼 이미지칸에 직접 붙여넣기(Ctrl+V) 하세요.
+      </div>
+    </section>
+
+    <!-- ====== 수수료 견적서 (추가 기능) ====== -->
+    <section class="input-section" id="quote_panel">
+      <h3>수수료 견적서 (보고서 1페이지)</h3>
+      <div style="margin-bottom:12px;">
+        <label class="q-toggle">
+          <input type="checkbox" id="q_enable" data-field="q_enable" checked>
+          견적서를 보고서 1페이지로 포함
+        </label>
+        <label class="q-toggle" style="margin-left:18px;">
+          <input type="checkbox" id="q_print_quote_only" data-field="q_print_quote_only">
+          인쇄 시 견적서만 출력
+        </label>
+      </div>
+      <div class="input-row col-half">
+        <div class="field"><label>수신자</label><input type="text" id="q_recipient" data-field="q_recipient" placeholder="비워두면 상호·대표자명 자동입력"></div>
+        <div class="field"><label>작성일자</label><input type="text" id="q_writedate" data-field="q_writedate" data-format="reportdate" placeholder="MMDD" maxlength="14"></div>
+      </div>
+      <div class="input-block">
+        <span class="blk-label">제목</span>
+        <input type="text" id="q_title" data-field="q_title" value="2025년 귀속 종합소득세 신고 수수료안내 및 신고 보고" style="width:100%;padding:6px 10px;border:1px solid #ccc;border-radius:4px;font-size:13px;font-family:inherit;background:#fff;">
+      </div>
+      <!-- 견적 합계 라인: CMS·수입금액·자동합계 -->
+      <div class="q-topline">
+        <div class="q-tcell">
+          <label>CMS 이체일</label>
+          <input type="text" id="q_cmsdate" data-field="q_cmsdate" placeholder="예: 5월 24일 금요일">
+        </div>
+        <div class="q-tcell">
+          <label>수입금액</label>
+          <input type="text" id="q_income" data-field="q_income" data-format="num" inputmode="numeric" placeholder="수입금액 입력">
+        </div>
+        <div class="q-auto">
+          <div class="q-ak">합계<span class="q-badge">자동</span></div>
+          <div class="q-av"><span id="q_sumView">0</span><span class="q-won"> 원</span></div>
+        </div>
+        <div class="q-auto total">
+          <div class="q-ak">총용역수수료<span class="q-badge">자동</span></div>
+          <div class="q-av"><span id="q_totalView">0</span><span class="q-won"> 원 (부가세 포함)</span></div>
+        </div>
+      </div>
+
+      <!-- 보수료 항목(동적) + 자유입력란 2단 -->
+      <div class="q-cols">
+        <div class="q-col-left">
+          <div class="q-col-title">보수료 항목</div>
+         <div class="qauto-bar">
+            <span class="qauto-label">수입금액 기준 기본보수료</span>
+            <span class="qauto-amt"><span id="q_basefeeView">0</span> 원</span>
+            <label class="qauto-control">결산조정
+              <input type="number" id="q_weight" data-field="q_weight" min="1.2" max="3" step="0.1" value="1.2">
+            </label>
+            <label class="qauto-control">가중치
+              <input type="number" id="q_adjust" data-field="q_adjust" step="0.1" value="1">
+            </label>
+            <div class="qauto-formula">
+              기본보수료 행 기본값 = 보수기준표 기본보수료 × 1.023 × 결산조정 × 가중치
+              <strong>(자동산정: <span id="q_calcfeeView">0</span> 원)</strong>
+            </div>
+          </div>
+          <div class="qfee-head">
+            <span class="h1">항목명</span><span class="h2">금액</span><span class="h3"></span>
+          </div>
+          <div id="q_feeRows"></div>
+          <button type="button" class="btn-add" onclick="addQuoteFeeItem()">＋ 항목 추가</button>
+
+          <div class="qextra-wrap">
+            <div class="q-col-title">기본보수표 하단 별도표(미입력시 미출력)</div>
+            <div class="qextra-head">
+              <span class="h1">항목명</span><span class="h2">금액</span><span class="h3"></span>
+            </div>
+            <div id="q_extraRows"></div>
+            <button type="button" class="btn-add" onclick="addQuoteExtraItem()">＋ 별도 항목 추가</button>
+            <div class="qextra-sum">별도 표 합계: <span id="q_extraSumView">0</span> 원</div>
+          </div>
+        </div>
+        <div class="q-col-right">
+          <div class="q-col-title">자유입력란</div>
+          <textarea id="q_free" data-field="q_free" placeholder="견적서 합계 박스 아래에 인쇄될 메모·특이사항을 자유롭게 입력하세요. (비워 두면 인쇄물에 표시되지 않습니다)"></textarea>
+        </div>
+      </div>
+      <div class="help-text">
+        ※ 작성일자는 4자리(MMDD) 입력 시 「2026년 M월 D일」로 자동 변환됩니다.<br>
+        ※ 「＋ 항목 추가」로 보수료 항목을 늘리고 「×」로 지웁니다. 항목명과 금액을 직접 입력합니다.<br>
+        ※ 기본보수료 행은 보수료 항목 맨 위에 고정됩니다. 기본값은 「보수기준표 기본보수료 × 1.023 × 결산조정 × 가중치」이며, 금액은 직접 수정할 수 있습니다.<br>
+        ※ 합계 = 보수료 항목 금액의 합, 총용역수수료 = 합계 × 1.1(부가세 포함). 자동 계산됩니다.<br>
+        ※ 자유입력란을 비우면 견적서에서 메모 박스가 사라집니다.<br>
+        ※ 「인쇄 시 견적서만 출력」을 체크하면 인쇄/PDF 저장 시 보고서 본문은 제외되고 견적서만 출력됩니다.<br>
+        ※ 「견적서를 보고서 1페이지로 포함」 체크를 해제하면 견적서 없이 보고서만 인쇄됩니다.
+      </div>
+    </section>
+
+    <section class="input-section">
+      <h3>1. 기본정보</h3>
+      <div class="input-row col-half">
+        <div class="field"><label>대표자명</label><input type="text" id="inp_name" data-field="name" autofocus></div>
+        <div class="field"><label>주민등록번호</label><input type="text" id="inp_rrn" data-field="rrn" data-format="rrn" maxlength="16"></div>
+      </div>
+      <div class="input-row col-half">
+        <div class="field"><label>상호</label><input type="text" id="inp_company" data-field="company"></div>
+        <div class="field"><label>사업자번호</label><input type="text" id="inp_brn" data-field="brn" data-format="brn" maxlength="12"></div>
+      </div>
+      <div class="input-row col-half">
+        <div class="field"><label>업종</label><input type="text" id="inp_industry" data-field="industry"></div>
+        <div class="field"><label>기장의무</label>
+          <select id="inp_booktype" data-field="booktype">
+            <option value="">선택</option>
+            <option value="간편장부">간편장부</option>
+            <option value="복식부기">복식부기</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-row col-half">
+        <div class="field"><label>귀속연도</label><input type="text" id="inp_period" data-field="period" value="2025.01.01. ~ 2025.12.31."></div>
+        <div class="field"><label>신고예정일자</label><input type="text" id="inp_reportdate" data-field="reportdate" data-format="reportdate" placeholder="MMDD" maxlength="14"></div>
+      </div>
+      <div class="help-text">※ 신고예정일자는 4자리(MMDD) 입력 시 자동으로 "2026년 M월 D일"로 변환됩니다. 기본값 0531(2026년 5월 31일).</div>
+    </section>
+
+    <section class="input-section">
+      <h3>2. 종합소득세 신고도움서비스 개별안내</h3>
+      <div class="input-block">
+        <span class="blk-label">이미지 첨부 (클릭, Ctrl+V 붙여넣기, 드래그앤드롭)</span>
+        <div class="image-drop" id="img_caution" tabindex="0" data-image="caution"
+             data-guide-title="※ 소득세 개별분석자료: 사전 성실신고지원 안내대상자"
+             data-guide-sub="하단 문구가 있는 고객만 입력">
+          <div class="image-drop-guide">
+            <div class="image-drop-guide-title">※ 소득세 개별분석자료: 사전 성실신고지원 안내대상자</div>
+            <div class="image-drop-guide-sub">하단 문구가 있는 고객만 입력</div>
+          </div>
+          <div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>
+          <button type="button" class="btn-mini" onclick="document.getElementById('file_caution').click(); event.stopPropagation();">📁 파일에서 선택</button>
+          <input type="file" id="file_caution" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'caution')">
+        </div>
+        <div class="btn-row" id="btnRow_caution" style="display:none;">
+          <button type="button" class="btn-mini danger" onclick="clearImage('caution')">🗑 이미지 제거</button>
+        </div>
+      </div>
+      <div class="input-block">
+        <span class="blk-label">의견</span>
+        <textarea id="inp_caution_opinion" data-field="caution_opinion"></textarea>
+      </div>
+    </section>
+
+    <section class="input-section">
+      <h3>3. 사업장별 수입금액 및 합산대상 자료유무</h3>
+      <div class="input-block">
+        <span class="blk-label">이미지 첨부</span>
+        <div class="image-drop" id="img_guide" tabindex="0" data-image="guide"
+             data-guide-title="사업장별 수입금액 이미지 붙여넣기"
+             data-guide-sub="타소득(합산대상)자료 있는 고객은 함께 캡쳐하여 붙여넣기">
+          <div class="image-drop-guide">
+            <div class="image-drop-guide-title">사업장별 수입금액 이미지 붙여넣기</div>
+            <div class="image-drop-guide-sub">타소득(합산대상)자료 있는 고객은 함께 캡쳐하여 붙여넣기</div>
+          </div>
+          <div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>
+          <button type="button" class="btn-mini" onclick="document.getElementById('file_guide').click(); event.stopPropagation();">📁 파일에서 선택</button>
+          <input type="file" id="file_guide" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'guide')">
+        </div>
+        <div class="btn-row" id="btnRow_guide" style="display:none;">
+          <button type="button" class="btn-mini danger" onclick="clearImage('guide')">🗑 이미지 제거</button>
+        </div>
+      </div>
+      <div class="input-block">
+        <span class="blk-label">의견</span>
+        <textarea id="inp_guide_opinion" data-field="guide_opinion"></textarea>
+      </div>
+    </section>
+
+    <section class="input-section">
+      <h3>4. 최근 3년간 종합소득세 신고상황</h3>
+      <div class="input-block">
+        <span class="blk-label">이미지 첨부</span>
+        <div class="image-drop" id="img_analysis" tabindex="0" data-image="analysis"
+             data-guide-title="※ 최근 3년간 신고소득률 이미지 캡쳐"
+             data-guide-sub="">
+          <div class="image-drop-guide">
+            <div class="image-drop-guide-title">※ 최근 3년간 신고소득률 이미지 캡쳐</div>
+          </div>
+          <div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>
+          <button type="button" class="btn-mini" onclick="document.getElementById('file_analysis').click(); event.stopPropagation();">📁 파일에서 선택</button>
+          <input type="file" id="file_analysis" accept="image/*" style="display:none;" onchange="handleFileSelect(event, 'analysis')">
+        </div>
+        <div class="btn-row" id="btnRow_analysis" style="display:none;">
+          <button type="button" class="btn-mini danger" onclick="clearImage('analysis')">🗑 이미지 제거</button>
+        </div>
+      </div>
+      <div class="input-block">
+        <span class="blk-label">의견</span>
+        <textarea id="inp_analysis_opinion" data-field="analysis_opinion"></textarea>
+      </div>
+    </section>
+
+    <section class="input-section section-income">
+      <h3>5. 매출·소득 요약 및 절세효과</h3>
+      <div class="field" style="margin-bottom:8px;">
+        <label>종합소득금액(반영후)</label>
+        <input type="text" id="inp_income_after" data-field="income_after" data-format="num" inputmode="numeric">
+      </div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>추가증빙 필요한 경비</label>
+        <input type="text" id="inp_cost1" data-field="cost1" data-format="num" inputmode="numeric">
+      </div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>인건비 추가 반영</label>
+        <input type="text" id="inp_cost2" data-field="cost2" data-format="num" inputmode="numeric">
+      </div>
+      <div class="field" style="margin-bottom:8px;">
+        <label>종합소득금액(반영전)</label>
+        <input type="text" id="inp_income_before" data-format="num" inputmode="numeric" placeholder="자동 합산값">
+      </div>
+      <div class="help-text">
+        ※ 종합소득금액(반영후)는 신고서상 사업소득금액을 입력합니다.<br>
+        ※ 종합소득금액(반영전)은 위 세 금액의 합계가 자동으로 채워집니다. 직접 수정 가능하며, 비우면 다시 자동 합산값으로 돌아옵니다.<br>
+        ※ 산출세액·절세액 합계·적용세율은 자동 계산됩니다 (누진구간 6/15/24/35/38/40/42/45%).
+      </div>
+    </section>
+
+    <section class="input-section">
+      <h3>6. 세액공제·감면 상세표</h3>
+      <div class="dyn-head taxcredit">
+        <div>항목</div><div>당기 신청액</div><div>최초연도</div><div>적용기수</div><div>감면율</div><div>종료</div><div>유의사항</div><div></div>
+      </div>
+      <div id="taxcredit_rows"></div>
+      <button type="button" class="btn-add" onclick="addTaxCreditRow()">＋ 항목 추가</button>
+    </section>
+
+    <section class="input-section">
+      <h3>7. 종합 검토의견</h3>
+      <div id="opinions_list"></div>
+      <button type="button" class="btn-add" onclick="addOpinion()">＋ 항목 추가</button>
+      <div class="help-text">※ 각 의견 박스에 이미지 또는 텍스트 중 하나라도 입력하면 보고서에 출력됩니다. 모두 비어 있으면 Ⅶ 종합 검토의견 섹션 자체가 출력되지 않습니다.</div>
+    </section>
+
+    <div style="text-align:center; margin: 12px 0 20px;">
+      <button class="btn-add" style="background:#c0392b; padding:8px 20px; font-size:13px;" onclick="setTitleAndPrint()">🖨 인쇄 / PDF 저장</button>
+    </div>
+
+  </aside>
+
+  <main class="preview-area">
+    <div class="quote-page" id="quotePage">
+      <div class="lh-firmtype">세무. 회계. 컨설팅 Firm</div>
+      <div class="lh-logo"><span class="lh-mark">C &amp; S</span><span class="lh-cs">Client's Success</span></div>
+      <div class="lh-addr">
+        경기도 부천시 길주로 275, 509호(중동, 중동프라자)
+        <span class="sep">|</span> Tel:032)719-7052
+        <span class="sep">|</span> Fax:032)719-0753
+      </div>
+      <div class="q-band"></div>
+      <table class="recv-table">
+        <tr><td class="recv-lab"><span class="recv-fit"><span>수</span><span>신</span></span></td><td><span class="q-val" id="qp_recipient">　</span> 대표님</td></tr>
+        <tr><td class="recv-lab"><span class="recv-fit"><span>작</span><span>성</span><span>일</span><span>자</span></span></td><td><span class="q-val" id="qp_writedate">　</span></td></tr>
+        <tr><td class="recv-lab"><span class="recv-fit"><span>제</span><span>목</span></span></td><td id="qp_title">　</td></tr>
+      </table>
+      <div class="q-band"></div>
+      <ol class="body-list">
+        <li><span class="bl-no">1.</span> 귀하의 일익 번창을 기원하며, 저희 세무법인삼호 남부지점이 귀하의 세무대리인으로서 전문적인 서비스를 제공할 수 있는 기회를 주신것에 무한한 감사의 말씀을 드립니다.</li>
+        <li><span class="bl-no">2.</span> 첨부된 【붙임 글】은 귀하의 자료 검토 및 종합소득세 신고 후 신고총평 및 향후 주의사항입니다. <span class="bl-warn">외부로 유출되지 않도록</span> 각별히 주의 부탁드립니다.</li>
+        <li><span class="bl-no">3.</span> 수임 기간 동안 보고서 하단에 추가증빙이 필요한 금액이 1회 이상 안내된 고객은 타 세무대리인 이관시 조정계산서만 PDF파일로 이관됩니다.</li>
+        <li><span class="bl-no">4.</span> 2025년도 종합소득세 신고 및 세무조정에 대한 보수료를 안내해 드리겠습니다. 보수료는 <span class="q-val" id="qp_cmsdate"></span> CMS로 이체되오니 확인부탁드립니다.</li>
+      </ol>
+      <div class="q-tbl-row">
+        <div class="q-tbl-left">
+          <table class="boxA">
+            <tr>
+              <td class="bA-lab">2025 년<br>수 입 금 액</td>
+              <td class="bA-val"><span class="q-val inc" id="qp_income">　</span></td>
+            </tr>
+          </table>
+          <table class="boxB"><tbody id="qp_feeBody"></tbody></table>
+          <table class="extraStd is-hidden" id="qp_extraTable">
+            <colgroup><col style="width:52%"><col style="width:48%"></colgroup>
+            <thead><tr><th>항 목 명</th><th>금 액</th></tr></thead>
+            <tbody id="qp_extraBody"></tbody>
+          </table>
+          <div class="free-print is-hidden" id="qp_free_box"></div>
+        </div>
+        <div class="q-tbl-right">
+          <table class="feeStd">
+            <colgroup><col style="width:21%"><col style="width:19%"><col style="width:60%"></colgroup>
+            <thead><tr><th colspan="2">수 입 금 액</th><th>보 수 기 준</th></tr></thead>
+            <tbody>
+              <tr id="fs1"><td colspan="2" class="fs-rng"><span class="fs-txt">5천만원 이하</span></td><td class="fs-std fs-single"><span class="fs-line fs-line-single"><span class="fs-amt">250,000</span></span></td></tr>
+              <tr id="fs2"><td class="fs-rng"><span class="fs-txt">5천만원 이상</span></td><td class="fs-rng"><span class="fs-txt">1억원 미만</span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">250,000</span><span class="fs-plus">+</span><span class="fs-base">5천만원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.33%</span></span></span></td></tr>
+              <tr id="fs3"><td class="fs-rng"><span class="fs-txt">1억원 이상</span></td><td class="fs-rng"><span class="fs-txt">3억원 미만</span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">415,000</span><span class="fs-plus">+</span><span class="fs-base">1억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.17%</span></span></span></td></tr>
+              <tr id="fs4"><td class="fs-rng"><span class="fs-txt">3억원 이상</span></td><td class="fs-rng"><span class="fs-txt">5억원 미만</span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">755,000</span><span class="fs-plus">+</span><span class="fs-base">3억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.085%</span></span></span></td></tr>
+              <tr id="fs5"><td class="fs-rng"><span class="fs-txt">5억원 이상</span></td><td class="fs-rng"><span class="fs-txt">10억원 미만</span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">925,000</span><span class="fs-plus">+</span><span class="fs-base">5억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.085%</span></span></span></td></tr>
+              <tr id="fs6"><td class="fs-rng"><span class="fs-txt">10억원 이상</span></td><td class="fs-rng"><span class="fs-txt">20억원 미만</span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">1,350,000</span><span class="fs-plus">+</span><span class="fs-base">10억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.042%</span></span></span></td></tr>
+              <tr id="fs7"><td class="fs-rng"><span class="fs-txt">20억원 이상</span></td><td class="fs-rng"><span class="fs-txt">30억원 미만</span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">1,770,000</span><span class="fs-plus">+</span><span class="fs-base">20억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.042%</span></span></span></td></tr>
+              <tr id="fs8"><td class="fs-rng"><span class="fs-txt">30억원 이상</span></td><td class="fs-rng"><span class="fs-txt">40억원 미만</span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">2,190,000</span><span class="fs-plus">+</span><span class="fs-base">30억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.033%</span></span></span></td></tr>
+              <tr id="fs9"><td class="fs-rng"><span class="fs-txt">40억원 이상</span></td><td class="fs-rng"><span class="fs-txt">50억원 미만</span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">2,520,000</span><span class="fs-plus">+</span><span class="fs-base">40억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.033%</span></span></span></td></tr>
+              <tr id="fs10"><td class="fs-rng"><span class="fs-txt">50억원 이상</span></td><td class="fs-rng"><span class="fs-txt">100억원 미만</span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">2,850,000</span><span class="fs-plus">+</span><span class="fs-base">50억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.033%</span></span></span></td></tr>
+              <tr id="fs11"><td class="fs-rng"><span class="fs-txt">100억원 이상</span></td><td class="fs-rng"><span class="fs-txt"></span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">4,500,000</span><span class="fs-plus">+</span><span class="fs-base">100억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.0042%</span></span></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="q-page-bottom">
+        <div class="total-box">
+          총 용 역 수 수 료 :　<span class="total-val" id="qp_total">　</span>　<span class="total-tail">원 (부가세 포함)</span>
+        </div>
+        <div class="q-footer">
+          <span>세무. 회계. 컨설팅 Firm</span>
+          <span>C&amp;S Client's Success</span>
+          <span>대 표 세 무 사　김 선 영</span>
+        </div>
+        <div class="q-motto">고객의 성공은 우리의 목표입니다.</div>
+      </div>
+    </div>
+    <div class="report-page" id="reportPage">
+      <div class="report-content">
+
+        <h1 class="rp-main-title">종합소득세 신고보고서</h1>
+
+        <section id="sec_basic">
+          <h2 class="rp-title">Ⅰ. 기본정보</h2>
+          <table class="rp-table compact">
+            <colgroup><col style="width:18%"><col style="width:32%"><col style="width:18%"><col style="width:32%"></colgroup>
+            <tbody>
+              <tr>
+                <td class="lab" data-distr="대표자명"></td>
+                <td class="txt" id="rp_name">　</td>
+                <td class="lab" data-distr="주민등록번호"></td>
+                <td class="txt" id="rp_rrn">　</td>
+              </tr>
+              <tr>
+                <td class="lab" data-distr="상호"></td>
+                <td class="txt" id="rp_company">　</td>
+                <td class="lab" data-distr="사업자등록번호"></td>
+                <td class="txt" id="rp_brn">　</td>
+              </tr>
+              <tr>
+                <td class="lab" data-distr="업종"></td>
+                <td class="txt" id="rp_industry">　</td>
+                <td class="lab" data-distr="기장의무"></td>
+                <td class="txt" id="rp_booktype">　</td>
+              </tr>
+              <tr>
+                <td class="lab" data-distr="귀속연도"></td>
+                <td class="txt" id="rp_period">　</td>
+                <td class="lab" data-distr="신고(예정)일자"></td>
+                <td class="txt" id="rp_reportdate">　</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="rp-note">※ 신고(예정)일자는 종합소득세 신고기한 안에서 최종 검토 과정 중 변경될 수 있습니다.</p>
+        </section>
+
+        <section id="sec_caution" class="is-hidden">
+          <h2 class="rp-title">Ⅱ. 종합소득세 신고도움서비스 개별안내</h2>
+          <div class="rp-image" id="rp_caution_img"></div>
+          <div class="rp-opinion" id="rp_caution_opinion"></div>
+        </section>
+
+        <section id="sec_guide" class="is-hidden">
+          <h2 class="rp-title">Ⅲ. 사업장별 수입금액 및 합산대상 자료유무</h2>
+          <div class="rp-image" id="rp_guide_img"></div>
+          <div class="rp-opinion" id="rp_guide_opinion"></div>
+        </section>
+
+        <section id="sec_analysis" class="is-hidden">
+          <h2 class="rp-title">Ⅳ. 최근 3년간 종합소득세 신고상황</h2>
+          <div class="rp-image" id="rp_analysis_img"></div>
+          <div class="rp-opinion" id="rp_analysis_opinion"></div>
+        </section>
+
+        <section id="sec_income">
+          <h2 class="rp-title">Ⅴ. 매출·소득 요약 및 절세효과<span class="unit">(단위: 원)</span></h2>
+
+          <div class="rp-subtitle">1. 소득 정보</div>
+          <table class="rp-table medium">
+            <colgroup><col style="width:20%"><col style="width:35%"><col style="width:45%"></colgroup>
+            <tbody>
+              <tr>
+                <td class="lab" colspan="2" data-distr="종합소득금액|(반영후)"></td>
+                <td class="num" id="rp_income_after">　</td>
+              </tr>
+              <tr>
+                <td class="lab cost-label" rowspan="2" data-distr="조정경비"></td>
+                <td class="lab2 sub-dist" data-distr="1. 추가증빙 필요한 경비"></td>
+                <td class="num" id="rp_cost1">　</td>
+              </tr>
+              <tr>
+                <td class="lab2 sub-dist" data-distr="2. 인건비 추가 반영"></td>
+                <td class="num" id="rp_cost2">　</td>
+              </tr>
+              <tr>
+                <td class="lab" colspan="2" data-distr="종합소득금액|(반영전)"></td>
+                <td class="num" id="rp_income_before">　</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="rp-subtitle">2. 절세효과 상세</div>
+          <table class="rp-table medium">
+            <colgroup><col style="width:55%"><col style="width:45%"></colgroup>
+            <thead>
+              <tr>
+                <th data-distr="구분"></th>
+                <th data-distr="금액"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="lab" id="rp_tax_before_lab" data-distr="조정 전 산출세액|(적용세율 38%)"></td>
+                <td class="num" id="rp_tax_before">　</td>
+              </tr>
+              <tr>
+                <td class="lab" id="rp_tax_after_lab" data-distr="조정 후 산출세액|(적용세율 35%)"></td>
+                <td class="num" id="rp_tax_after">　</td>
+              </tr>
+              <tr>
+                <td class="lab highlight" data-distr="절세액 합계"></td>
+                <td class="num highlight" id="rp_save_total">　</td>
+              </tr>
+              <tr>
+                <td class="lab" id="rp_save_nat_lab" data-distr="종합소득세 절감|(적용세율 38%)"></td>
+                <td class="num" id="rp_save_nat">　</td>
+              </tr>
+              <tr>
+                <td class="lab" id="rp_save_loc_lab" data-distr="지방소득세 절감|(적용세율 3.8%)"></td>
+                <td class="num" id="rp_save_loc">　</td>
+              </tr>
+              <tr>
+                <td class="lab" data-distr="건강보험료 절감|(적용세율 8.13%)"></td>
+                <td class="num" id="rp_save_hi">　</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="rp-note">※ 소득공제는 납세자별 적용 여부와 금액이 상이하므로 절세효과 계산에서는 제외하였습니다. 본 계산은 종합소득금액을 과세표준으로 간주하여 산출세액 기준으로 세액 변동 효과를 산정한 것입니다.</p>
+          <p class="rp-note">※ 건강보험료 절감 = (추가증빙 필요한 경비 + 인건비 추가 반영) × 8.13% (건강보험료 7.19% + 장기요양보험료는 건강보험료의 13.14%, 2026년 직장가입자 통합요율 기준)</p>
+        </section>
+
+        <section id="sec_taxcredit" class="is-hidden">
+          <h2 class="rp-title">Ⅵ. 세액공제·감면 상세표<span class="unit">(단위: 원)</span></h2>
+          <table class="rp-table compact">
+            <colgroup>
+              <col style="width:18%"><col style="width:12%"><col style="width:10%">
+              <col style="width:12%"><col style="width:8%"><col style="width:10%"><col style="width:30%">
+            </colgroup>
+            <thead>
+              <tr>
+                <th data-distr="세액공제|감면항목"></th>
+                <th data-distr="당기|신청액"></th>
+                <th data-distr="최초 적용|사업연도"></th>
+                <th data-distr="해당 적용|기수"></th>
+                <th data-distr="감면율"></th>
+                <th data-distr="감면 종료"></th>
+                <th data-distr="유의사항"></th>
+              </tr>
+            </thead>
+            <tbody id="rp_taxcredit_body"></tbody>
+          </table>
+        </section>
+
+        <section id="sec_opinions" class="is-hidden">
+          <h2 class="rp-title">Ⅶ. 종합 검토의견</h2>
+          <div id="rp_opinions_body"></div>
+        </section>
+
+      </div>
+
+      <div class="rp-footer">
+        <p class="firm">세무법인삼호 남부지점</p>
+        <p class="note">이 보고서는 귀사의 자료 검토 및 종합소득세 신고 후 신고총평입니다.</p>
+        <p class="warn"><span class="red">외부로 유출되지 않도록</span> 각별히 주의 부탁드립니다.</p>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<div id="modal_root"></div>
+
+<script>
+'use strict';
+
+// ===== 캐시 우회 새로고침 =====
+function hardReload() {
+  try {
+    var url = new URL(location.href);
+    url.searchParams.set('v', Date.now().toString());
+    location.replace(url.toString());
+  } catch (e) { location.reload(); }
+}
+
+(function cleanupQuery() {
+  try {
+    var url = new URL(location.href);
+    if (url.searchParams.has('v')) {
+      url.searchParams.delete('v');
+      history.replaceState({}, '', url.pathname + (url.search || '') + url.hash);
+    }
+  } catch (e) {}
+})();
+
+(function showSyncTime() {
+  try {
+    var d = new Date(document.lastModified);
+    if (!isNaN(d.getTime())) {
+      var s = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+        String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      document.getElementById('syncTime').textContent = '동기화 ' + s;
+    }
+  } catch (e) {}
+})();
+
+// ===== 균등분할 =====
+function tokenize(text) {
+  var tokens = [];
+  var i = 0;
+  while (i < text.length) {
+    var rest = text.slice(i);
+    var m = rest.match(/^(\d+(?:\.\d*)?%?)/);
+    if (m) {
+      tokens.push(m[1]);
+      i += m[1].length;
+      continue;
+    }
+    if (text[i] === ' ') { i++; continue; }
+    tokens.push(text[i]);
+    i++;
+  }
+  return tokens;
+}
+function applyDistribute(el) {
+  var raw = el.getAttribute('data-distr');
+  if (!raw) return;
+  var lines = raw.split('|');
+  var html = lines.map(function (line, idx) {
+    var cls = idx === 0 ? 'rp-dist' : 'rp-dist sub';
+    var spans = tokenize(line).map(function (t) { return '<span>' + t + '</span>'; }).join('');
+    return '<div class="' + cls + '">' + spans + '</div>';
+  }).join('');
+  el.innerHTML = html;
+}
+function reapplyAllDistribute() {
+  document.querySelectorAll('[data-distr]').forEach(applyDistribute);
+}
+reapplyAllDistribute();
+
+// ===== 숫자 포맷 =====
+function parseNum(v) {
+  if (v == null) return null;
+  var d = String(v).replace(/[^\d]/g, '');
+  if (!d) return null;
+  return parseInt(d, 10);
+}
+function formatNum(v) {
+  var n = parseNum(v);
+  if (n == null) return '';
+  return n.toLocaleString('ko-KR');
+}
+function formatRRN(v) {
+  var d = String(v).replace(/[^\d]/g, '');
+  if (!d) return '';
+  if (d.length < 6) return d;
+  return d.slice(0, 6) + ' - *******';
+}
+function formatBRN(v) {
+  var d = String(v).replace(/[^\d]/g, '');
+  if (d.length <= 3) return d;
+  if (d.length <= 5) return d.slice(0, 3) + '-' + d.slice(3);
+  return d.slice(0, 3) + '-' + d.slice(3, 5) + '-' + d.slice(5, 10);
+}
+function formatReportDate(v) {
+  var d = String(v).replace(/[^\d]/g, '');
+  if (d.length === 4) {
+    var mm = parseInt(d.slice(0, 2), 10);
+    var dd = parseInt(d.slice(2, 4), 10);
+    if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
+      return '2026년 ' + mm + '월 ' + dd + '일';
+    }
+  }
+  return v;
+}
+
+// ===== 입력 자동 포맷 =====
+document.querySelectorAll('input[data-format]').forEach(function (inp) {
+  var fmt = inp.getAttribute('data-format');
+  inp.addEventListener('input', function () {
+    var v = inp.value;
+    if (fmt === 'num') {
+      inp.value = formatNum(v);
+    } else if (fmt === 'rrn') {
+      inp.value = formatRRN(v);
+      handleRRNChange();
+    } else if (fmt === 'brn') {
+      inp.value = formatBRN(v);
+    }
+    updatePreview();
+    scheduleAutoSave();
+  });
+  inp.addEventListener('blur', function () {
+    if (fmt === 'reportdate') {
+      inp.value = formatReportDate(inp.value);
+      updatePreview();
+      scheduleAutoSave();
+    }
+    if (inp.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(inp.value)) {
+      inp.value = '';
+      updatePreview();
+      scheduleAutoSave();
+    }
+  });
+});
+
+document.querySelectorAll('input[data-field], select[data-field], textarea[data-field]').forEach(function (el) {
+  el.addEventListener('input', function () { updatePreview(); scheduleAutoSave(); });
+  el.addEventListener('change', function () { updatePreview(); scheduleAutoSave(); });
+  el.addEventListener('blur', function () {
+    if (el.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(el.value)) {
+      el.value = '';
+      updatePreview();
+      scheduleAutoSave();
+    }
+  });
+});
+
+// ===== 종합소득금액(반영전) 사용자 수정 플래그 =====
+var userEditedIncomeBefore = false;
+(function () {
+  var inp = document.getElementById('inp_income_before');
+  inp.addEventListener('input', function () {
+    if (inp.value.trim() === '') {
+      userEditedIncomeBefore = false;
+    } else {
+      userEditedIncomeBefore = true;
+    }
+    inp.classList.remove('auto-filled');
+    updatePreview();
+    scheduleAutoSave();
+  });
+})();
+
+// ===== 신고예정일자 기본값 =====
+(function () {
+  var d = document.getElementById('inp_reportdate');
+  d.value = formatReportDate('0531');
+})();
+
+// ===== 키보드 네비게이션 =====
+function getFocusableInputs() {
+  return Array.from(document.querySelectorAll('.input-panel input, .input-panel textarea, .input-panel select'))
+    .filter(function (el) {
+      if (el.offsetParent === null || el.disabled) return false;
+      if (el.closest('.slot-panel')) return false; // 작업 관리 박스 제외
+      return true;
+    });
+}
+document.addEventListener('keydown', function (e) {
+  var target = e.target;
+  if (!target.matches || !target.matches('.input-panel input, .input-panel textarea, .input-panel select')) return;
+  if (target.closest('.slot-panel')) return;
+  var all = getFocusableInputs();
+  var idx = all.indexOf(target);
+  if (idx < 0) return;
+  if (e.key === 'Enter') {
+    if (target.tagName === 'TEXTAREA' && !e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    var next = all[idx + 1];
+    if (next) { next.focus(); if (next.select) try { next.select(); } catch (er) {} }
+  } else if (e.key === 'ArrowDown' && target.tagName !== 'TEXTAREA' && target.tagName !== 'SELECT') {
+    e.preventDefault();
+    var next2 = all[idx + 1];
+    if (next2) { next2.focus(); if (next2.select) try { next2.select(); } catch (er) {} }
+  } else if (e.key === 'ArrowUp' && target.tagName !== 'TEXTAREA' && target.tagName !== 'SELECT') {
+    e.preventDefault();
+    var prev = all[idx - 1];
+    if (prev) { prev.focus(); if (prev.select) try { prev.select(); } catch (er) {} }
+  }
+});
+
+// ===== 이미지 첨부 =====
+var imageStore = {};
+
+function setImage(key, dataUrl) {
+  imageStore[key] = dataUrl;
+  var dropEl = document.getElementById('img_' + key);
+  if (!dropEl) return;
+  dropEl.classList.add('has-image');
+  dropEl.innerHTML = '<img src="' + dataUrl + '" alt="">';
+  var btnRow = document.getElementById('btnRow_' + key);
+  if (btnRow) btnRow.style.display = 'flex';
+  updatePreview();
+  scheduleAutoSave();
+}
+function clearImage(key) {
+  imageStore[key] = null;
+  var dropEl = document.getElementById('img_' + key);
+  if (!dropEl) return;
+  dropEl.classList.remove('has-image');
+  var guideTitle = dropEl.getAttribute('data-guide-title') || '';
+  var guideSub = dropEl.getAttribute('data-guide-sub') || '';
+  var guideHtml = '';
+  if (guideTitle) {
+    guideHtml = '<div class="image-drop-guide">' +
+                '<div class="image-drop-guide-title">' + escapeHtml(guideTitle) + '</div>' +
+                (guideSub ? '<div class="image-drop-guide-sub">' + escapeHtml(guideSub) + '</div>' : '') +
+                '</div>';
+  }
+  dropEl.innerHTML = guideHtml +
+    '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
+    '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + key + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
+    '<input type="file" id="file_' + key + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + key + '\')">';
+  var btnRow = document.getElementById('btnRow_' + key);
+  if (btnRow) btnRow.style.display = 'none';
+  updatePreview();
+  scheduleAutoSave();
+}
+function handleFileSelect(ev, key) {
+  var f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function (e) { setImage(key, e.target.result); };
+  r.readAsDataURL(f);
+}
+window.handleFileSelect = handleFileSelect;
+window.clearImage = clearImage;
+
+function attachImageDropHandlers(drop) {
+  drop.addEventListener('click', function (e) {
+    if (e.target.tagName === 'BUTTON') return;
+    drop.focus();
+  });
+  drop.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    drop.classList.add('drag-over');
+  });
+  drop.addEventListener('dragleave', function () {
+    drop.classList.remove('drag-over');
+  });
+  drop.addEventListener('drop', function (e) {
+    e.preventDefault();
+    drop.classList.remove('drag-over');
+    var f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) {
+      var r = new FileReader();
+      r.onload = function (ev) { setImage(drop.getAttribute('data-image'), ev.target.result); };
+      r.readAsDataURL(f);
+    }
+  });
+  drop.addEventListener('paste', function (e) {
+    var items = (e.clipboardData || {}).items;
+    if (!items) return;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        var f = items[i].getAsFile();
+        var r = new FileReader();
+        r.onload = function (ev) { setImage(drop.getAttribute('data-image'), ev.target.result); };
+        r.readAsDataURL(f);
+        e.preventDefault();
+        break;
+      }
+    }
+  });
+}
+document.querySelectorAll('.image-drop').forEach(attachImageDropHandlers);
+
+// ===== 누진세율 =====
+function calcTax(income) {
+  var i = parseNum(income);
+  if (i == null || i <= 0) return 0;
+  var tax;
+  if (i <= 14000000) tax = i * 0.06;
+  else if (i <= 50000000) tax = i * 0.15 - 1260000;
+  else if (i <= 88000000) tax = i * 0.24 - 5760000;
+  else if (i <= 150000000) tax = i * 0.35 - 15440000;
+  else if (i <= 300000000) tax = i * 0.38 - 19940000;
+  else if (i <= 500000000) tax = i * 0.40 - 25940000;
+  else if (i <= 1000000000) tax = i * 0.42 - 35940000;
+  else tax = i * 0.45 - 65940000;
+  return Math.round(tax);
+}
+function getRate(income) {
+  var i = parseNum(income);
+  if (i == null || i <= 0) return null;
+  if (i <= 14000000) return 6;
+  if (i <= 50000000) return 15;
+  if (i <= 88000000) return 24;
+  if (i <= 150000000) return 35;
+  if (i <= 300000000) return 38;
+  if (i <= 500000000) return 40;
+  if (i <= 1000000000) return 42;
+  return 45;
+}
+
+// ===== 세액공제 행 =====
+function autoResizeTextarea(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+}
+document.addEventListener('input', function (e) {
+  if (e.target && e.target.tagName === 'TEXTAREA') {
+    autoResizeTextarea(e.target);
+  }
+});
+var taxcreditCount = 0;
+function addTaxCreditRow(values) {
+  taxcreditCount++;
+  var id = 'tc_' + taxcreditCount;
+  var row = document.createElement('div');
+  row.className = 'dyn-row taxcredit';
+  row.id = id;
+  row.innerHTML =
+    '<input type="text" data-tc="item" placeholder="항목">' +
+    '<input type="text" data-tc="amt" data-format="num" inputmode="numeric" placeholder="신청액">' +
+    '<input type="text" data-tc="firstyear" placeholder="2025">' +
+    '<input type="text" data-tc="period" placeholder="1기/5기">' +
+    '<input type="text" data-tc="rate" placeholder="50%">' +
+    '<input type="text" data-tc="end" placeholder="2029">' +
+    '<textarea data-tc="note" placeholder="유의사항" rows="1" style="resize:none; overflow:hidden; min-height:26px; line-height:1.5;"></textarea>' +
+    '<button type="button" class="del-btn" onclick="this.parentElement.remove(); updatePreview(); scheduleAutoSave();">×</button>';
+  document.getElementById('taxcredit_rows').appendChild(row);
+  row.querySelectorAll('input, textarea').forEach(function (inp) {
+    if (inp.tagName === 'TEXTAREA') {
+      inp.addEventListener('input', function () {
+        autoResizeTextarea(inp);
+        updatePreview();
+        scheduleAutoSave();
+      });
+    } else if (inp.getAttribute('data-format') === 'num') {
+      inp.addEventListener('input', function () { inp.value = formatNum(inp.value); updatePreview(); scheduleAutoSave(); });
+    } else {
+      inp.addEventListener('input', function () { updatePreview(); scheduleAutoSave(); });
+    }
+  });
+  if (values) {
+    row.querySelector('[data-tc="item"]').value = values.item || '';
+    row.querySelector('[data-tc="amt"]').value = values.amt || '';
+    row.querySelector('[data-tc="firstyear"]').value = values.firstyear || '';
+    row.querySelector('[data-tc="period"]').value = values.period || '';
+    row.querySelector('[data-tc="rate"]').value = values.rate || '';
+    row.querySelector('[data-tc="end"]').value = values.end || '';
+    row.querySelector('[data-tc="note"]').value = values.note || '';
+    var noteTa = row.querySelector('[data-tc="note"]');
+    if (noteTa && values.note) {
+      setTimeout(function () { autoResizeTextarea(noteTa); }, 0);
+    }
+  }
+  updatePreview();
+}
+  window.addTaxCreditRow = addTaxCreditRow;
+
+// ===== 의견 (완전 동적) =====
+var opinionSeq = 0;
+var CIRCLED = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮'];
+function getCircled(n) {
+  if (n >= 1 && n <= CIRCLED.length) return CIRCLED[n-1];
+  return '(' + n + ')';
+}
+function renumberOpinions() {
+  var items = document.querySelectorAll('#opinions_list .opinion-item');
+  items.forEach(function (item, idx) {
+    var no = item.querySelector('.opinion-no');
+    if (no) no.textContent = '의견 ' + getCircled(idx + 1);
+  });
+}
+function addOpinion(values) {
+  opinionSeq++;
+  var oid = 'op_' + opinionSeq;
+  imageStore[oid] = null;
+
+  var item = document.createElement('div');
+  item.className = 'opinion-item';
+  item.dataset.oid = oid;
+  item.innerHTML =
+    '<div class="opinion-head">' +
+      '<span class="opinion-no">의견 ①</span>' +
+      '<button type="button" class="del-op-btn" onclick="removeOpinion(\'' + oid + '\')">×</button>' +
+    '</div>' +
+    '<div class="image-drop" id="img_' + oid + '" tabindex="0" data-image="' + oid + '">' +
+      '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
+      '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + oid + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
+      '<input type="file" id="file_' + oid + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + oid + '\')">' +
+    '</div>' +
+    '<div class="btn-row" id="btnRow_' + oid + '" style="display:none;">' +
+      '<button type="button" class="btn-mini danger" onclick="clearImage(\'' + oid + '\')">🗑 이미지 제거</button>' +
+    '</div>' +
+    '<textarea data-opinion="' + oid + '" placeholder="의견 내용"></textarea>';
+
+  document.getElementById('opinions_list').appendChild(item);
+
+  attachImageDropHandlers(item.querySelector('.image-drop'));
+
+  var ta = item.querySelector('textarea');
+  ta.addEventListener('input', function () { updatePreview(); scheduleAutoSave(); });
+  ta.addEventListener('blur', function () {
+    if (ta.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(ta.value)) {
+      ta.value = '';
+      updatePreview();
+      scheduleAutoSave();
+    }
+  });
+
+  if (values) {
+    if (values.text) ta.value = values.text;
+    if (values.image) setImage(oid, values.image);
+  }
+
+  renumberOpinions();
+  updatePreview();
+  return oid;
+}
+function removeOpinion(oid) {
+  var item = document.querySelector('.opinion-item[data-oid="' + oid + '"]');
+  if (item) {
+    item.remove();
+    delete imageStore[oid];
+    renumberOpinions();
+    updatePreview();
+    scheduleAutoSave();
+  }
+}
+window.addOpinion = addOpinion;
+window.removeOpinion = removeOpinion;
+
+// ===== 미리보기 갱신 =====
+function setText(id, v) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = v && v.trim() ? v : '　';
+}
+function setNum(id, v) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = v && v !== 0 ? (typeof v === 'number' ? v.toLocaleString('ko-KR') : v) : '　';
+}
+function toggleSection(secId, show) {
+  var el = document.getElementById(secId);
+  if (!el) return;
+  el.classList.toggle('is-hidden', !show);
+}
+function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+function toRoman(num) {
+  var arr = ['', 'Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ', 'Ⅶ', 'Ⅷ', 'Ⅸ', 'Ⅹ'];
+  return arr[num] || String(num);
+}
+
+function renumberReportSections() {
+  var sections = [
+    { id: 'sec_basic', title: '기본정보' },
+    { id: 'sec_caution', title: '종합소득세 신고도움서비스 개별안내' },
+    { id: 'sec_guide', title: '사업장별 수입금액 및 합산대상 자료유무' },
+    { id: 'sec_analysis', title: '최근 3년간 종합소득세 신고상황' },
+    { id: 'sec_income', title: '매출·소득 요약 및 절세효과', unit: '<span class="unit">(단위: 원)</span>' },
+    { id: 'sec_taxcredit', title: '세액공제·감면 상세표', unit: '<span class="unit">(단위: 원)</span>' },
+    { id: 'sec_opinions', title: '종합 검토의견' }
+  ];
+
+  var no = 1;
+
+  sections.forEach(function (s) {
+    var sec = document.getElementById(s.id);
+    if (!sec || sec.classList.contains('is-hidden')) return;
+
+    var h = sec.querySelector('.rp-title');
+    if (!h) return;
+
+    h.innerHTML = toRoman(no) + '. ' + s.title + (s.unit || '');
+    no++;
+  });
+}  
+  
+function updatePreview() {
+  // Ⅰ
+  setText('rp_name', val('inp_name'));
+  var rrnFront = String(val('inp_rrn')).replace(/[^\d]/g, '').slice(0, 6);
+  setText('rp_rrn', rrnFront ? rrnFront + ' - *******' : '');
+  setText('rp_company', val('inp_company'));
+  setText('rp_brn', val('inp_brn'));
+  setText('rp_industry', val('inp_industry'));
+  setText('rp_booktype', val('inp_booktype'));
+  setText('rp_period', val('inp_period'));
+  setText('rp_reportdate', val('inp_reportdate'));
+
+  // Ⅱ·Ⅲ·Ⅳ
+  ['caution','guide','analysis'].forEach(function (key) {
+    var img = imageStore[key];
+    var op = val('inp_' + key + '_opinion') || '';
+    var imgEl = document.getElementById('rp_' + key + '_img');
+    var opEl = document.getElementById('rp_' + key + '_opinion');
+    if (imgEl) {
+      imgEl.innerHTML = img ? '<img src="' + img + '" alt="">' : '';
+      imgEl.classList.toggle('is-hidden', !img);
+    }
+    if (opEl) {
+      opEl.textContent = op;
+      opEl.classList.toggle('is-hidden', !op.trim());
+    }
+    toggleSection('sec_' + key, !!(img || op.trim()));
+  });
+
+  // Ⅴ
+  var incomeAfter = parseNum(val('inp_income_after')) || 0;
+  var cost1 = parseNum(val('inp_cost1')) || 0;
+  var cost2 = parseNum(val('inp_cost2')) || 0;
+  var autoSum = incomeAfter + cost1 + cost2;
+  var inpBefore = document.getElementById('inp_income_before');
+  var incomeBefore;
+  if (userEditedIncomeBefore) {
+    incomeBefore = parseNum(inpBefore.value) || 0;
+  } else {
+    if (autoSum > 0) {
+      inpBefore.value = formatNum(autoSum);
+      inpBefore.classList.add('auto-filled');
+    } else {
+      inpBefore.value = '';
+      inpBefore.classList.remove('auto-filled');
+    }
+    incomeBefore = autoSum;
+  }
+
+  setNum('rp_income_after', incomeAfter || '');
+  setNum('rp_cost1', cost1 || '');
+  setNum('rp_cost2', cost2 || '');
+  setNum('rp_income_before', incomeBefore || '');
+
+  var taxBefore = incomeBefore > 0 ? calcTax(incomeBefore) : 0;
+  var taxAfter = incomeAfter > 0 ? calcTax(incomeAfter) : 0;
+  var saveNat = Math.max(0, taxBefore - taxAfter);
+  var saveLoc = Math.round(saveNat * 0.1);
+  var saveHi = Math.round((cost1 + cost2) * 0.0813);
+  var saveTotal = saveNat + saveLoc + saveHi;
+
+  setNum('rp_tax_before', taxBefore || '');
+  setNum('rp_tax_after', taxAfter || '');
+  setNum('rp_save_total', saveTotal || '');
+  setNum('rp_save_nat', saveNat || '');
+  setNum('rp_save_loc', saveLoc || '');
+  setNum('rp_save_hi', saveHi || '');
+
+  var rateBefore = getRate(incomeBefore);
+  var rateAfter = getRate(incomeAfter);
+  var rateLoc = rateBefore != null ? (rateBefore * 0.1) : null;
+  var fmtPct = function (r) { return r == null ? '38%' : (Number.isInteger(r) ? r + '%' : r.toFixed(1) + '%'); };
+  function rewriteLab(id, main, subText) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.setAttribute('data-distr', main + '|(적용세율 ' + subText + ')');
+    applyDistribute(el);
+  }
+  if (incomeBefore > 0) {
+    rewriteLab('rp_tax_before_lab', '조정 전 산출세액', fmtPct(rateBefore));
+    rewriteLab('rp_save_nat_lab', '종합소득세 절감', fmtPct(rateBefore));
+    rewriteLab('rp_save_loc_lab', '지방소득세 절감', fmtPct(rateLoc));
+  }
+  if (incomeAfter > 0) {
+    rewriteLab('rp_tax_after_lab', '조정 후 산출세액', fmtPct(rateAfter));
+  }
+
+  // Ⅵ
+  var tcRows = document.querySelectorAll('#taxcredit_rows .dyn-row');
+  var tcBody = document.getElementById('rp_taxcredit_body');
+  tcBody.innerHTML = '';
+  var tcShown = 0;
+  tcRows.forEach(function (row) {
+    var item = row.querySelector('[data-tc="item"]').value.trim();
+    var amt = row.querySelector('[data-tc="amt"]').value.trim();
+    var firstyear = row.querySelector('[data-tc="firstyear"]').value.trim();
+    var period = row.querySelector('[data-tc="period"]').value.trim();
+    var rate = row.querySelector('[data-tc="rate"]').value.trim();
+    var end = row.querySelector('[data-tc="end"]').value.trim();
+    var note = row.querySelector('[data-tc="note"]').value.trim();
+    if (!item && !amt && !note) return;
+    tcShown++;
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="lab item-cell">' + (item ? escapeHtml(item) : '-') + '</td>' +
+      '<td class="num">' + (amt || '-') + '</td>' +
+      '<td class="ctr">' + (firstyear || '-') + '</td>' +
+      '<td class="ctr">' + (period || '-') + '</td>' +
+      '<td class="ctr">' + (rate || '-') + '</td>' +
+      '<td class="ctr">' + (end || '-') + '</td>' +
+      '<td class="txt">' + escapeHtml(note) + '</td>';
+    tcBody.appendChild(tr);
+  });
+  toggleSection('sec_taxcredit', tcShown > 0);
+
+  // Ⅶ
+  var opItems = document.querySelectorAll('#opinions_list .opinion-item');
+  var rpOpBody = document.getElementById('rp_opinions_body');
+  rpOpBody.innerHTML = '';
+  var opShown = 0;
+  opItems.forEach(function (item, idx) {
+    var oid = item.dataset.oid;
+    var img = imageStore[oid];
+    var txt = (item.querySelector('textarea').value || '').trim();
+    if (!img && !txt) return;
+    opShown++;
+    var no = getCircled(idx + 1);
+    var html = '';
+    if (img) {
+      html += '<div class="rp-op-img"><img src="' + img + '" alt=""></div>';
+    }
+    if (txt) {
+      html += '<div class="rp-opinion"><span class="rp-opinion-label">의견 ' + no + '</span>' + escapeHtml(txt) + '</div>';
+    } else {
+      html += '<div class="rp-opinion"><span class="rp-opinion-label">의견 ' + no + '</span></div>';
+    }
+    rpOpBody.insertAdjacentHTML('beforeend', html);
+  });
+  toggleSection('sec_opinions', opShown > 0);
+
+  renumberReportSections();
+}
+
+function buildDistrHTML(text) {
+  if (!text) return '-';
+  var spans = tokenize(text).map(function (t) { return '<span>' + escapeHtml(t) + '</span>'; }).join('');
+  return '<div class="rp-dist">' + spans + '</div>';
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ============================================================
+// ===== 작업 관리 (슬롯 시스템 + JSON 내보내기/불러오기) =====
+// ============================================================
+var SLOT_PREFIX = 'jongso:slot:';
+var SLOT_INDEX_KEY = 'jongso:slots:index';
+var DRAFT_KEY = '_draft';
+var QUOTA_BUDGET_BYTES = 10 * 1024 * 1024; // 약 10 MB
+var currentSlotKey = DRAFT_KEY;
+var autoSaveTimer = null;
+var isApplyingSlot = false; // 슬롯 로드 중 자동 저장 차단
+
+// --- 슬롯 인덱스 ---
+function loadSlotIndex() {
+  try {
+    var raw = localStorage.getItem(SLOT_INDEX_KEY);
+    if (!raw) return [];
+    var arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+function saveSlotIndex(arr) {
+  try { localStorage.setItem(SLOT_INDEX_KEY, JSON.stringify(arr)); }
+  catch (e) { handleStorageError(e); }
+}
+function upsertSlotInIndex(meta) {
+  var arr = loadSlotIndex();
+  var idx = arr.findIndex(function (m) { return m.key === meta.key; });
+  if (idx >= 0) arr[idx] = meta; else arr.push(meta);
+  arr.sort(function (a, b) { return (b.updated || '').localeCompare(a.updated || ''); });
+  saveSlotIndex(arr);
+}
+function removeSlotFromIndex(key) {
+  var arr = loadSlotIndex().filter(function (m) { return m.key !== key; });
+  saveSlotIndex(arr);
+}
+
+// --- 직렬화 ---
+function serializeCurrentState() {
+  var opItems = document.querySelectorAll('#opinions_list .opinion-item');
+  var opinions = Array.from(opItems).map(function (item) {
+    var oid = item.dataset.oid;
+    var ta = item.querySelector('textarea');
+    return { text: ta ? ta.value : '', image: imageStore[oid] || null };
+  });
+  var tcRows = document.querySelectorAll('#taxcredit_rows .dyn-row');
+  var taxcredit = Array.from(tcRows).map(function (row) {
+    return {
+      item: row.querySelector('[data-tc="item"]').value,
+      amt: row.querySelector('[data-tc="amt"]').value,
+      firstyear: row.querySelector('[data-tc="firstyear"]').value,
+      period: row.querySelector('[data-tc="period"]').value,
+      rate: row.querySelector('[data-tc="rate"]').value,
+      end: row.querySelector('[data-tc="end"]').value,
+      note: row.querySelector('[data-tc="note"]').value
+    };
+  });
+  return {
+    version: 1,
+    key: currentSlotKey,
+    meta: {
+      name: val('inp_name'),
+      rrn: val('inp_rrn'),
+      updated: new Date().toISOString()
+    },
+    fields: {
+      name: val('inp_name'),
+      rrn: val('inp_rrn'),
+      company: val('inp_company'),
+      brn: val('inp_brn'),
+      industry: val('inp_industry'),
+      booktype: val('inp_booktype'),
+      period: val('inp_period'),
+      reportdate: val('inp_reportdate'),
+      income_after: val('inp_income_after'),
+      cost1: val('inp_cost1'),
+      cost2: val('inp_cost2'),
+      income_before: val('inp_income_before'),
+      caution_opinion: val('inp_caution_opinion'),
+      guide_opinion: val('inp_guide_opinion'),
+      analysis_opinion: val('inp_analysis_opinion')
+    },
+    images: {
+      caution: imageStore.caution || null,
+      guide: imageStore.guide || null,
+      analysis: imageStore.analysis || null
+    },
+    income_before_user_edited: userEditedIncomeBefore,
+    taxcredit: taxcredit,
+    opinions: opinions
+  };
+}
+
+// --- 역직렬화 (슬롯 → 화면) ---
+function applySlotState(data) {
+  isApplyingSlot = true;
+  try {
+    // 1) 동적 항목 초기화
+    document.getElementById('opinions_list').innerHTML = '';
+    document.getElementById('taxcredit_rows').innerHTML = '';
+    Object.keys(imageStore).forEach(function (k) { delete imageStore[k]; });
+
+    // 2) 정적 이미지 초기화
+    ['caution','guide','analysis'].forEach(function (key) {
+      clearImageSilent(key);
+    });
+
+    // 3) 필드 채우기
+    var f = data.fields || {};
+    var setVal = function (id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; };
+    setVal('inp_name', f.name);
+    setVal('inp_rrn', f.rrn);
+    setVal('inp_company', f.company);
+    setVal('inp_brn', f.brn);
+    setVal('inp_industry', f.industry);
+    setVal('inp_booktype', f.booktype);
+    setVal('inp_period', f.period || '2025.01.01. ~ 2025.12.31.');
+    setVal('inp_reportdate', f.reportdate || formatReportDate('0531'));
+    setVal('inp_income_after', f.income_after);
+    setVal('inp_cost1', f.cost1);
+    setVal('inp_cost2', f.cost2);
+    setVal('inp_income_before', f.income_before);
+    setVal('inp_caution_opinion', f.caution_opinion);
+    setVal('inp_guide_opinion', f.guide_opinion);
+    setVal('inp_analysis_opinion', f.analysis_opinion);
+
+    userEditedIncomeBefore = !!data.income_before_user_edited;
+
+    // 4) 정적 이미지 채우기
+    var imgs = data.images || {};
+    ['caution','guide','analysis'].forEach(function (key) {
+      if (imgs[key]) setImageSilent(key, imgs[key]);
+    });
+
+    // 5) 세액공제 행 복원
+    (data.taxcredit || []).forEach(function (v) { addTaxCreditRow(v); });
+
+    // 6) 의견 박스 복원 (최소 1개 유지)
+    var ops = data.opinions || [];
+    if (ops.length === 0) {
+      addOpinion();
+    } else {
+      ops.forEach(function (op) { addOpinion(op); });
+    }
+
+    currentSlotKey = data.key || DRAFT_KEY;
+    updatePreview();
+    setTimeout(function () {
+      document.querySelectorAll('textarea').forEach(autoResizeTextarea);
+    }, 0);
+  } finally {
+    isApplyingSlot = false;
+  }
+}
+
+// 자동 저장 없이 이미지 set/clear (슬롯 로드 시 사용)
+function setImageSilent(key, dataUrl) {
+  imageStore[key] = dataUrl;
+  var dropEl = document.getElementById('img_' + key);
+  if (!dropEl) return;
+  dropEl.classList.add('has-image');
+  dropEl.innerHTML = '<img src="' + dataUrl + '" alt="">';
+  var btnRow = document.getElementById('btnRow_' + key);
+  if (btnRow) btnRow.style.display = 'flex';
+}
+function clearImageSilent(key) {
+  imageStore[key] = null;
+  var dropEl = document.getElementById('img_' + key);
+  if (!dropEl) return;
+  dropEl.classList.remove('has-image');
+  var guideTitle = dropEl.getAttribute('data-guide-title') || '';
+  var guideSub = dropEl.getAttribute('data-guide-sub') || '';
+  var guideHtml = '';
+  if (guideTitle) {
+    guideHtml = '<div class="image-drop-guide">' +
+                '<div class="image-drop-guide-title">' + escapeHtml(guideTitle) + '</div>' +
+                (guideSub ? '<div class="image-drop-guide-sub">' + escapeHtml(guideSub) + '</div>' : '') +
+                '</div>';
+  }
+  dropEl.innerHTML = guideHtml +
+    '<div class="image-drop-info">📷 클릭하거나 Ctrl+V로 이미지 붙여넣기</div>' +
+    '<button type="button" class="btn-mini" onclick="document.getElementById(\'file_' + key + '\').click(); event.stopPropagation();">📁 파일에서 선택</button>' +
+    '<input type="file" id="file_' + key + '" accept="image/*" style="display:none;" onchange="handleFileSelect(event, \'' + key + '\')">';
+  var btnRow = document.getElementById('btnRow_' + key);
+  if (btnRow) btnRow.style.display = 'none';
+}
+
+// --- 저장 ---
+function saveCurrentSlot() {
+  if (isApplyingSlot) return;
+  var data = serializeCurrentState();
+  try {
+    localStorage.setItem(SLOT_PREFIX + currentSlotKey, JSON.stringify(data));
+    upsertSlotInIndex({
+      key: currentSlotKey,
+      name: data.meta.name,
+      rrn: data.meta.rrn,
+      updated: data.meta.updated
+    });
+    markSaved();
+    updateSlotUI();
+  } catch (e) {
+    handleStorageError(e);
+  }
+}
+function scheduleAutoSave() {
+  if (isApplyingSlot) return;
+  markModified();
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(saveCurrentSlot, 1000);
+}
+function saveNow() {
+  if (isApplyingSlot) return;
+  clearTimeout(autoSaveTimer);
+  saveCurrentSlot();
+}
+window.saveNow = saveNow;
+
+// --- 주민번호 변경 처리 ---
+function handleRRNChange() {
+  if (isApplyingSlot) return;
+  var rrnDigits = (val('inp_rrn') || '').replace(/[^\d]/g, '');
+  if (rrnDigits.length !== 13) return; // 미완성은 무시
+  var newKey = rrnDigits;
+  if (newKey === currentSlotKey) return;
+
+  // 일치 슬롯 조회
+  var existing = localStorage.getItem(SLOT_PREFIX + newKey);
+  if (existing) {
+    // 일치 슬롯 → 직전 슬롯의 자동 저장은 이미 수행됨, 그 슬롯 로드
+    try {
+      var data = JSON.parse(existing);
+      applySlotState(data);
+      currentSlotKey = newKey;
+      markSaved();
+      updateSlotUI();
+    } catch (e) {}
+  } else {
+    // 일치 슬롯 없음 → 키만 갱신 (rename)
+    var oldKey = currentSlotKey;
+    try {
+      var stateData = serializeCurrentState();
+      stateData.key = newKey;
+      localStorage.setItem(SLOT_PREFIX + newKey, JSON.stringify(stateData));
+      if (oldKey !== newKey) {
+        localStorage.removeItem(SLOT_PREFIX + oldKey);
+        removeSlotFromIndex(oldKey);
+      }
+      upsertSlotInIndex({
+        key: newKey,
+        name: stateData.meta.name,
+        rrn: stateData.meta.rrn,
+        updated: stateData.meta.updated
+      });
+      currentSlotKey = newKey;
+      updateSlotUI();
+    } catch (e) {
+      handleStorageError(e);
+    }
+  }
+}
+
+// --- 슬롯 선택 / 새 작업 / 삭제 ---
+function onSlotSelect(key) {
+  if (!key) return;
+  if (key === currentSlotKey) { updateSlotUI(); return; }
+  // 현재 작업은 이미 자동 저장됨 → 안전하게 전환
+  var raw = localStorage.getItem(SLOT_PREFIX + key);
+  if (!raw) {
+    showModal('슬롯을 찾을 수 없음', '선택한 슬롯이 존재하지 않습니다.', []);
+    updateSlotUI();
+    return;
+  }
+  try {
+    var data = JSON.parse(raw);
+    applySlotState(data);
+    currentSlotKey = key;
+    markSaved();
+    updateSlotUI();
+  } catch (e) {
+    showModal('슬롯 로드 실패', '슬롯 데이터를 읽을 수 없습니다.', []);
+  }
+}
+
+function newSlot() {
+  // 현재 작업은 자동 저장된 상태로 보존 (드롭다운에서 다시 복귀 가능)
+  clearAllInputs();
+  currentSlotKey = DRAFT_KEY;
+  // 기존 _draft 슬롯은 새 입력으로 덮어쓰기 됨 → 사전 정리
+  try {
+    localStorage.removeItem(SLOT_PREFIX + DRAFT_KEY);
+    removeSlotFromIndex(DRAFT_KEY);
+  } catch (e) {}
+  clearSaveStatus();
+  updateSlotUI();
+}
+
+function deleteCurrentSlot() {
+  var label = currentSlotKey === DRAFT_KEY ? '임시 작업' : getSlotLabel(currentSlotKey);
+  showModal('슬롯 삭제',
+    '"' + label + '" 슬롯을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.',
+    [
+      { text: '취소', cls: '' },
+      { text: '삭제', cls: 'primary', action: function () {
+        try {
+          localStorage.removeItem(SLOT_PREFIX + currentSlotKey);
+          removeSlotFromIndex(currentSlotKey);
+        } catch (e) {}
+        clearAllInputs();
+        currentSlotKey = DRAFT_KEY;
+        clearSaveStatus();
+        updateSlotUI();
+      }}
+    ]);
+}
+
+function clearAllInputs() {
+  isApplyingSlot = true;
+  try {
+    var ids = ['inp_name','inp_rrn','inp_company','inp_brn','inp_industry','inp_booktype',
+               'inp_income_after','inp_cost1','inp_cost2','inp_income_before',
+               'inp_caution_opinion','inp_guide_opinion','inp_analysis_opinion'];
+    ids.forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('inp_period').value = '2025.01.01. ~ 2025.12.31.';
+    document.getElementById('inp_reportdate').value = formatReportDate('0531');
+
+    ['caution','guide','analysis'].forEach(function (k) { clearImageSilent(k); });
+    Object.keys(imageStore).forEach(function (k) { delete imageStore[k]; });
+
+    document.getElementById('opinions_list').innerHTML = '';
+    document.getElementById('taxcredit_rows').innerHTML = '';
+
+    userEditedIncomeBefore = false;
+    addOpinion(); // 기본 의견 1개
+    updatePreview();
+  } finally {
+    isApplyingSlot = false;
+  }
+}
+
+// --- 라벨 ---
+function getSlotLabel(key) {
+  if (key === DRAFT_KEY) return '임시 작업';
+  var arr = loadSlotIndex();
+  var meta = arr.find(function (m) { return m.key === key; });
+  if (!meta) return key;
+  var name = meta.name || '(이름 미입력)';
+  var rrn = meta.rrn || '';
+  var rrnShort = rrn ? maskRRN(rrn) : '';
+  return name + (rrnShort ? ' (' + rrnShort + ')' : '');
+}
+function maskRRN(rrn) {
+  var d = rrn.replace(/[^\d]/g, '');
+  if (d.length < 7) return rrn;
+  return d.slice(0, 6) + '-' + d.charAt(6) + '******';
+}
+function formatUpdated(iso) {
+  if (!iso) return '';
+  try {
+    var d = new Date(iso);
+    var m = d.getMonth() + 1;
+    var dd = d.getDate();
+    var hh = String(d.getHours()).padStart(2, '0');
+    var mm = String(d.getMinutes()).padStart(2, '0');
+    return m + '/' + dd + ' ' + hh + ':' + mm;
+  } catch (e) { return ''; }
+}
+
+// --- 용량 ---
+function getStorageUsageBytes() {
+  var total = 0;
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (!k) continue;
+      if (k === SLOT_INDEX_KEY || k.indexOf(SLOT_PREFIX) === 0) {
+        var v = localStorage.getItem(k);
+        total += (k.length + (v ? v.length : 0)) * 2;
+      }
+    }
+  } catch (e) {}
+  return total;
+}
+
+// --- UI 갱신 ---
+function updateSlotUI() {
+  var sel = document.getElementById('slot_select');
+  var arr = loadSlotIndex();
+  // 임시 작업이 인덱스에 없을 수 있음 → 별도 추가
+  var draftEntry = arr.find(function (m) { return m.key === DRAFT_KEY; });
+  var hasDraftData = !!localStorage.getItem(SLOT_PREFIX + DRAFT_KEY);
+  var items = arr.slice();
+  if (!draftEntry && hasDraftData) {
+    items.unshift({ key: DRAFT_KEY, name: '', rrn: '', updated: '' });
+  }
+  // 옵션 렌더
+  sel.innerHTML = '<option value="">─ 슬롯 선택 ─</option>';
+  items.forEach(function (m) {
+    var label = (m.key === DRAFT_KEY ? '임시 작업 (주민번호 미입력)' : getSlotLabel(m.key));
+    var up = formatUpdated(m.updated);
+    var mark = (m.key === currentSlotKey) ? ' ← 현재' : '';
+    var opt = document.createElement('option');
+    opt.value = m.key;
+    opt.textContent = label + (up ? ' · ' + up : '') + mark;
+    if (m.key === currentSlotKey) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  // 현재 작업 표시
+  var nameEl = document.getElementById('slot_current_name');
+  if (currentSlotKey === DRAFT_KEY) {
+    nameEl.textContent = '임시 작업';
+  } else {
+    nameEl.textContent = getSlotLabel(currentSlotKey);
+  }
+
+  // 용량 표시
+  var bytes = getStorageUsageBytes();
+  var mb = bytes / 1024 / 1024;
+  var pct = (bytes / QUOTA_BUDGET_BYTES) * 100;
+  var qEl = document.getElementById('slot_quota');
+  qEl.classList.remove('warn','danger');
+  var label = '용량 <strong>' + mb.toFixed(1) + '</strong> / 약 10 MB';
+  if (pct >= 95) {
+    qEl.classList.add('danger');
+    label = '⚠ 용량 ' + mb.toFixed(1) + ' / 10 MB (' + Math.round(pct) + '%)';
+  } else if (pct >= 80) {
+    qEl.classList.add('warn');
+    label = '⚠ 용량 ' + mb.toFixed(1) + ' / 10 MB (' + Math.round(pct) + '%)';
+  }
+  qEl.innerHTML = label;
+}
+
+var lastSavedAt = null;
+function fmtTime(d) {
+  var h = String(d.getHours()).padStart(2, '0');
+  var m = String(d.getMinutes()).padStart(2, '0');
+  return h + ':' + m;
+}
+function markSaved() {
+  var el = document.getElementById('slot_save_status');
+  if (!el) return;
+  lastSavedAt = new Date();
+  el.className = 'status saved';
+  el.textContent = '✓ 저장됨 ' + fmtTime(lastSavedAt);
+}
+function markModified() {
+  var el = document.getElementById('slot_save_status');
+  if (!el) return;
+  el.className = 'status modified';
+  el.textContent = '● 수정됨 (저장 대기 중)';
+}
+function clearSaveStatus() {
+  var el = document.getElementById('slot_save_status');
+  if (!el) return;
+  el.className = 'status';
+  el.textContent = '';
+}
+
+// --- 저장 실패 처리 ---
+function handleStorageError(e) {
+  console.error('Storage error:', e);
+  var isQuota = (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014));
+  if (isQuota) {
+    showModal('저장 용량 초과',
+      '브라우저 저장 용량이 부족합니다.\n사용하지 않는 슬롯을 삭제하거나 첨부 이미지를 줄여 주세요.\n\n진행 중인 작업은 「📥 내보내기」로 .json 파일로 받아 두실 수 있습니다.',
+      [{ text: '확인', cls: 'primary' }]);
+  } else {
+    showModal('저장 실패', '데이터를 저장하지 못했습니다. 브라우저 콘솔을 확인하세요.', [{ text: '확인', cls: 'primary' }]);
+  }
+}
+
+// --- 모달 ---
+function showModal(title, body, actions, isDanger) {
+  var root = document.getElementById('modal_root');
+  root.innerHTML = '';
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  var box = document.createElement('div');
+  box.className = 'modal-box';
+  var t = document.createElement('p');
+  var dangerKeywords = ['실패', '용량 초과', '삭제', '오류', '찾을 수 없음', '잘못된', '읽기 실패'];
+  var autoDanger = dangerKeywords.some(function (k) { return title.indexOf(k) >= 0; });
+  t.className = 'modal-title' + ((isDanger || autoDanger) ? ' danger' : '');
+  t.textContent = title;
+  var b = document.createElement('p');
+  b.className = 'modal-body';
+  b.textContent = body;
+  var actWrap = document.createElement('div');
+  actWrap.className = 'modal-actions';
+  (actions || [{ text: '확인', cls: 'primary' }]).forEach(function (a) {
+    var btn = document.createElement('button');
+    btn.textContent = a.text;
+    if (a.cls) btn.className = a.cls;
+    btn.addEventListener('click', function () {
+      root.innerHTML = '';
+      if (typeof a.action === 'function') a.action();
+    });
+    actWrap.appendChild(btn);
+  });
+  box.appendChild(t);
+  box.appendChild(b);
+  box.appendChild(actWrap);
+  overlay.appendChild(box);
+  root.appendChild(overlay);
+}
+
+// --- 내보내기 ---
+function exportCurrentSlot() {
+  var data = serializeCurrentState();
+  var name = (val('inp_name') || '임시작업').replace(/[\\\/:*?"<>|]/g, '');
+  var rrnDigits = (val('inp_rrn') || '').replace(/[^\d]/g, '');
+  var rrn6 = rrnDigits.length >= 6 ? rrnDigits.slice(0, 6) : '주민번호미입력';
+  var today = new Date();
+  var ds = today.getFullYear() + String(today.getMonth() + 1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+  var fname = name + '_' + rrn6 + '_종합소득세_' + ds + '.json';
+
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  markSaved();
+  showModal('📥 내보내기 완료',
+    '파일명: ' + fname + '\n\n저장 위치: 브라우저 기본 다운로드 폴더\n(보통 C:\\Users\\[사용자명]\\Downloads\\)\n\n파일 탐색기(Windows 키 + E)로 「내 PC → 다운로드」에서 확인하실 수 있습니다.',
+    [{ text: '확인', cls: 'primary' }]);
+}
+window.exportCurrentSlot = exportCurrentSlot;
+
+// --- 불러오기 ---
+function importSlotFile(ev) {
+  var f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!data || !data.fields || !data.key) {
+        showModal('잘못된 파일', '이 파일은 본 도구에서 만든 슬롯 파일이 아닙니다.', [{ text: '확인', cls: 'primary' }]);
+        ev.target.value = '';
+        return;
+      }
+      var existing = localStorage.getItem(SLOT_PREFIX + data.key);
+      var importNow = function () {
+        try {
+          var saveData = Object.assign({}, data);
+          saveData.meta = saveData.meta || {};
+          saveData.meta.updated = new Date().toISOString();
+          localStorage.setItem(SLOT_PREFIX + data.key, JSON.stringify(saveData));
+          upsertSlotInIndex({
+            key: data.key,
+            name: saveData.meta.name || '',
+            rrn: saveData.meta.rrn || '',
+            updated: saveData.meta.updated
+          });
+          applySlotState(saveData);
+          currentSlotKey = data.key;
+          markSaved();
+          updateSlotUI();
+        } catch (err) { handleStorageError(err); }
+      };
+      if (existing) {
+        var lbl = getSlotLabel(data.key);
+        showModal('슬롯 덮어쓰기',
+          '"' + lbl + '" 슬롯이 이미 있습니다.\n현재 슬롯을 덮어쓸까요?',
+          [
+            { text: '취소', cls: '' },
+            { text: '덮어쓰기', cls: 'primary', action: importNow }
+          ]);
+      } else {
+        importNow();
+      }
+    } catch (err) {
+      showModal('파일 읽기 실패', '파일 형식이 올바르지 않습니다.', [{ text: '확인', cls: 'primary' }]);
+    }
+    ev.target.value = '';
+  };
+  reader.readAsText(f, 'utf-8');
+}
+window.importSlotFile = importSlotFile;
+window.onSlotSelect = onSlotSelect;
+window.newSlot = newSlot;
+window.deleteCurrentSlot = deleteCurrentSlot;
+
+// ============================================================
+// ===== 초기 렌더 =====
+// ============================================================
+addOpinion(); // 기본 의견 ① 1개 자동 생성
+
+// 마지막 작업 슬롯 자동 복원
+(function autoRestoreLastSlot() {
+  var arr = loadSlotIndex();
+  var restoredMeta = null;
+  if (arr.length > 0) {
+    var last = arr[0]; // 최신 정렬
+    var raw = localStorage.getItem(SLOT_PREFIX + last.key);
+    if (raw) {
+      try {
+        var data = JSON.parse(raw);
+        applySlotState(data);
+        currentSlotKey = last.key;
+        restoredMeta = last;
+      } catch (e) {}
+    }
+  } else {
+    // 임시 슬롯 자동 복원
+    var draft = localStorage.getItem(SLOT_PREFIX + DRAFT_KEY);
+    if (draft) {
+      try {
+        var dd = JSON.parse(draft);
+        applySlotState(dd);
+        currentSlotKey = DRAFT_KEY;
+        restoredMeta = { updated: dd.meta && dd.meta.updated };
+      } catch (e) {}
+    }
+  }
+  if (restoredMeta && restoredMeta.updated) {
+    try {
+      lastSavedAt = new Date(restoredMeta.updated);
+      var el = document.getElementById('slot_save_status');
+      if (el) {
+        el.className = 'status saved';
+        el.textContent = '✓ 저장됨 ' + fmtTime(lastSavedAt);
+      }
+    } catch (e) {}
+  }
+  updateSlotUI();
+})();
+
+updatePreview();
+
+// ===== 인쇄 버튼 트리거 (title 선제 변경 후 인쇄) =====
+function setTitleAndPrint() {
+  if (!window._origTitle) window._origTitle = document.title;
+  var name = (document.getElementById('inp_name').value || '').trim();
+  var company = (document.getElementById('inp_company').value || '').trim();
+  var fname = '종합소득세 신고보고서';
+  if (company) fname += '_' + company;
+  if (name) fname += '_' + name + ' 대표님';
+  document.title = fname;
+  setTimeout(function () { window.print(); }, 50);
+}
+window.setTitleAndPrint = setTitleAndPrint;
+
+// ===== 인쇄 시 헤더 우상단에 오늘 날짜 자동 표시 =====
+window.addEventListener('beforeprint', function () {
+  var d = new Date();
+  var ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  var el = document.getElementById('print-date-style');
+  if (!el) {
+    el = document.createElement('style');
+    el.id = 'print-date-style';
+    document.head.appendChild(el);
+  }
+  el.textContent = '@media print { @page samho { @top-right { content: "' + ds + '"; } } }';
+});
+
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    var first = document.getElementById('inp_name');
+    if (first) try { first.focus(); } catch (e) {}
+    document.querySelectorAll('textarea').forEach(autoResizeTextarea);
+  }, 100);
+});
+</script>
+
+<script>
+/* ===== [PDF 자동 불러오기] 추가 스크립트 — 기존 코드 미변경, 신규 기능만 추가 ===== */
+(function () {
+  'use strict';
+
+  var PDFX_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  var PDFX_SCALE = 2.4;
+
+  var pdfxDir = null;
+  var pdfxClients = [];
+  var pdfxActiveRow = null;
+
+  function $(id) { return document.getElementById(id); }
+  function pdfxEsc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function pdfxStatus(kind, msg) {
+    var el = $('pdfx_status');
+    if (!el) return;
+    el.style.display = 'block';
+    el.className = 'pdfx-status pdfx-' + kind;
+    el.textContent = msg;
+  }
+  function pdfxHideStatus() {
+    var el = $('pdfx_status');
+    if (el) el.style.display = 'none';
+  }
+
+  // ---------- IndexedDB: 폴더 핸들 기억 ----------
+  function pdfxOpenDb() {
+    return new Promise(function (res, rej) {
+      var r = indexedDB.open('pdfx_folder_db', 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore('handles'); };
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+    });
+  }
+  async function pdfxSaveHandle(h) {
+    try {
+      var db = await pdfxOpenDb();
+      await new Promise(function (res, rej) {
+        var t = db.transaction('handles', 'readwrite');
+        t.objectStore('handles').put(h, 'dir');
+        t.oncomplete = function () { res(); };
+        t.onerror = function () { rej(t.error); };
+      });
+    } catch (e) { /* 기억 실패는 치명적이지 않음 */ }
+  }
+  async function pdfxLoadHandle() {
+    try {
+      var db = await pdfxOpenDb();
+      return await new Promise(function (res) {
+        var t = db.transaction('handles', 'readonly');
+        var rq = t.objectStore('handles').get('dir');
+        rq.onsuccess = function () { res(rq.result || null); };
+        rq.onerror = function () { res(null); };
+      });
+    } catch (e) { return null; }
+  }
+
+  function pdfxSupported() { return (typeof window.showDirectoryPicker === 'function'); }
+
+  // ---------- 폴더 선택 ----------
+  async function pdfxPickFolder() {
+    if (!pdfxSupported()) {
+      pdfxStatus('warn', '이 브라우저는 폴더 열기를 지원하지 않습니다. Chrome 또는 Edge에서 사용해 주세요.');
+      return;
+    }
+    var handle;
+    try {
+      handle = await window.showDirectoryPicker();
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+      pdfxStatus('warn', '폴더를 열 수 없습니다: ' + (e && e.message || e));
+      return;
+    }
+    pdfxDir = handle;
+    await pdfxSaveHandle(handle);
+    await pdfxScan();
+  }
+
+  async function pdfxOpenRemembered() {
+    if (!pdfxDir) return;
+    try {
+      var perm = await pdfxDir.requestPermission({ mode: 'read' });
+      if (perm !== 'granted') {
+        pdfxStatus('warn', '폴더 접근 권한이 거부되었습니다. 「거래처 폴더 선택」으로 다시 지정해 주세요.');
+        return;
+      }
+    } catch (e) {
+      pdfxStatus('warn', '기억된 폴더를 열 수 없습니다. 「거래처 폴더 선택」으로 다시 지정해 주세요.');
+      return;
+    }
+    await pdfxScan();
+  }
+
+  // ---------- 거래처 폴더 스캔 ----------
+  async function pdfxScan() {
+    pdfxStatus('loading', '거래처 폴더를 읽는 중입니다…');
+    pdfxClients = [];
+    try {
+      for await (const entry of pdfxDir.values()) {
+        if (entry.kind !== 'directory') continue;
+        var m = entry.name.match(/^(.+?)\s*_\s*(\d{6})(?:\D|$)/);
+        if (!m) continue;
+        pdfxClients.push({ folder: entry.name, name: m[1].trim(), birth: m[2], handle: entry });
+      }
+    } catch (e) {
+      pdfxStatus('warn', '폴더를 읽는 중 오류가 발생했습니다: ' + (e && e.message || e));
+      return;
+    }
+    pdfxClients.sort(function (a, b) { return a.name.localeCompare(b.name, 'ko'); });
+    $('pdfx_folder_info').innerHTML = '지정된 폴더: <strong>' + pdfxEsc(pdfxDir.name) + '</strong> · 거래처 ' + pdfxClients.length + '곳';
+    $('pdfx_open').style.display = 'none';
+    $('pdfx_pick').textContent = '📁 폴더 다시 선택';
+    $('pdfx_search_wrap').style.display = 'block';
+    $('pdfx_list').style.display = 'block';
+    $('pdfx_search').value = '';
+    pdfxRenderList();
+    if (pdfxClients.length === 0) {
+      pdfxStatus('warn', '「이름 _ 생년월일6자리」 형식의 거래처 폴더를 찾지 못했습니다. 상위 폴더를 다시 확인해 주세요.');
+    } else {
+      pdfxHideStatus();
+    }
+  }
+
+  function pdfxRenderList() {
+    var q = ($('pdfx_search').value || '').replace(/\s+/g, '').toLowerCase();
+    var list = $('pdfx_list');
+    var rows = pdfxClients.filter(function (c) {
+      if (!q) return true;
+      return (c.name + c.birth).replace(/\s+/g, '').toLowerCase().indexOf(q) >= 0;
+    });
+    list.innerHTML = '';
+    pdfxActiveRow = null;
+    if (rows.length === 0) {
+      list.innerHTML = '<div class="pdfx-empty">' +
+        (pdfxClients.length === 0 ? '거래처 폴더가 없습니다.' : '검색 결과가 없습니다.') + '</div>';
+      return;
+    }
+    rows.forEach(function (c) {
+      var div = document.createElement('div');
+      div.className = 'pdfx-row';
+      div.innerHTML = '<span class="pdfx-name">' + pdfxEsc(c.name) + '</span>' +
+        '<span class="pdfx-birth">생년월일 ' + pdfxEsc(c.birth) + '</span>';
+      div.addEventListener('click', function () {
+        if (pdfxActiveRow) pdfxActiveRow.classList.remove('pdfx-active');
+        div.classList.add('pdfx-active');
+        pdfxActiveRow = div;
+        pdfxLoadClient(c);
+      });
+      list.appendChild(div);
+    });
+  }
+
+  // ---------- 거래처 클릭 → 안내문 처리 ----------
+  async function pdfxLoadClient(c) {
+    if (typeof window.pdfjsLib === 'undefined') {
+      pdfxStatus('warn', 'PDF 라이브러리를 불러오지 못했습니다. 인터넷에 연결한 뒤 새로고침해 주세요.');
+      return;
+    }
+    var nameEl = document.getElementById('inp_name');
+    if (nameEl && nameEl.value.trim()) {
+      if (!window.confirm('현재 입력 내용을 「' + c.name + '」 안내문 자동입력 값으로 바꿀까요?')) return;
+    }
+    pdfxStatus('loading', '「' + c.name + '」 폴더에서 안내문 PDF를 찾는 중입니다…');
+    try {
+      var file = await pdfxFindAnnounce(c.handle);
+      if (!file) {
+        pdfxStatus('warn', '「' + c.name + '」 폴더에서 "안내문" PDF를 찾지 못했습니다. 파일명에 "안내문"이 포함되어야 합니다.');
+        return;
+      }
+      pdfxStatus('loading', '「' + c.name + '」 안내문을 분석하는 중입니다…');
+      var buf = await file.arrayBuffer();
+      var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+      var result = await pdfxProcess(pdf);
+      pdfxApplyResult(c, result);
+    } catch (e) {
+      pdfxStatus('warn', '처리 중 오류가 발생했습니다: ' + (e && e.message || e));
+    }
+  }
+
+  async function pdfxFindAnnounce(dirHandle) {
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file' && /안내문/.test(entry.name) && /\.pdf$/i.test(entry.name)) {
+        return await entry.getFile();
+      }
+    }
+    return null;
+  }
+
+  // ---------- PDF 분석 ----------
+  async function pdfxProcess(pdf) {
+    var pages = [];
+    for (var i = 1; i <= pdf.numPages; i++) {
+      var page = await pdf.getPage(i);
+      var vp = page.getViewport({ scale: PDFX_SCALE });
+      var tc = await page.getTextContent();
+      pages.push({ num: i, page: page, vp: vp, lines: pdfxLines(tc, vp), canvas: null });
+    }
+    var pdfxNorm = function (s) {
+      return String(s == null ? '' : s).replace(/(\S) (?=\S)/g, '$1');
+    };
+    var p1 = pages[0] ? pdfxNorm(pages[0].lines.map(function (l) { return l.rawtext; }).join(' ')) : '';
+    var all = pdfxNorm(pages.map(function (p) {
+      return p.lines.map(function (l) { return l.rawtext; }).join(' ');
+    }).join(' \n '));
+    var info = pdfxExtractInfo(p1, all, pages);
+    var totalIncome = pdfxExtractTotalIncome(pages);
+    var crops = {};
+    crops.guide = await pdfxCrop(pages, { startKeys: ['사업장별수입금액', '※'], end: { type: 'top', keys: ['종교인'] } });
+    crops.analysis = await pdfxCrop(pages, { startKeys: ['신고소득률', '※'], end: { type: 'rowbottom', keys: ['소득률', '당해업체'] } });
+    crops.caution = await pdfxCropCautionOnly(pages);
+    return { info: info, crops: crops, income: totalIncome };
+  }
+
+  function pdfxLines(tc, vp) {
+    var arr = [];
+    (tc.items || []).forEach(function (it) {
+      if (!it.str || !it.transform) return;
+      var pt = vp.convertToViewportPoint(it.transform[4], it.transform[5]);
+      var h = (it.height || 8) * vp.scale;
+      var w = (it.width || 0) * vp.scale;
+      arr.push({ str: it.str, x: pt[0], yBase: pt[1], h: h, top: pt[1] - h, bottom: pt[1] + h * 0.3, right: pt[0] + w });
+    });
+    arr.sort(function (a, b) { return (a.yBase - b.yBase) || (a.x - b.x); });
+    var lines = [];
+    arr.forEach(function (r) {
+      var ln = null, i;
+      for (i = 0; i < lines.length; i++) {
+        if (Math.abs(lines[i].yBase - r.yBase) < Math.max(4, r.h * 0.5)) { ln = lines[i]; break; }
+      }
+      if (!ln) {
+        ln = { yBase: r.yBase, top: r.top, bottom: r.bottom, left: r.x, right: r.right, items: [] };
+        lines.push(ln);
+      }
+      ln.items.push(r);
+      ln.top = Math.min(ln.top, r.top);
+      ln.bottom = Math.max(ln.bottom, r.bottom);
+      ln.left = Math.min(ln.left, r.x);
+      ln.right = Math.max(ln.right, r.right);
+    });
+    lines.forEach(function (L) {
+      L.items.sort(function (a, b) { return a.x - b.x; });
+      L.rawtext = L.items.map(function (i) { return i.str; }).join(' ');
+      L.text = L.items.map(function (i) { return i.str; }).join('').replace(/\s+/g, '');
+    });
+    lines.sort(function (a, b) { return a.top - b.top; });
+    return lines;
+  }
+
+  function pdfxHas(line, keys) {
+    for (var i = 0; i < keys.length; i++) {
+      if (line.text.indexOf(keys[i]) < 0) return false;
+    }
+    return true;
+  }
+
+  async function pdfxRenderPage(p) {
+    if (p.canvas) return p.canvas;
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.ceil(p.vp.width));
+    c.height = Math.max(1, Math.ceil(p.vp.height));
+    await p.page.render({ canvasContext: c.getContext('2d'), viewport: p.vp }).promise;
+    p.canvas = c;
+    return c;
+  }
+
+  async function pdfxCrop(pages, spec) {
+    // --- 시작 줄 ---
+    var startLine = null, startPage = null, pi, li;
+    for (pi = 0; pi < pages.length; pi++) {
+      for (li = 0; li < pages[pi].lines.length; li++) {
+        if (pdfxHas(pages[pi].lines[li], spec.startKeys)) {
+          startLine = pages[pi].lines[li];
+          startPage = pages[pi];
+          if (!spec.startLast) break;
+        }
+      }
+      if (startLine && !spec.startLast) break;
+    }
+    if (!startLine) return null;
+
+    var lines = startPage.lines;
+    var topY = Math.max(0, startLine.top - 8);
+    var botY = null;
+    var k;
+
+    if (spec.end.type === 'top') {
+      var endLine = null;
+      for (k = 0; k < lines.length; k++) {
+        if (lines[k].top > startLine.top + 2 && pdfxHas(lines[k], spec.end.keys)) { endLine = lines[k]; break; }
+      }
+      botY = endLine ? (endLine.top - 4) : startPage.vp.height;
+    } else if (spec.end.type === 'rowbottom') {
+      var rowLine = null;
+      for (k = 0; k < lines.length; k++) {
+        if (lines[k].top > startLine.top + 2 && pdfxHas(lines[k], spec.end.keys)) rowLine = lines[k];
+      }
+      if (!rowLine) return null;
+      var prev = null;
+      for (k = 0; k < lines.length; k++) {
+        if (lines[k].yBase < rowLine.yBase - 2 && (!prev || lines[k].yBase > prev.yBase)) prev = lines[k];
+      }
+      var rowGap = prev ? (rowLine.yBase - prev.yBase) : (rowLine.bottom - rowLine.top) * 1.8;
+      botY = rowLine.yBase + rowGap * 0.6;
+    } else { // pagebottom — 시작 줄 이후 연속 블록만
+      var below = lines.filter(function (L) { return L.top > startLine.top + 2; })
+        .sort(function (a, b) { return a.top - b.top; });
+      var gaps = [];
+      var srt = lines.slice().sort(function (a, b) { return a.yBase - b.yBase; });
+      for (k = 1; k < srt.length; k++) {
+        var g = srt[k].yBase - srt[k - 1].yBase;
+        if (g > 2 && g < 260) gaps.push(g);
+      }
+      gaps.sort(function (a, b) { return a - b; });
+      var med = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 20;
+      var lastBottom = startLine.bottom;
+      for (k = 0; k < below.length; k++) {
+        if (below[k].top - lastBottom > med * 4) break; // 표 이후 큰 공백(푸터 등) → 중단
+        if (below[k].bottom > lastBottom) lastBottom = below[k].bottom;
+      }
+      botY = lastBottom + med * 0.9;
+    }
+
+    botY = Math.min(botY, startPage.vp.height);
+    if (botY <= topY + 10) return null;
+
+    // --- x 범위 ---
+    var xL = 1e9, xR = -1e9;
+    for (k = 0; k < lines.length; k++) {
+      var L = lines[k];
+      if (L.bottom >= topY && L.top <= botY) {
+        if (L.left < xL) xL = L.left;
+        if (L.right > xR) xR = L.right;
+      }
+    }
+    if (xL > xR) { xL = 0; xR = startPage.vp.width; }
+    xL = Math.max(0, xL - 14);
+    xR = Math.min(startPage.vp.width, xR + 14);
+
+    var canvas = await pdfxRenderPage(startPage);
+    var sx = Math.max(0, Math.floor(xL));
+    var sy = Math.max(0, Math.floor(topY));
+    var sw = Math.min(Math.ceil(xR - xL), canvas.width - sx);
+    var sh = Math.min(Math.ceil(botY - topY), canvas.height - sy);
+    if (sw <= 0 || sh <= 0) return null;
+
+    var out = document.createElement('canvas');
+    out.width = sw;
+    out.height = sh;
+    out.getContext('2d').drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+    return out.toDataURL('image/png');
+  }
+async function pdfxCropCautionOnly(pages) {
+  var startLine = null, startPage = null;
+  var pi, li, k;
+
+  // "소득세 개별분석자료" 중에서
+  // 바로 아래에 "항목 / 항목설명" 표가 있는 블록만 찾는다.
+  // "업종별 유의사항" 블록은 제외한다.
+  for (pi = 0; pi < pages.length; pi++) {
+    var lines = pages[pi].lines;
+
+    for (li = 0; li < lines.length; li++) {
+      var t = lines[li].text || '';
+
+      if (
+        t.indexOf('소득세개별분석자료') >= 0 &&
+        t.indexOf('사전성실신고지원안내대상자') >= 0
+      ) {
+        var hasItemTable = false;
+        var hasIndustryCaution = false;
+
+        for (k = li + 1; k < Math.min(lines.length, li + 8); k++) {
+          var nt = lines[k].text || '';
+
+          if (nt.indexOf('업종별유의사항') >= 0) {
+            hasIndustryCaution = true;
+            break;
+          }
+
+          if (nt.indexOf('항목') >= 0 && nt.indexOf('항목설명') >= 0) {
+            hasItemTable = true;
+            break;
+          }
+        }
+
+        if (hasItemTable && !hasIndustryCaution) {
+          startLine = lines[li];
+          startPage = pages[pi];
+          break;
+        }
+      }
+    }
+
+    if (startLine) break;
+  }
+
+  if (!startLine) return null;
+
+  var lines2 = startPage.lines;
+  var topY = Math.max(0, startLine.top - 8);
+
+  // 시작 줄 이후 연속 블록만 자른다.
+  var below = lines2.filter(function (L) {
+    return L.top > startLine.top + 2;
+  }).sort(function (a, b) {
+    return a.top - b.top;
+  });
+
+  var gaps = [];
+  var srt = lines2.slice().sort(function (a, b) {
+    return a.yBase - b.yBase;
+  });
+
+  for (k = 1; k < srt.length; k++) {
+    var g = srt[k].yBase - srt[k - 1].yBase;
+    if (g > 2 && g < 260) gaps.push(g);
+  }
+
+  gaps.sort(function (a, b) { return a - b; });
+
+  var med = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 20;
+  var lastBottom = startLine.bottom;
+
+  for (k = 0; k < below.length; k++) {
+    if (below[k].top - lastBottom > med * 4) break;
+    if (below[k].bottom > lastBottom) lastBottom = below[k].bottom;
+  }
+
+  var botY = Math.min(lastBottom + med * 0.9, startPage.vp.height);
+  if (botY <= topY + 10) return null;
+
+  var xL = 1e9;
+  var xR = -1e9;
+
+  for (k = 0; k < lines2.length; k++) {
+    var L = lines2[k];
+    if (L.bottom >= topY && L.top <= botY) {
+      if (L.left < xL) xL = L.left;
+      if (L.right > xR) xR = L.right;
+    }
+  }
+
+  if (xL > xR) {
+    xL = 0;
+    xR = startPage.vp.width;
+  }
+
+  xL = Math.max(0, xL - 14);
+  xR = Math.min(startPage.vp.width, xR + 14);
+
+  var canvas = await pdfxRenderPage(startPage);
+  var sx = Math.max(0, Math.floor(xL));
+  var sy = Math.max(0, Math.floor(topY));
+  var sw = Math.min(Math.ceil(xR - xL), canvas.width - sx);
+  var sh = Math.min(Math.ceil(botY - topY), canvas.height - sy);
+
+  if (sw <= 0 || sh <= 0) return null;
+
+  var out = document.createElement('canvas');
+  out.width = sw;
+  out.height = sh;
+  out.getContext('2d').drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+
+  return out.toDataURL('image/png');
+}  
+  // ---------- 기본정보 추출 ----------
+function pdfxFormatIndustryName(raw) {
+  var t = String(raw == null ? '' : raw);
+  if (!t) return '';
+
+  // 코드·구분기호 제거 후, PDF 글자 단위 공백을 우선 제거한다.
+  t = t.replace(/\d{6}.*$/, '');
+  t = t.replace(/[|:：]/g, ' ');
+  t = t.replace(/\s+/g, '');
+
+  // 업종명에 끼어들 수 있는 표 머리글 잔여값 제거
+  t = t.replace(/^업종/, '');
+  t = t.replace(/^업종코드/, '');
+  t = t.replace(/^신고시유의할사항/, '');
+
+  // 한국어 업종명에 필요한 최소 문장부호만 보정
+  t = t.replace(/,/g, ', ');
+  t = t.replace(/및/g, ' 및 ');
+  t = t.replace(/\s+/g, ' ').trim();
+  return t;
+}
+
+function pdfxExtractIndustryFromPages(pages) {
+  if (!pages || !pages.length) return '';
+
+  var found = [];
+  var seen = {};
+
+  for (var pi = 0; pi < pages.length; pi++) {
+    var lines = pages[pi].lines || [];
+    var startIndex = -1;
+
+    for (var li = 0; li < lines.length; li++) {
+      if ((lines[li].text || '').indexOf('업종별유의사항') >= 0) {
+        startIndex = li;
+        break;
+      }
+    }
+
+    if (startIndex < 0) continue;
+
+    for (var k = startIndex + 1; k < lines.length; k++) {
+      var L = lines[k];
+      var t = L.text || '';
+      if (!t) continue;
+
+      // 다음 큰 섹션이 나오면 중단
+      if (k > startIndex + 1 && t.indexOf('※') >= 0 && t.indexOf('업종별유의사항') < 0) break;
+
+      // 표 머리글 또는 우측 유의사항 본문은 제외
+      if (t.indexOf('업종코드') >= 0 || t.indexOf('신고시유의') >= 0) continue;
+      if (t.indexOf('○') >= 0) continue;
+
+      // 업종별 유의사항 표의 좌측 셀: 업종명 + 6자리 업종코드
+      var m = t.match(/^([가-힣A-Za-z,&/·ㆍ().\-]{2,80}?)(\d{6})(?!\d)/);
+      if (!m) continue;
+
+      var name = pdfxFormatIndustryName(m[1]);
+      if (!name || !/[가-힣]/.test(name)) continue;
+
+      // 과도하게 긴 유의사항 문장이 우연히 잡히는 경우 방지
+      if (name.length > 35) continue;
+
+      if (!seen[name]) {
+        seen[name] = true;
+        found.push(name);
+      }
+    }
+
+    if (found.length) break;
+  }
+
+  return found.join(' / ');
+}
+
+function pdfxExtractIndustry(all) {
+  var s = String(all == null ? '' : all);
+  var compact = s.replace(/\s+/g, '');
+
+  var start = compact.indexOf('업종별유의사항');
+  if (start < 0) return '';
+
+  var tail = compact.slice(start, start + 4000);
+  var m = tail.match(/업종업종코드신고시유의할사항([가-힣A-Za-z,&/·ㆍ().\-]{2,80}?)(\d{6})(?!\d)/);
+  if (!m) m = tail.match(/업종코드신고시유의할사항([가-힣A-Za-z,&/·ㆍ().\-]{2,80}?)(\d{6})(?!\d)/);
+  if (!m) m = tail.match(/신고시유의할사항([가-힣A-Za-z,&/·ㆍ().\-]{2,80}?)(\d{6})(?!\d)/);
+  if (!m) return '';
+
+  var name = pdfxFormatIndustryName(m[1]);
+  return (name && name.length <= 35) ? name : '';
+}
+
+  // ----- 사업장별 수입금액 표에서 수입금액 합계 추출 -----
+  // 1순위: "수입금액" 열의 각 사업장 금액을 원 단위로 합산
+  // 2순위: 합산 실패 시 기존처럼 "총계" 행의 금액을 보조 추출
+  function pdfxExtractTotalIncome(pages) {
+    function onlyDigits(s) {
+      return String(s == null ? '' : s).replace(/[^\d]/g, '');
+    }
+    function isMoneyToken(s) {
+      return /^[\d,]+$/.test(String(s || '').replace(/\s+/g, ''));
+    }
+    function median(arr) {
+      if (!arr || !arr.length) return 0;
+      arr = arr.slice().sort(function (a, b) { return a - b; });
+      return arr[Math.floor(arr.length / 2)];
+    }
+    function lineHeight(lines) {
+      var hs = [];
+      (lines || []).forEach(function (L) {
+        var h = (L.bottom || 0) - (L.top || 0);
+        if (h > 2 && h < 80) hs.push(h);
+      });
+      return median(hs) || 10;
+    }
+    function compactText(L) {
+      return (L && (L.text || L.rawtext) || '').replace(/\s+/g, '');
+    }
+    function itemText(it) {
+      return String((it && it.str) || '').replace(/\s+/g, '');
+    }
+    function overlaps(aL, aR, bL, bR) {
+      return aL <= bR && aR >= bL;
+    }
+
+    // [A] 수입금액 열의 사업장별 금액을 합산한다.
+    // PDF에 따라 143,796,839가 "143,796,83" + "9"처럼 두 줄로 쪼개지므로
+    // 금액 열의 조각을 세로 클러스터로 묶은 뒤 합산한다.
+    for (var pi = 0; pi < pages.length; pi++) {
+      var lines = pages[pi].lines || [];
+      var startIdx = -1;
+      for (var si = 0; si < lines.length; si++) {
+        if (compactText(lines[si]).indexOf('사업장별수입금액') >= 0) {
+          startIdx = si;
+          break;
+        }
+      }
+      if (startIdx < 0) continue;
+
+      var totalIdx = -1;
+      for (var ti = startIdx + 1; ti < lines.length; ti++) {
+        var ttxt = compactText(lines[ti]);
+        if (ttxt.indexOf('총계') >= 0) { totalIdx = ti; break; }
+        if (ti > startIdx + 1 && ttxt.indexOf('※') >= 0) break;
+      }
+      if (totalIdx < 0) continue;
+
+      var headerItem = null;
+      var headerLine = null;
+      for (var hi = startIdx + 1; hi < totalIdx; hi++) {
+        var itemsH = lines[hi].items || [];
+        for (var hj = 0; hj < itemsH.length; hj++) {
+          if (itemText(itemsH[hj]).indexOf('수입금액') >= 0) {
+            headerItem = itemsH[hj];
+            headerLine = lines[hi];
+            break;
+          }
+        }
+        if (headerItem) break;
+      }
+      if (!headerItem) continue;
+
+      var lh = lineHeight(lines);
+      var colL = Math.max(0, headerItem.x - lh * 1.6);
+      var colR = headerItem.right + lh * 1.6;
+      var topLimit = headerLine.bottom;
+      var bottomLimit = lines[totalIdx].top - lh * 0.2;
+
+      var toks = [];
+      for (var li = startIdx + 1; li < totalIdx; li++) {
+        var L = lines[li];
+        if (L.bottom < topLimit || L.top > bottomLimit) continue;
+        (L.items || []).forEach(function (it) {
+          var s = itemText(it);
+          if (!isMoneyToken(s)) return;
+          if (!overlaps(it.x, it.right, colL, colR)) return;
+          toks.push({
+            x: it.x,
+            right: it.right,
+            y: it.yBase,
+            s: s,
+            digits: onlyDigits(s)
+          });
+        });
+      }
+
+      if (toks.length) {
+        toks.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+        var clusters = [];
+        var cur = [];
+        var yGapLimit = lh * 0.9;
+
+        toks.forEach(function (tok) {
+          if (!cur.length) {
+            cur.push(tok);
+            return;
+          }
+          var prev = cur[cur.length - 1];
+          if (Math.abs(tok.y - prev.y) <= yGapLimit) {
+            cur.push(tok);
+          } else {
+            clusters.push(cur);
+            cur = [tok];
+          }
+        });
+        if (cur.length) clusters.push(cur);
+
+        var sum = 0;
+        var count = 0;
+        clusters.forEach(function (cl) {
+          cl.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+          var digits = onlyDigits(cl.map(function (p) { return p.s; }).join(''));
+          if (!digits) return;
+          var n = parseInt(digits, 10);
+          if (!isFinite(n)) return;
+          // 업종코드·세율 등 오인 방지: 수입금액 열에서 100원 이상 금액만 합산
+          if (n >= 100) {
+            sum += n;
+            count++;
+          }
+        });
+
+        if (count > 0 && sum > 0) return String(sum);
+      }
+    }
+
+    // [B] 보조 로직: "총계" 행의 수입금액 셀을 직접 추출한다.
+    // 수입금액 열 합산이 실패한 예외 PDF에 대비한다.
+    for (var pi2 = 0; pi2 < pages.length; pi2++) {
+      var lines2 = pages[pi2].lines || [];
+      var startIdx2 = -1;
+      for (var si2 = 0; si2 < lines2.length; si2++) {
+        if (compactText(lines2[si2]).indexOf('사업장별수입금액') >= 0) {
+          startIdx2 = si2;
+          break;
+        }
+      }
+      if (startIdx2 < 0) continue;
+
+      var headerItem2 = null;
+      for (var h2 = startIdx2 + 1; h2 < lines2.length; h2++) {
+        if (h2 > startIdx2 + 1 && compactText(lines2[h2]).indexOf('※') >= 0) break;
+        var ih = lines2[h2].items || [];
+        for (var h3 = 0; h3 < ih.length; h3++) {
+          if (itemText(ih[h3]).indexOf('수입금액') >= 0) {
+            headerItem2 = ih[h3];
+            break;
+          }
+        }
+        if (headerItem2) break;
+      }
+
+      var anchor = null;
+      for (var li2 = startIdx2 + 1; li2 < lines2.length; li2++) {
+        var tt = compactText(lines2[li2]);
+        if (tt.indexOf('총계') >= 0) { anchor = lines2[li2]; break; }
+        if (li2 > startIdx2 + 1 && tt.indexOf('※') >= 0) break;
+      }
+      if (!anchor) continue;
+
+      var lh2 = lineHeight(lines2);
+      var cy = (anchor.top + anchor.bottom) / 2;
+      var bandTop = cy - lh2 * 1.0;
+      var bandBot = cy + lh2 * 1.7;
+      var colL2 = headerItem2 ? Math.max(0, headerItem2.x - lh2 * 1.6) : 0;
+      var colR2 = headerItem2 ? (headerItem2.right + lh2 * 1.6) : 1e9;
+
+      var toks2 = [];
+      for (var lj = 0; lj < lines2.length; lj++) {
+        (lines2[lj].items || []).forEach(function (it2) {
+          var s2 = itemText(it2);
+          if (!isMoneyToken(s2)) return;
+          if (it2.yBase < bandTop || it2.yBase > bandBot) return;
+          if (!overlaps(it2.x, it2.right, colL2, colR2)) return;
+          toks2.push({ x: it2.x, y: it2.yBase, s: s2 });
+        });
+      }
+
+      if (toks2.length) {
+        toks2.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+        var joined = onlyDigits(toks2.map(function (p) { return p.s; }).join(''));
+        if (joined.length >= 4) return joined;
+      }
+    }
+
+    return '';
+  }
+
+  function pdfxExtractInfo(p1, all, pages) {
+    var info = { name: '', birth6: '', company: '', brn: '', industry: '', booktype: '' };
+    var m;
+    m = p1.match(/성\s*명\s*([가-힣]{2,4})/);
+    if (m) info.name = m[1];
+    m = p1.match(/(\d{2})\s*[.\-]\s*(\d{2})\s*[.\-]\s*(\d{2})/);
+    if (m) info.birth6 = m[1] + m[2] + m[3];
+    if (/복식부기/.test(p1)) info.booktype = '복식부기';
+    else if (/간편장부/.test(p1)) info.booktype = '간편장부';
+    m = all.match(/상\s*호\s*(.{1,40}?)\s*사업자등록번호\s*(\d{3}-\d{2}-\d{5})/);
+    if (m) {
+      info.company = m[1].trim()
+        .replace(/\s*\(\s*/g, '(').replace(/\s*\)\s*/g, ')').replace(/\s{2,}/g, ' ');
+      info.brn = m[2];
+    } else {
+      m = p1.match(/(\d{3}-\d{2}-\d{5})/);
+      if (m) info.brn = m[1];
+    }
+    info.industry = pdfxExtractIndustryFromPages(pages) || pdfxExtractIndustry(all);
+    return info;
+  }
+
+  // ---------- 결과 반영 ----------
+  function pdfxSetField(id, val) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.value = (val == null ? '' : val);
+    try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+  }
+
+  function pdfxApplyResult(c, result) {
+    var info = result.info, crops = result.crops;
+    var setImg = (typeof window.setImage === 'function') ? window.setImage : null;
+    var clrImg = (typeof window.clearImage === 'function') ? window.clearImage : null;
+
+    pdfxSetField('inp_name', info.name);
+    pdfxSetField('inp_rrn', formatRRN(info.birth6));   // 주민등록번호 앞 6자리 + 마스킹
+    pdfxSetField('inp_company', info.company);
+    pdfxSetField('inp_brn', info.brn);
+    if (info.industry) pdfxSetField('inp_industry', info.industry);
+    if (info.booktype) pdfxSetField('inp_booktype', info.booktype);
+    pdfxSetField('q_income', result.income || '');
+
+    if (setImg && clrImg) {
+      crops.caution ? setImg('caution', crops.caution) : clrImg('caution');
+      crops.guide ? setImg('guide', crops.guide) : clrImg('guide');
+      crops.analysis ? setImg('analysis', crops.analysis) : clrImg('analysis');
+    }
+
+    var miss = [];
+    if (!crops.caution) miss.push('Ⅱ');
+    if (!crops.guide) miss.push('Ⅲ');
+    if (!crops.analysis) miss.push('Ⅳ');
+    var msg = '「' + c.name + '」 자동 입력 완료.';
+    if (info.industry) msg += ' 업종: ' + info.industry + '.';
+    else msg += ' 업종은 자동 추출되지 않았습니다.';
+    if (result.income) msg += ' 수입금액 총계: ' + Number(result.income).toLocaleString('ko-KR') + '원.';
+    else msg += ' 수입금액 총계는 자동 추출되지 않았습니다(견적서에 직접 입력하세요).';
+    if (miss.length) msg += ' (자동 추출이 안 된 칸: ' + miss.join('·') + ' — 해당 이미지칸에 직접 붙여넣기)';
+    pdfxStatus('ok', msg);
+  }
+
+  // ---------- 초기화 ----------
+  async function pdfxInit() {
+    var pick = $('pdfx_pick'), open = $('pdfx_open'), search = $('pdfx_search');
+    if (pick) pick.addEventListener('click', pdfxPickFolder);
+    if (open) open.addEventListener('click', pdfxOpenRemembered);
+    if (search) {
+      search.addEventListener('input', pdfxRenderList);
+      search.addEventListener('keydown', function (e) { e.stopPropagation(); }); // 기존 키보드 이동과 분리
+    }
+    if (typeof window.pdfjsLib !== 'undefined') {
+      try { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFX_WORKER; } catch (e) {}
+    }
+    if (!pdfxSupported()) {
+      $('pdfx_folder_info').textContent = '이 브라우저는 폴더 열기를 지원하지 않습니다 (Chrome·Edge에서 사용해 주세요).';
+      if (pick) pick.disabled = true;
+      return;
+    }
+    var h = await pdfxLoadHandle();
+    if (h) {
+      pdfxDir = h;
+      $('pdfx_folder_info').innerHTML = '기억된 폴더: <strong>' + pdfxEsc(h.name) + '</strong> — 「기억된 폴더 열기」를 눌러 주세요.';
+      if (open) open.style.display = 'inline-block';
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', pdfxInit);
+  } else {
+    pdfxInit();
+  }
+})();
+</script>
+
+<script>
+/* ===== [수수료 견적서] 연결 스크립트 — 동적 보수료 항목 방식 (v3) ===== */
+(function () {
+  'use strict';
+  var QUOTE_TITLE_DEFAULT = '2025년 귀속 종합소득세 신고 수수료안내 및 신고 보고';
+
+  function $(id) { return document.getElementById(id); }
+  function qNum(v) {
+    if (v == null) return null;
+    var d = String(v).replace(/[^0-9]/g, '');
+    if (!d) return null;
+    return parseInt(d, 10);
+  }
+  function qFmt(n) {
+    if (n == null || isNaN(n)) return '';
+    return Number(n).toLocaleString('ko-KR');
+  }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (ch) {
+      return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[ch];
+    });
+  }
+
+  // ----- 보수기준표 구간(수입금액 → 강조 행) -----
+  function feeTier(income) {
+    var i = qNum(income) || 0;
+    if (i <= 0) return 0;
+    if (i <= 50000000) return 1;
+    if (i <= 100000000) return 2;
+    if (i <= 300000000) return 3;
+    if (i <= 500000000) return 4;
+    if (i <= 1000000000) return 5;
+    if (i <= 2000000000) return 6;
+    if (i <= 3000000000) return 7;
+    if (i <= 4000000000) return 8;
+    if (i <= 5000000000) return 9;
+   if (i <= 10000000000) return 10;
+    return 11;
+  }
+
+  // ----- 수입금액 기준 기본보수료 자동계산 (보수기준표 동일 산식, 공급가액 기준) -----
+  function calcBaseFee(income) {
+    var i = qNum(income) || 0;
+    if (i <= 0) return 0;
+    var fee;
+    if (i <= 50000000) fee = 250000;
+    else if (i <= 100000000) fee = 250000 + (i - 50000000) * 0.0033;
+    else if (i <= 300000000) fee = 415000 + (i - 100000000) * 0.0017;
+    else if (i <= 500000000) fee = 755000 + (i - 300000000) * 0.00085;
+    else if (i <= 1000000000) fee = 925000 + (i - 500000000) * 0.00085;
+    else if (i <= 2000000000) fee = 1350000 + (i - 1000000000) * 0.00042;
+    else if (i <= 3000000000) fee = 1770000 + (i - 2000000000) * 0.00042;
+    else if (i <= 4000000000) fee = 2190000 + (i - 3000000000) * 0.00033;
+    else if (i <= 5000000000) fee = 2520000 + (i - 4000000000) * 0.00033;
+    else if (i <= 10000000000) fee = 2850000 + (i - 5000000000) * 0.00033;
+    else fee = 4500000 + (i - 10000000000) * 0.000042;
+    return Math.round(fee);
+  }
+
+  // ----- 보수료 항목(동적) -----
+  var feeRows = null;
+  var extraRows = null;
+
+  function quoteRecalc() {
+    var sum = 0;
+    if (feeRows) feeRows.querySelectorAll('.qf-amt').forEach(function (a) { sum += (qNum(a.value) || 0); });
+    var extraSum = quoteExtraSum();
+    var total = Math.round(sum * 1.1);
+    var sv = $('q_sumView'); if (sv) sv.textContent = sum ? qFmt(sum) : '0';
+    var tv = $('q_totalView'); if (tv) tv.textContent = total ? qFmt(total) : '0';
+    var esv = $('q_extraSumView'); if (esv) esv.textContent = extraSum ? qFmt(extraSum) : '0';
+    return { sum: sum, total: total, extraSum: extraSum };
+  }
+
+  function quoteFloat(id, def) {
+    var el = $(id);
+    var raw = el ? String(el.value || '').replace(',', '.') : '';
+    var n = parseFloat(raw);
+    return isFinite(n) ? n : def;
+  }
+
+  function quoteWeight() {
+    var w = quoteFloat('q_weight', 1.2);
+    if (w < 1.2) w = 1.2;
+    if (w > 3) w = 3;
+    return w;
+  }
+
+  function quoteAdjust() {
+    var a = quoteFloat('q_adjust', 1);
+    return isFinite(a) ? a : 1;
+  }
+
+  function calcWeightedBaseFee(income) {
+    var base = calcBaseFee(income);
+    if (!base) return 0;
+    return Math.round(base * 1.023 * quoteWeight() * quoteAdjust());
+  }
+
+  function findBaseFeeRow() {
+    if (!feeRows) feeRows = $('q_feeRows');
+    if (!feeRows) return null;
+    var found = feeRows.querySelector('.qfee-base-row');
+    if (found) return found;
+    feeRows.querySelectorAll('.qfee-row').forEach(function (r) {
+      var lbl = (r.querySelector('.qf-lbl').value || '').replace(/\s+/g, '');
+      if (!found && lbl === '기본보수료') found = r;
+    });
+    return found;
+  }
+
+  function markAsBaseFeeRow(row) {
+    if (!row) return row;
+    row.classList.add('qfee-base-row');
+    row.dataset.baseFeeRow = '1';
+    var lblEl = row.querySelector('.qf-lbl');
+    if (lblEl) {
+      lblEl.value = '기본보수료';
+      lblEl.readOnly = true;
+      lblEl.tabIndex = -1;
+    }
+    return row;
+  }
+
+  function ensureBaseFeeRow(forceApply) {
+    if (!feeRows) feeRows = $('q_feeRows');
+    if (!feeRows) return null;
+    var row = findBaseFeeRow();
+    if (!row) row = addQuoteFeeItem('기본보수료', '', { baseRow: true });
+    markAsBaseFeeRow(row);
+    if (feeRows.firstChild !== row) feeRows.insertBefore(row, feeRows.firstChild);
+
+    var income = qNum(($('q_income') || {}).value) || 0;
+    var calcAmt = calcWeightedBaseFee(income);
+    var amtEl = row.querySelector('.qf-amt');
+    if (amtEl && (forceApply || row.dataset.manual !== '1')) {
+      amtEl.value = calcAmt ? qFmt(calcAmt) : '';
+      row.dataset.manual = '0';
+    }
+    return row;
+  }
+
+  function addQuoteFeeItem(label, amt, opts) {
+    opts = opts || {};
+    if (!feeRows) feeRows = $('q_feeRows');
+    if (!feeRows) return null;
+    var row = document.createElement('div');
+    row.className = 'qfee-row';
+    row.innerHTML =
+      '<input type="text" class="qf-lbl" placeholder="항목명 입력">' +
+      '<input type="text" class="qf-amt" inputmode="numeric" placeholder="금액 입력">' +
+      '<button type="button" class="qf-del">×</button>';
+    feeRows.appendChild(row);
+    var lblEl = row.querySelector('.qf-lbl');
+    var amtEl = row.querySelector('.qf-amt');
+    if (label != null) lblEl.value = label;
+    if (amt != null && amt !== '') amtEl.value = qFmt(qNum(amt));
+    if (opts.baseRow || (String(label || '').replace(/\s+/g, '') === '기본보수료')) markAsBaseFeeRow(row);
+    lblEl.addEventListener('input', function () {
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+    amtEl.addEventListener('input', function () {
+      if (row.classList.contains('qfee-base-row')) row.dataset.manual = '1';
+      var atEnd = (amtEl.selectionStart === amtEl.value.length);
+      amtEl.value = qFmt(qNum(amtEl.value));
+      if (atEnd) { try { amtEl.setSelectionRange(amtEl.value.length, amtEl.value.length); } catch (e) {} }
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+    row.querySelector('.qf-del').addEventListener('click', function () {
+      if (row.classList.contains('qfee-base-row')) return;
+      row.remove();
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+    return row;
+  }
+  window.addQuoteFeeItem = addQuoteFeeItem;
+
+
+  // ----- 기본보수표 하단 별도표(미입력시 미출력)(동적) -----
+  function addQuoteExtraItem(label, amt, note, opts) {
+    opts = opts || {};
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (!extraRows) return null;
+    var row = document.createElement('div');
+    row.className = 'qextra-row';
+    row.innerHTML =
+      '<input type="text" class="qx-lbl" placeholder="항목명 입력">' +
+      '<input type="text" class="qx-amt" inputmode="numeric" placeholder="금액 입력">' +
+      '<button type="button" class="qx-del">×</button>';
+    extraRows.appendChild(row);
+    var lblEl = row.querySelector('.qx-lbl');
+    var amtEl = row.querySelector('.qx-amt');
+    if (label != null) lblEl.value = label;
+    if (amt != null && amt !== '') amtEl.value = qFmt(qNum(amt));
+    if (opts.defaultRow) {
+      row.classList.add('qextra-default-row');
+      row.dataset.defaultRow = '1';
+    }
+    lblEl.addEventListener('input', function () {
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+    amtEl.addEventListener('input', function () {
+      var atEnd = (amtEl.selectionStart === amtEl.value.length);
+      amtEl.value = qFmt(qNum(amtEl.value));
+      if (atEnd) { try { amtEl.setSelectionRange(amtEl.value.length, amtEl.value.length); } catch (e) {} }
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+    row.querySelector('.qx-del').addEventListener('click', function () {
+      if (row.classList.contains('qextra-default-row')) return;
+      row.remove();
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+    return row;
+  }
+  window.addQuoteExtraItem = addQuoteExtraItem;
+
+  function ensureQuoteExtraDefaultRow() {
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (!extraRows) return null;
+    var row = extraRows.querySelector('.qextra-default-row');
+    if (!row) row = addQuoteExtraItem('', '', '', { defaultRow: true });
+    if (extraRows.firstChild !== row) extraRows.insertBefore(row, extraRows.firstChild);
+    return row;
+  }
+
+  function collectExtraItems() {
+    var items = [];
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (extraRows) extraRows.querySelectorAll('.qextra-row').forEach(function (r) {
+      items.push({
+        label: r.querySelector('.qx-lbl').value,
+        amt: r.querySelector('.qx-amt').value,
+        note: '',
+        defaultRow: r.classList.contains('qextra-default-row')
+      });
+    });
+    return items;
+  }
+
+  function quoteExtraVisibleItems() {
+    return collectExtraItems().filter(function (it) {
+      var label = (it.label || '').trim();
+      var amt = qNum(it.amt) || 0;
+      // 기본으로 생성되는 빈 줄은 입력 전에는 출력하지 않음.
+      // 이전 파일에서 저장된 기본줄 라벨 '기본'도 금액이 없으면 미출력 처리.
+      if (it.defaultRow && !amt && (!label || label === '기본')) return false;
+      return !!label || !!amt;
+    });
+  }
+
+  function quoteExtraSum() {
+    var sum = 0;
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (extraRows) extraRows.querySelectorAll('.qx-amt').forEach(function (a) { sum += (qNum(a.value) || 0); });
+    return sum;
+  }
+
+  function setExtraItems(items) {
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (extraRows) extraRows.innerHTML = '';
+    if (items && items.length) {
+      items.forEach(function (it, idx) {
+        var exLabel = (it.defaultRow && String(it.label || '').trim() === '기본' && !(qNum(it.amt) || 0)) ? '' : it.label;
+        addQuoteExtraItem(exLabel, it.amt, it.note, { defaultRow: !!it.defaultRow || idx === 0 });
+      });
+    }
+    ensureQuoteExtraDefaultRow();
+  }
+
+  function quoteAutoApplyBaseFee() {
+    ensureBaseFeeRow(true);
+    if (typeof updatePreview === 'function') updatePreview();
+    if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+  }
+  window.quoteAutoApplyBaseFee = quoteAutoApplyBaseFee;
+
+  function collectFeeItems() {
+    var items = [];
+    if (!feeRows) feeRows = $('q_feeRows');
+    if (feeRows) feeRows.querySelectorAll('.qfee-row').forEach(function (r) {
+      items.push({ label: r.querySelector('.qf-lbl').value, amt: r.querySelector('.qf-amt').value, base: r.classList.contains('qfee-base-row'), manual: r.dataset.manual === '1' });
+    });
+    return items;
+  }
+
+  function setFeeItems(items) {
+    if (!feeRows) feeRows = $('q_feeRows');
+    if (feeRows) feeRows.innerHTML = '';
+    if (items && items.length) {
+      items.forEach(function (it) {
+        var row = addQuoteFeeItem(it.label, it.amt, { baseRow: !!it.base || String(it.label || '').replace(/\s+/g, '') === '기본보수료' });
+        if (row && it.manual) row.dataset.manual = '1';
+      });
+    }
+    ensureBaseFeeRow(false);
+    if (!items || !items.length) addQuoteFeeItem();
+  }
+
+  // ----- 견적서 미리보기 갱신 -----
+  function quoteUpdatePreview() {
+    var qp = $('quotePage');
+    if (!qp) return;
+    var enable = $('q_enable') ? $('q_enable').checked : true;
+    qp.classList.toggle('is-hidden', !enable);
+
+    var rc = $('qp_recipient');
+    if (rc) {
+      var rv = ($('q_recipient') || {}).value || '';
+      if (rv.trim()) {
+        rc.textContent = rv;
+      } else {
+        var compV = (($('inp_company') || {}).value || '').trim();
+        var nameV = (($('inp_name') || {}).value || '').trim();
+        var autoV = (compV + ' ' + nameV).trim();
+        rc.textContent = autoV ? autoV : '\u3000';
+      }
+    }
+    var wd = $('qp_writedate');
+    if (wd) { var wv = ($('q_writedate') || {}).value || ''; wd.textContent = wv.trim() ? wv : '\u3000'; }
+    var tt = $('qp_title');
+    if (tt) {
+      var tv = (($('q_title') || {}).value || '').trim();
+      tt.textContent = tv ? tv : QUOTE_TITLE_DEFAULT;
+    }
+    var cm = $('qp_cmsdate');
+    if (cm) { cm.textContent = (($('q_cmsdate') || {}).value || ''); }
+
+    var income = qNum(($('q_income') || {}).value) || 0;
+    var qi = $('qp_income');
+    if (qi) qi.textContent = income ? qFmt(income) : '\u3000';
+
+    // 수입금액 기준 기본보수료 및 가중치 적용 산정금액 — 라이브 표시
+    var baseFee = calcBaseFee(income);
+    var calcFee = calcWeightedBaseFee(income);
+    var bv = $('q_basefeeView');
+    if (bv) bv.textContent = baseFee ? qFmt(baseFee) : '0';
+    var cv = $('q_calcfeeView');
+    if (cv) cv.textContent = calcFee ? qFmt(calcFee) : '0';
+    ensureBaseFeeRow(false);
+
+    // 보수료 항목 → 합계 + boxB 동적 렌더
+    var r = quoteRecalc();
+    var body = $('qp_feeBody');
+    if (body) {
+      var html = '';
+      collectFeeItems().forEach(function (it) {
+        var amtN = qNum(it.amt) || 0;
+        var lbl = (it.label || '').trim();
+        if (!lbl && !amtN) return;   // 빈 행은 견적서에 출력하지 않음
+        html += '<tr><td class="bB-lab">' + escapeHtml(lbl || '\u3000') + '</td>' +
+                '<td class="bB-val">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
+      });
+      html += '<tr><td class="bB-lab bB-sum">합\u3000\u3000계</td>' +
+              '<td class="bB-sumval">' + (r.sum ? qFmt(r.sum) : '-') + '</td></tr>';
+      body.innerHTML = html;
+    }
+
+    var extraTable = $('qp_extraTable');
+    var extraBody = $('qp_extraBody');
+    if (extraTable && extraBody) {
+      var extraItems = quoteExtraVisibleItems();
+      var extraHtml = '';
+      extraItems.forEach(function (it) {
+        var amtN = qNum(it.amt) || 0;
+        extraHtml += '<tr><td class="qx-lab-print">' + escapeHtml((it.label || '').trim() || '\u3000') + '</td>' +
+                     '<td class="qx-amt-print">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
+      });
+      if (extraItems.length) {
+        extraHtml += '<tr><td class="qx-sum-lab">합\u3000\u3000계</td>' +
+                     '<td class="qx-sum-val">' + (r.extraSum ? qFmt(r.extraSum) : '-') + '</td></tr>';
+        extraBody.innerHTML = extraHtml;
+        extraTable.classList.remove('is-hidden');
+      } else {
+        extraBody.innerHTML = '';
+        extraTable.classList.add('is-hidden');
+      }
+    }
+
+    var qt = $('qp_total');
+    if (qt) qt.textContent = r.total ? qFmt(r.total) : '\u3000';
+
+    var freeV = (($('q_free') || {}).value) || '';
+    var fb = $('qp_free_box');
+    if (fb) {
+      if (freeV.trim()) { fb.textContent = freeV; fb.classList.remove('is-hidden'); }
+      else { fb.textContent = ''; fb.classList.add('is-hidden'); }
+    }
+
+    var tier = feeTier(income);
+    for (var n = 1; n <= 11; n++) {
+      var row = $('fs' + n);
+      if (row) row.classList.toggle('fs-active', n === tier);
+    }
+  }
+  window.quoteUpdatePreview = quoteUpdatePreview;
+
+  // ----- 견적서 데이터 적용/수집 -----
+  function setQuoteTitleValue(v, userEdited) {
+    var el = $('q_title');
+    if (!el) return;
+    var title = (v == null ? '' : String(v)).trim();
+    el.value = title ? title : QUOTE_TITLE_DEFAULT;
+    el.dataset.userEdited = (userEdited && title && title !== QUOTE_TITLE_DEFAULT) ? '1' : '0';
+  }
+  function quoteApplyData(q) {
+    q = q || {};
+    var sv = function (id, v) { var el = $(id); if (el) el.value = (v == null ? '' : v); };
+    if ($('q_enable')) $('q_enable').checked = (q.enable === undefined ? true : !!q.enable);
+    if ($('q_print_quote_only')) $('q_print_quote_only').checked = !!q.print_quote_only;
+    sv('q_recipient', q.recipient);
+    sv('q_writedate', q.writedate);
+
+    // 제목은 기본값 고정. 사용자가 직접 수정한 경우에만 저장된 수정 제목을 복원한다.
+    // 구버전 슬롯/자동저장에 남은 비정상 제목값은 기본 제목으로 되돌린다.
+    var titleEdited = (q.title_user_edited === true || q.title_user_edited === '1');
+    setQuoteTitleValue(titleEdited ? q.title : QUOTE_TITLE_DEFAULT, titleEdited);
+
+    sv('q_cmsdate', q.cmsdate);
+    sv('q_income', q.income);
+    sv('q_weight', q.weight === undefined ? '1.2' : q.weight);
+    sv('q_adjust', q.adjust === undefined ? '1' : q.adjust);
+    sv('q_free', q.free);
+    // 보수료 항목: 신규 items 우선, 없으면 구버전(basefee/honest/explain) 자동 변환
+    var items = q.items;
+    if (!items && (q.basefee || q.honest || q.explain)) {
+      items = [];
+      if (q.basefee) items.push({ label: '기본보수료', amt: q.basefee });
+      if (q.honest) items.push({ label: '성실신고확인', amt: q.honest });
+      if (q.explain) items.push({ label: '신고후소명', amt: q.explain });
+    }
+    setFeeItems(items);
+    setExtraItems(q.extraItems);
+  }
+  function quoteCollectData() {
+    var gv = function (id) { var el = $(id); return el ? el.value : ''; };
+    var titleEl = $('q_title');
+    var titleRaw = titleEl ? String(titleEl.value || '').trim() : '';
+    var titleEdited = !!(titleEl && titleEl.dataset.userEdited === '1' && titleRaw && titleRaw !== QUOTE_TITLE_DEFAULT);
+    return {
+      enable: $('q_enable') ? $('q_enable').checked : true,
+      print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
+      recipient: gv('q_recipient'),
+      writedate: gv('q_writedate'),
+      title: titleEdited ? titleRaw : '',
+      title_user_edited: titleEdited,
+      cmsdate: gv('q_cmsdate'),
+      income: gv('q_income'),
+      weight: gv('q_weight'),
+      adjust: gv('q_adjust'),
+      free: gv('q_free'),
+      items: collectFeeItems(),
+      extraItems: collectExtraItems()
+    };
+  }
+
+  // ----- override: updatePreview -----
+  if (typeof updatePreview === 'function') {
+    var _origUpdate = updatePreview;
+    updatePreview = function () { _origUpdate(); quoteUpdatePreview(); };
+    window.updatePreview = updatePreview;
+  }
+  // ----- override: serializeCurrentState (슬롯 저장에 견적서 포함) -----
+  if (typeof serializeCurrentState === 'function') {
+    var _origSerialize = serializeCurrentState;
+    serializeCurrentState = function () {
+      var data = _origSerialize();
+      data.quote = quoteCollectData();
+      return data;
+    };
+    window.serializeCurrentState = serializeCurrentState;
+  }
+  // ----- override: applySlotState (슬롯 불러오기에 견적서 포함) -----
+  if (typeof applySlotState === 'function') {
+    var _origApply = applySlotState;
+    applySlotState = function (data) {
+      _origApply(data);
+      quoteApplyData((data || {}).quote);
+      quoteUpdatePreview();
+    };
+    window.applySlotState = applySlotState;
+  }
+  // ----- override: clearAllInputs (새 작업 시 견적서 초기화) -----
+  if (typeof clearAllInputs === 'function') {
+    var _origClear = clearAllInputs;
+    clearAllInputs = function () {
+      _origClear();
+      quoteApplyData(null);
+      quoteUpdatePreview();
+    };
+    window.clearAllInputs = clearAllInputs;
+  }
+  // ----- override: setTitleAndPrint (인쇄 파일명 및 견적서만 출력 모드 반영) -----
+  if (typeof setTitleAndPrint === 'function') {
+    setTitleAndPrint = function () {
+      if (!window._origTitle) window._origTitle = document.title;
+      var name = (($('inp_name') || {}).value || '').trim();
+      var company = (($('inp_company') || {}).value || '').trim();
+      var qOnly = $('q_print_quote_only') ? $('q_print_quote_only').checked : false;
+      var qOn = $('q_enable') ? $('q_enable').checked : false;
+
+      // 견적서만 출력은 견적서 출력이 전제이므로, 체크 시 인쇄 직전에 견적서를 강제로 표시한다.
+      if (qOnly && $('q_enable') && !qOn) {
+        $('q_enable').checked = true;
+        qOn = true;
+        quoteUpdatePreview();
+      }
+
+      document.body.classList.toggle('print-quote-only', !!(qOnly && qOn));
+
+      var fname = (qOnly && qOn) ? '수수료견적서'
+                : qOn ? '수수료견적서 및 종합소득세 신고보고서'
+                      : '종합소득세 신고보고서';
+      if (company) fname += '_' + company;
+      if (name) fname += '_' + name + ' 대표님';
+      document.title = fname;
+      setTimeout(function () { window.print(); }, 50);
+    };
+    window.setTitleAndPrint = setTitleAndPrint;
+  }
+
+  window.addEventListener('afterprint', function () {
+    document.body.classList.remove('print-quote-only');
+    if (window._origTitle) document.title = window._origTitle;
+  });
+
+  // ----- 제목 직접 수정 여부 기록 -----
+  var qTitleEl = $('q_title');
+  if (qTitleEl) {
+    qTitleEl.dataset.userEdited = '0';
+    qTitleEl.addEventListener('input', function () {
+      var v = String(qTitleEl.value || '').trim();
+      qTitleEl.dataset.userEdited = (v && v !== QUOTE_TITLE_DEFAULT) ? '1' : '0';
+    });
+  }
+
+  // ----- 기본보수료 자동산정 입력값 변경 시 기본 행 갱신 -----
+  ['q_income', 'q_weight', 'q_adjust'].forEach(function (id) {
+    var el = $(id);
+    if (!el) return;
+    var ev = (el.tagName === 'SELECT') ? 'change' : 'input';
+    el.addEventListener(ev, function () {
+      var row = findBaseFeeRow();
+      if (row) row.dataset.manual = '0';
+      ensureBaseFeeRow(true);
+    });
+  });
+
+  // ----- 초기 복원 (보고서 자동복원 직후 견적서 부분만 반영) -----
+  (function () {
+    feeRows = $('q_feeRows');
+    extraRows = $('q_extraRows');
+    ensureQuoteExtraDefaultRow();
+    var applied = false;
+    try {
+      var key = (typeof currentSlotKey !== 'undefined') ? currentSlotKey : '_draft';
+      var prefix = (typeof SLOT_PREFIX !== 'undefined') ? SLOT_PREFIX : 'jongso:slot:';
+      var raw = localStorage.getItem(prefix + key);
+      if (raw) {
+        var data = JSON.parse(raw);
+        if (data && data.quote) { quoteApplyData(data.quote); applied = true; }
+      }
+    } catch (e) {}
+    if (!applied) {
+      setFeeItems(null);
+      setExtraItems(null);
+    }
+    quoteUpdatePreview();
+    try {
+      if (typeof autoResizeTextarea === 'function') {
+        var f = $('q_free');
+        if (f) autoResizeTextarea(f);
+      }
+    } catch (e) {}
+  })();
+
+})();
+</script>
+
+</body>
+</html>
   color: #000;
   font-size: 13.5px;
   line-height: 1.5;
@@ -1474,7 +6308,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-24 08:55</span>
+    <span class="build-date">업데이트 2026-05-24 11:09</span>
   </div>
 </header>
 
