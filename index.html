@@ -1681,16 +1681,32 @@ textarea {
 }
 </style>
 <style id="quote-fee-label-fill-same-as-recv">
-/* PATCH: 견적서 출력 — 2025년 수입금액 / 기본보수료 / 합계 / 총용역수수료 셀 색상 통일
-   - 수신·작성일자 좌측 셀과 동일한 색상 적용
+/* PATCH: 출력 색상 보정
+   - 총용역수수료 셀과 동일한 채움색 적용
+   - 1. 기본정보 표 전체 셀 채움
+   - 5. 매출·소득 요약 및 절세효과 > 2. 절세효과 상세 표 전체 셀 채움
+   - 견적서 기본보수료/추가항목/합계 표 글자색 검은색
    - 계산 로직 / 입력 로직 / 행높이 / 글자 크기 변경 없음 */
 
 .quote-page .boxA .bA-lab,
 .quote-page .boxB .bB-lab,
 .quote-page .boxB .bB-sum,
 .quote-page .boxB .bB-sumval,
-.quote-page .total-box {
+.quote-page .total-box,
+#sec_basic .rp-table.compact tbody td,
+#sec_income > table.rp-table.medium:nth-of-type(2) th,
+#sec_income > table.rp-table.medium:nth-of-type(2) td {
   background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
+}
+
+/* 보수표에 의한 기본 보수료 / 추가항목 / 합계 표 글자색 검은색 */
+.quote-page .boxB td,
+.quote-page .boxB td *,
+.quote-page .q-tbl-left .extraStd th,
+.quote-page .q-tbl-left .extraStd th *,
+.quote-page .q-tbl-left .extraStd td,
+.quote-page .q-tbl-left .extraStd td * {
+  color: #000 !important;
 }
 
 @media print {
@@ -1698,7 +1714,10 @@ textarea {
   .quote-page .boxB .bB-lab,
   .quote-page .boxB .bB-sum,
   .quote-page .boxB .bB-sumval,
-  .quote-page .total-box {
+  .quote-page .total-box,
+  #sec_basic .rp-table.compact tbody td,
+  #sec_income > table.rp-table.medium:nth-of-type(2) th,
+  #sec_income > table.rp-table.medium:nth-of-type(2) td {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
