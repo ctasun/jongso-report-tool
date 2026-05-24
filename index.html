@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-24 14:15 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
+<!-- BUILD_DATE: 2026-05-24 11:09 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -835,6 +835,37 @@ textarea {
 .quote-page .boxB td { border:1px solid #9aa9c6; padding:9px 9px; height:36px; }
 .quote-page .boxB .bB-lab { width:52%; text-align:center; font-weight:600; font-size:12px; background:#fff; color:#1a2c5b; }
 .quote-page .boxB .bB-val { text-align:right; font-size:13px; }
+
+.quote-page .boxB tr.q-basefee-row td {
+  height: auto !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  vertical-align: middle !important;
+}
+
+.quote-page .boxB .q-basefee-lab {
+  text-align: center !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+}
+
+.quote-page .boxB .q-basefee-print {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  gap: 1px !important;
+}
+
+.quote-page .boxB .q-basefee-line {
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
 .quote-page .boxB .bB-sum { background:#c9d6ea !important; font-weight:700; font-size:13px; letter-spacing:2px; color:#14264f; }
 .quote-page .boxB .bB-sumval { background:#c9d6ea; text-align:right; font-weight:700; font-size:13.5px; color:#14264f; }
 .q-dash { color:#555; }
@@ -1659,7 +1690,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-24 14:15</span>
+    <span class="build-date">업데이트 2026-05-24 11:09</span>
   </div>
 </header>
 
@@ -4728,7 +4759,16 @@ function bindQuoteRecipientSync() {
     if (!base) return 0;
     return Math.round(base * 1.023 * quoteWeight() * quoteAdjust());
   }
+  var QUOTE_BASE_FEE_INPUT_LABEL = '보수표에 의한 기본 보수료 (결산수수료 포함)';
 
+  function quoteBaseFeeLabelKey(v) {
+    return String(v || '').replace(/\s+/g, '');
+  }
+
+  function quoteIsBaseFeeLabel(v) {
+    var k = quoteBaseFeeLabelKey(v);
+    return k === '기본보수료' || k === '보수표에의한기본보수료(결산수수료포함)';
+  }
   function findBaseFeeRow() {
     if (!feeRows) feeRows = $('q_feeRows');
     if (!feeRows) return null;
@@ -4736,7 +4776,7 @@ function bindQuoteRecipientSync() {
     if (found) return found;
     feeRows.querySelectorAll('.qfee-row').forEach(function (r) {
       var lbl = (r.querySelector('.qf-lbl').value || '').replace(/\s+/g, '');
-      if (!found && lbl === '기본보수료') found = r;
+      if (!found && quoteIsBaseFeeLabel(lbl)) found = r;
     });
     return found;
   }
@@ -4747,7 +4787,7 @@ function bindQuoteRecipientSync() {
     row.dataset.baseFeeRow = '1';
     var lblEl = row.querySelector('.qf-lbl');
     if (lblEl) {
-      lblEl.value = '기본보수료';
+      lblEl.value = QUOTE_BASE_FEE_INPUT_LABEL;
       lblEl.readOnly = true;
       lblEl.tabIndex = -1;
     }
@@ -4758,7 +4798,7 @@ function bindQuoteRecipientSync() {
     if (!feeRows) feeRows = $('q_feeRows');
     if (!feeRows) return null;
     var row = findBaseFeeRow();
-    if (!row) row = addQuoteFeeItem('기본보수료', '', { baseRow: true });
+    if (!row) row = addQuoteFeeItem(QUOTE_BASE_FEE_INPUT_LABEL, '', { baseRow: true });
     markAsBaseFeeRow(row);
     if (feeRows.firstChild !== row) feeRows.insertBefore(row, feeRows.firstChild);
 
@@ -4787,7 +4827,7 @@ function bindQuoteRecipientSync() {
     var amtEl = row.querySelector('.qf-amt');
     if (label != null) lblEl.value = label;
     if (amt != null && amt !== '') amtEl.value = qFmt(qNum(amt));
-    if (opts.baseRow || (String(label || '').replace(/\s+/g, '') === '기본보수료')) markAsBaseFeeRow(row);
+    if (opts.baseRow || quoteIsBaseFeeLabel(label)) markAsBaseFeeRow(row);
     lblEl.addEventListener('input', function () {
       if (typeof updatePreview === 'function') updatePreview();
       if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
@@ -4926,7 +4966,7 @@ function bindQuoteRecipientSync() {
     if (feeRows) feeRows.innerHTML = '';
     if (items && items.length) {
       items.forEach(function (it) {
-        var row = addQuoteFeeItem(it.label, it.amt, { baseRow: !!it.base || String(it.label || '').replace(/\s+/g, '') === '기본보수료' });
+        var row = addQuoteFeeItem(it.label, it.amt, { baseRow: !!it.base || quoteIsBaseFeeLabel(it.label) });
         if (row && it.manual) row.dataset.manual = '1';
       });
     }
@@ -4982,8 +5022,18 @@ function bindQuoteRecipientSync() {
         var amtN = qNum(it.amt) || 0;
         var lbl = (it.label || '').trim();
         if (!lbl && !amtN) return;   // 빈 행은 견적서에 출력하지 않음
-        html += '<tr><td class="bB-lab">' + escapeHtml(lbl || '\u3000') + '</td>' +
-                '<td class="bB-val">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
+        var isBaseRow = !!it.base || quoteIsBaseFeeLabel(lbl);
+        var labelHtml = isBaseRow
+          ? '<span class="q-basefee-print">' +
+            '<span class="q-basefee-line">보수표에 의한</span>' +
+            '<span class="q-basefee-line">기본 보수료</span>' +
+            '<span class="q-basefee-line">(결산수수료 포함)</span>' +
+            '</span>'
+          : escapeHtml(lbl || '\u3000');
+
+        html += '<tr' + (isBaseRow ? ' class="q-basefee-row"' : '') + '><td class="bB-lab' + (isBaseRow ? ' q-basefee-lab' : '') + '">' + labelHtml + '</td>' +
+                '<td class="bB-val' + (isBaseRow ? ' q-basefee-val' : '') + '">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
+
       });
       html += '<tr><td class="bB-lab bB-sum">합\u3000\u3000계</td>' +
               '<td class="bB-sumval">' + (r.sum ? qFmt(r.sum) : '-') + '</td></tr>';
