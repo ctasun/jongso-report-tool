@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-24 14:03 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
+<!-- BUILD_DATE: 2026-05-24 11:09 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1659,7 +1659,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-24 14:03</span>
+    <span class="build-date">업데이트 2026-05-24 11:09</span>
   </div>
 </header>
 
@@ -4437,6 +4437,39 @@ function quoteNormalizeWriteDateInput(v) {
   return s.replace(/[^0-9]/g, '').slice(0, 4);
 }
 
+function quoteSetWriteDatePart(part) {
+  var el = $('q_writedate');
+  if (!el) return;
+
+  var d = quoteNormalizeWriteDateInput(el.value);
+  if (el.value !== d) el.value = d;
+
+  var start = part === 'dd' ? 2 : 0;
+  var end = part === 'dd' ? 4 : 2;
+
+  el.dataset.writeDatePart = part === 'dd' ? 'dd' : 'mm';
+
+  try {
+    el.setSelectionRange(
+      Math.min(start, el.value.length),
+      Math.min(end, el.value.length)
+    );
+  } catch (e) {}
+
+  quoteUpdateWriteDateDisplay();
+}
+
+function quoteGetWriteDatePartByCaret(el, d) {
+  if (!el) return 'mm';
+
+  if (el.dataset.writeDatePart === 'mm' || el.dataset.writeDatePart === 'dd') {
+    return el.dataset.writeDatePart;
+  }
+
+  var pos = typeof el.selectionStart === 'number' ? el.selectionStart : d.length;
+  return pos <= 2 ? 'mm' : 'dd';
+}
+
 function quoteUpdateWriteDateDisplay() {
   var el = $('q_writedate');
   var mmEl = $('q_writedate_mm');
@@ -4466,14 +4499,15 @@ function quoteUpdateWriteDateDisplay() {
   if (ddEl) ddEl.classList.remove('q-date-active');
 
   if (document.activeElement === el) {
-    if (d.length < 2 && mmEl) {
+    var activePart = quoteGetWriteDatePartByCaret(el, d);
+
+    if (activePart === 'mm' && mmEl) {
       mmEl.classList.add('q-date-active');
     } else if (ddEl) {
       ddEl.classList.add('q-date-active');
     }
   }
 }
-
 function quoteFormatWriteDate(v) {
   var d = quoteNormalizeWriteDateInput(v);
   if (!/^\d{4}$/.test(d)) return '';
@@ -4495,14 +4529,45 @@ function bindQuoteWriteDateFormat() {
   el.dataset.boundWriteDate = '1';
 
   el.addEventListener('focus', function () {
+    if (!el.dataset.writeDatePart) el.dataset.writeDatePart = 'mm';
     quoteUpdateWriteDateDisplay();
   });
 
+  el.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'Home') {
+      e.preventDefault();
+      quoteSetWriteDatePart('mm');
+      return;
+    }
+
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'End') {
+      e.preventDefault();
+      quoteSetWriteDatePart('dd');
+    }
+  });
+
   el.addEventListener('input', function () {
+    el.value = quoteNormalizeWriteDateInput(el.value);
+
+    if (
+      el.dataset.writeDatePart === 'mm' &&
+      el.value.length >= 2 &&
+      typeof el.selectionStart === 'number' &&
+      el.selectionStart >= 2
+    ) {
+      el.dataset.writeDatePart = 'dd';
+    }
+
     quoteUpdateWriteDateDisplay();
 
     if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
     if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+  });
+
+  el.addEventListener('click', function () {
+    var pos = typeof el.selectionStart === 'number' ? el.selectionStart : 0;
+    el.dataset.writeDatePart = pos <= 2 ? 'mm' : 'dd';
+    quoteUpdateWriteDateDisplay();
   });
 
   el.addEventListener('blur', function () {
@@ -4511,6 +4576,8 @@ function bindQuoteWriteDateFormat() {
 
     if ($('q_writedate_mm')) $('q_writedate_mm').classList.remove('q-date-active');
     if ($('q_writedate_dd')) $('q_writedate_dd').classList.remove('q-date-active');
+
+    el.dataset.writeDatePart = '';
 
     if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
     if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
