@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-24 15:59 (Ⅴ 매출·소득 요약 표 음영·강조 적용) -->
+<!-- BUILD_DATE: 2026-05-24 18:29 (반영후 음수 입력·절세효과 표·이월결손금 주석·카드 필요경비·반영전 음수 표시) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -594,6 +594,7 @@ textarea {
   font-weight: 400;
 }
 .rp-table th .rp-dist.sub { color: #cdd5e6; }
+.rp-distnote { text-align: left; font-size: 11px; color: #000; font-weight: 400; margin-top: 2px; padding: 0 40px; }
 
 .rp-image {
   width: 100%;
@@ -1866,7 +1867,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-24 15:59</span>
+    <span class="build-date">업데이트 2026-05-24 18:29</span>
   </div>
 </header>
 
@@ -2150,6 +2151,14 @@ textarea {
         <input type="text" id="inp_cost2" data-field="cost2" data-format="num" inputmode="numeric">
       </div>
       <div class="field" style="margin-bottom:8px;">
+        <label>사용하신 카드 필요경비로 추가 반영</label>
+        <input type="text" id="inp_cardcost" data-field="cardcost" data-format="num" inputmode="numeric">
+      </div>
+      <label style="display:block; margin:-2px 0 10px; font-size:12px; color:#1a2c5b; cursor:pointer;">
+        <input type="checkbox" id="inp_cardcost_enable" data-field="cardcost_enable" style="width:auto; margin-right:6px; vertical-align:middle;">
+        보고서·인쇄에 표시 (체크 시, 값이 있을 때만)
+      </label>
+      <div class="field" style="margin-bottom:8px;">
         <label>종합소득금액(반영전)</label>
         <input type="text" id="inp_income_before" data-format="num" inputmode="numeric" placeholder="자동 합산값">
       </div>
@@ -2317,7 +2326,7 @@ textarea {
             <colgroup><col style="width:20%"><col style="width:35%"><col style="width:45%"></colgroup>
             <tbody>
               <tr>
-                <td class="lab" colspan="2" data-distr="종합소득금액|(반영후)"></td>
+                <td class="lab" colspan="2" data-distr="종합소득금액|(반영후)|※ 이월결손금 공제 후"></td>
                 <td class="num" id="rp_income_after">　</td>
               </tr>
               <tr>
@@ -2329,8 +2338,12 @@ textarea {
                 <td class="lab2 sub-dist" data-distr="2. 인건비 추가 반영"></td>
                 <td class="num" id="rp_cost2">　</td>
               </tr>
+              <tr class="is-hidden">
+                <td class="lab" colspan="2" id="rp_cardcost_lab" data-distr="사용하신 카드 필요경비로 추가 반영"></td>
+                <td class="num" id="rp_cardcost">　</td>
+              </tr>
               <tr>
-                <td class="lab" colspan="2" data-distr="종합소득금액|(반영전)"></td>
+                <td class="lab" colspan="2" data-distr="종합소득금액|(반영전)|※ 이월결손금 공제 후"></td>
                 <td class="num" id="rp_income_before">　</td>
               </tr>
             </tbody>
@@ -2373,7 +2386,7 @@ textarea {
             </tbody>
           </table>
           <p class="rp-note">※ 소득공제는 납세자별 적용 여부와 금액이 상이하므로 절세효과 계산에서는 제외하였습니다. 본 계산은 종합소득금액을 과세표준으로 간주하여 산출세액 기준으로 세액 변동 효과를 산정한 것입니다.</p>
-          <p class="rp-note">※ 건강보험료 절감 = (추가증빙 필요한 경비 + 인건비 추가 반영) × 8.13% (건강보험료 7.19% + 장기요양보험료는 건강보험료의 13.14%, 2026년 직장가입자 통합요율 기준)</p>
+          <p class="rp-note" id="rp_hi_note">※ 건강보험료 절감 = (추가증빙 필요한 경비 + 인건비 추가 반영) × 8.13% (건강보험료 7.19% + 장기요양보험료는 건강보험료의 13.14%, 2026년 직장가입자 통합요율 기준)</p>
         </section>
 
         <section id="sec_taxcredit" class="is-hidden">
@@ -2474,6 +2487,7 @@ function applyDistribute(el) {
   if (!raw) return;
   var lines = raw.split('|');
   var html = lines.map(function (line, idx) {
+    if (line.charAt(0) === '※') { return '<div class="rp-distnote">' + line + '</div>'; }
     var cls = idx === 0 ? 'rp-dist' : 'rp-dist sub';
     var spans = tokenize(line).map(function (t) { return '<span>' + t + '</span>'; }).join('');
     return '<div class="' + cls + '">' + spans + '</div>';
@@ -2496,6 +2510,21 @@ function formatNum(v) {
   var n = parseNum(v);
   if (n == null) return '';
   return n.toLocaleString('ko-KR');
+}
+function parseSignedNum(v) {
+  if (v == null) return null;
+  var neg = /^\s*-/.test(String(v));
+  var d = String(v).replace(/[^\d]/g, '');
+  if (!d) return null;
+  var n = parseInt(d, 10);
+  return neg ? -n : n;
+}
+function formatSignedNum(v) {
+  var s = String(v == null ? '' : v);
+  var neg = /^\s*-/.test(s);
+  var d = s.replace(/[^\d]/g, '');
+  if (!d) return neg ? '-' : '';
+  return (neg ? '-' : '') + parseInt(d, 10).toLocaleString('ko-KR');
 }
 function formatRRN(v) {
   var d = String(v).replace(/[^\d]/g, '');
@@ -2527,7 +2556,7 @@ document.querySelectorAll('input[data-format]').forEach(function (inp) {
   inp.addEventListener('input', function () {
     var v = inp.value;
     if (fmt === 'num') {
-      inp.value = formatNum(v);
+      inp.value = (inp.id === 'inp_income_after') ? formatSignedNum(v) : formatNum(v);
     } else if (fmt === 'rrn') {
       inp.value = formatRRN(v);
       handleRRNChange();
@@ -2939,17 +2968,19 @@ function updatePreview() {
   });
 
   // Ⅴ
-  var incomeAfter = parseNum(val('inp_income_after')) || 0;
+  var incomeAfter = parseSignedNum(val('inp_income_after')) || 0;
   var cost1 = parseNum(val('inp_cost1')) || 0;
   var cost2 = parseNum(val('inp_cost2')) || 0;
-  var autoSum = incomeAfter + cost1 + cost2;
+  var cardEnabled = !!((document.getElementById('inp_cardcost_enable') || {}).checked);
+  var cost3 = cardEnabled ? (parseNum(val('inp_cardcost')) || 0) : 0;
+  var autoSum = incomeAfter + cost1 + cost2 + cost3;
   var inpBefore = document.getElementById('inp_income_before');
   var incomeBefore;
   if (userEditedIncomeBefore) {
     incomeBefore = parseNum(inpBefore.value) || 0;
   } else {
-    if (autoSum > 0) {
-      inpBefore.value = formatNum(autoSum);
+    if (autoSum !== 0) {
+      inpBefore.value = formatSignedNum(autoSum);
       inpBefore.classList.add('auto-filled');
     } else {
       inpBefore.value = '';
@@ -2965,9 +2996,9 @@ function updatePreview() {
 
   var taxBefore = incomeBefore > 0 ? calcTax(incomeBefore) : 0;
   var taxAfter = incomeAfter > 0 ? calcTax(incomeAfter) : 0;
-  var saveNat = Math.max(0, taxBefore - taxAfter);
+  var saveNat = incomeAfter < 0 ? calcTax(cost1 + cost2 + cost3) : Math.max(0, taxBefore - taxAfter);
   var saveLoc = Math.round(saveNat * 0.1);
-  var saveHi = Math.round((cost1 + cost2) * 0.0813);
+  var saveHi = Math.round((cost1 + cost2 + cost3) * 0.0813);
   var saveTotal = saveNat + saveLoc + saveHi;
 
   setNum('rp_tax_before', taxBefore || '');
@@ -2995,6 +3026,24 @@ function updatePreview() {
   if (incomeAfter > 0) {
     rewriteLab('rp_tax_after_lab', '조정 후 산출세액', fmtPct(rateAfter));
   }
+
+  var afterNeg = incomeAfter < 0;
+  var rowTB = document.getElementById('rp_tax_before_lab');
+  var rowTA = document.getElementById('rp_tax_after_lab');
+  if (rowTB && rowTB.closest('tr')) rowTB.closest('tr').classList.toggle('is-hidden', afterNeg);
+  if (rowTA && rowTA.closest('tr')) rowTA.closest('tr').classList.toggle('is-hidden', afterNeg);
+  if (afterNeg) {
+    var rNat = getRate(cost1 + cost2 + cost3);
+    rewriteLab('rp_save_nat_lab', '종합소득세 절감', fmtPct(rNat));
+    rewriteLab('rp_save_loc_lab', '지방소득세 절감', fmtPct(rNat != null ? rNat * 0.1 : null));
+  }
+  var cardLab = document.getElementById('rp_cardcost_lab');
+  if (cardLab && cardLab.closest('tr')) cardLab.closest('tr').classList.toggle('is-hidden', !(cost3 > 0));
+  setNum('rp_cardcost', cost3 || '');
+  var hiNote = document.getElementById('rp_hi_note');
+  if (hiNote) hiNote.textContent = (cost3 > 0)
+    ? '※ 건강보험료 절감 = (추가증빙 필요한 경비 + 인건비 추가 반영 + 카드 필요경비) × 8.13% (건강보험료 7.19% + 장기요양보험료는 건강보험료의 13.14%, 2026년 직장가입자 통합요율 기준)'
+    : '※ 건강보험료 절감 = (추가증빙 필요한 경비 + 인건비 추가 반영) × 8.13% (건강보험료 7.19% + 장기요양보험료는 건강보험료의 13.14%, 2026년 직장가입자 통합요율 기준)';
 
   // Ⅵ
   var tcRows = document.querySelectorAll('#taxcredit_rows .dyn-row');
@@ -3140,6 +3189,8 @@ function serializeCurrentState() {
       cost1: val('inp_cost1'),
       cost2: val('inp_cost2'),
       income_before: val('inp_income_before'),
+      cardcost: val('inp_cardcost'),
+      cardcost_enable: !!((document.getElementById('inp_cardcost_enable') || {}).checked),
       caution_opinion: val('inp_caution_opinion'),
       guide_opinion: val('inp_guide_opinion'),
       analysis_opinion: val('inp_analysis_opinion')
@@ -3184,6 +3235,8 @@ function applySlotState(data) {
     setVal('inp_cost1', f.cost1);
     setVal('inp_cost2', f.cost2);
     setVal('inp_income_before', f.income_before);
+    setVal('inp_cardcost', f.cardcost);
+    var _cce1 = document.getElementById('inp_cardcost_enable'); if (_cce1) _cce1.checked = !!f.cardcost_enable;
     setVal('inp_caution_opinion', f.caution_opinion);
     setVal('inp_guide_opinion', f.guide_opinion);
     setVal('inp_analysis_opinion', f.analysis_opinion);
@@ -3382,9 +3435,10 @@ function clearAllInputs() {
   isApplyingSlot = true;
   try {
     var ids = ['inp_name','inp_rrn','inp_company','inp_brn','inp_industry','inp_booktype',
-               'inp_income_after','inp_cost1','inp_cost2','inp_income_before',
+'inp_income_after','inp_cost1','inp_cost2','inp_cardcost','inp_income_before',       
                'inp_caution_opinion','inp_guide_opinion','inp_analysis_opinion'];
     ids.forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    var _cce0 = document.getElementById('inp_cardcost_enable'); if (_cce0) _cce0.checked = false;
     document.getElementById('inp_period').value = '2025.01.01. ~ 2025.12.31.';
     document.getElementById('inp_reportdate').value = formatReportDate('0531');
 
