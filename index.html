@@ -885,6 +885,56 @@ textarea {
   white-space: nowrap;
   border-left: 1px solid #e5e8ef;
 }
+#quote_panel .q-recipient-field .q-recipient-suffix {
+  padding: 0 10px 0 4px;
+  color: #14264f;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  border-left: 1px solid #e5e8ef;
+}
+
+/* PATCH: 견적서 작성일자 입력칸 — 2026년/월/일은 고정, 입력값은 MMDD 숫자 4자리만 */
+#quote_panel .q-writedate-field .q-writedate-edit {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  padding: 0 10px;
+  overflow: hidden;
+}
+
+#quote_panel .q-writedate-field .q-writedate-edit:focus-within {
+  border-color: #1a2c5b;
+  box-shadow: 0 0 0 2px rgba(26,44,91,0.08);
+}
+
+#quote_panel .q-writedate-field .q-date-fixed {
+  color: #14264f;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+#quote_panel .q-writedate-field #q_writedate {
+  flex: 0 0 58px;
+  width: 58px;
+  min-width: 58px;
+  border: 0 !important;
+  border-bottom: 1px solid #c9d3e6 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+  padding: 6px 0;
+  text-align: center;
+  color: #14264f;
+  font-weight: 600;
+}
+
 #quote_panel .q-topline { display:flex; gap:9px; align-items:stretch; margin-bottom:14px; }
 #quote_panel .q-topline .q-tcell { flex:1; display:flex; flex-direction:column; justify-content:center; }
 #quote_panel .q-topline .q-tcell > label { font-size:11px; font-weight:600; color:#5f6a82; margin-bottom:3px; }
@@ -1672,9 +1722,13 @@ textarea {
      </div>
     </div>
         <div class="field q-writedate-field">
-           <label>작성일자</label>
-           <input type="text" id="q_writedate" data-field="q_writedate" value="2026년   월   일" placeholder="2026년   월   일 또는 0524" inputmode="numeric">
-    </div>
+          <label>작성일자</label>
+          <div class="q-writedate-edit">
+            <span class="q-date-fixed">2026년</span>
+            <input type="text" id="q_writedate" data-field="q_writedate" value="" placeholder="0524" inputmode="numeric" maxlength="4" autocomplete="off">
+            <span class="q-date-fixed">월 일</span>
+          </div>
+      </div>
       </div>
       <div class="input-block">
         <span class="blk-label">제목</span>
