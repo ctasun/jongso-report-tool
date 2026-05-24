@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-24 15:30 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
+<!-- BUILD_DATE: 2026-05-24 15:59 (Ⅴ 매출·소득 요약 표 음영·강조 적용) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1796,6 +1796,65 @@ textarea {
   border-color: #9c9c9c !important;
 }
 </style>
+<style id="sec5-income-shading">
+/* PATCH: Ⅴ. 매출·소득 요약 및 절세효과 — 음영·글자색·굵기만 조정
+   - 1. 소득 정보 표: 반영후 행 짙은 음영 / 반영전 행 옅은 음영 / 조정경비 라벨열 기본 음영
+   - 2. 절세효과 상세 표: 구분·금액 헤더 음영 통일 / 절세액 합계행 강조 / 절감 3행 금액 강조색
+   - 행높이·여백·들여쓰기·글자 크기·계산 로직 변경 없음 */
+
+#sec_income > table.rp-table.medium:nth-of-type(1) td,
+#sec_income > table.rp-table.medium:nth-of-type(1) td * {
+  color: #000 !important;
+}
+#sec_income > table.rp-table.medium:nth-of-type(1) td.lab,
+#sec_income > table.rp-table.medium:nth-of-type(1) td.lab2 {
+  background: #f1f2f4 !important;
+}
+#sec_income > table.rp-table.medium:nth-of-type(1) td.num {
+  background: transparent !important;
+}
+#sec_income > table.rp-table.medium:nth-of-type(1) tbody tr:first-child td {
+  background: #cfd3da !important;
+  font-weight: 700 !important;
+}
+#sec_income > table.rp-table.medium:nth-of-type(1) tbody tr:last-child td {
+  background: #e2e5e9 !important;
+  font-weight: 700 !important;
+}
+
+#sec_income > table.rp-table.medium:nth-of-type(2) td,
+#sec_income > table.rp-table.medium:nth-of-type(2) td * {
+  color: #000 !important;
+}
+#sec_income > table.rp-table.medium:nth-of-type(2) thead th {
+  background: #cfd3da !important;
+}
+#sec_income > table.rp-table.medium:nth-of-type(2) tbody td.lab,
+#sec_income > table.rp-table.medium:nth-of-type(2) tbody td.num {
+  background: transparent !important;
+}
+#sec_income > table.rp-table.medium:nth-of-type(2) tbody td.lab.highlight,
+#sec_income > table.rp-table.medium:nth-of-type(2) tbody td.num.highlight {
+  background: #e9e1e0 !important;
+}
+#sec_income > table.rp-table.medium:nth-of-type(2) tbody td.highlight,
+#sec_income > table.rp-table.medium:nth-of-type(2) tbody td.highlight * {
+  color: #a32d2d !important;
+}
+#sec_income > table.rp-table.medium:nth-of-type(2) tbody #rp_save_nat,
+#sec_income > table.rp-table.medium:nth-of-type(2) tbody #rp_save_loc,
+#sec_income > table.rp-table.medium:nth-of-type(2) tbody #rp_save_hi {
+  color: #a32d2d !important;
+}
+
+@media print {
+  #sec_income > table.rp-table.medium td,
+  #sec_income > table.rp-table.medium th {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -1807,7 +1866,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-24 15:30</span>
+    <span class="build-date">업데이트 2026-05-24 15:59</span>
   </div>
 </header>
 
