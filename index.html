@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-24 09:15 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
+<!-- BUILD_DATE: 2026-05-24 10:20 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1318,8 +1318,9 @@ textarea {
 <style id="feeStd-unified">
 /* 보수표(feeStd) 통합 최종 스타일
    - 보수표 행높이 완전 고정: 헤더 34px / 본문 31px
-   - 글자 크기: 헤더 5px / 본문 5px
-   - 왼쪽 수입금액표와 보수표 사이 간격: 직전값의 1/2(28px → 14px)
+   - 글자 크기: 헤더 2px / 본문 2px
+   - 헤더/본문 세로 정렬: 모두 가운데
+   - 보수표 테두리: 전체 균일한 가는 선
    - 수입금액표·기본보수료표·합계표·계산 로직 변경 없음
 */
 
@@ -1345,7 +1346,9 @@ textarea {
 .quote-page .feeStd {
   width: 100% !important;
   border-collapse: collapse !important;
+  border-spacing: 0 !important;
   table-layout: fixed !important;
+  border: 0.4px solid #9c9c9c !important;
 }
 
 .quote-page .feeStd col:nth-child(1) { width: 23% !important; }
@@ -1372,44 +1375,47 @@ textarea {
   overflow: hidden !important;
   text-overflow: clip !important;
   white-space: nowrap !important;
+  margin: 0 !important;
 }
 
 .quote-page .feeStd th,
 .quote-page .feeStd td {
-  border: 1px solid #9c9c9c !important;
+  border: 0.4px solid #9c9c9c !important;
   text-align: center !important;
   vertical-align: middle !important;
 }
 
-.quote-page .feeStd th {
+.quote-page .feeStd thead th {
   height: 34px !important;
   min-height: 34px !important;
   max-height: 34px !important;
-  padding: 3px 2px !important;
+  padding: 0 !important;
   background: #ededee !important;
+  font-size: 2px !important;
+  line-height: 1 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.05px !important;
+  word-spacing: 0 !important;
 }
 
-.quote-page .feeStd th,
-.quote-page .feeStd th * {
-  font-size: 5px !important;
-  line-height: 1.15 !important;
+.quote-page .feeStd thead th * {
+  font-size: 2px !important;
+  line-height: 1 !important;
   font-weight: 700 !important;
-  letter-spacing: 0 !important;
-  word-spacing: 0 !important;
 }
 
 .quote-page .feeStd tbody td {
   height: 31px !important;
   min-height: 31px !important;
   max-height: 31px !important;
-  padding: 2px 2px !important;
+  padding: 0 2px !important;
   background: #fff !important;
 }
 
 .quote-page .feeStd tbody td,
 .quote-page .feeStd tbody td * {
-  font-size: 5px !important;
-  line-height: 1.15 !important;
+  font-size: 2px !important;
+  line-height: 1.05 !important;
   letter-spacing: -0.12px !important;
   word-spacing: -0.3px !important;
   color: #000 !important;
@@ -1435,13 +1441,19 @@ textarea {
   grid-template-columns: 48px 8px minmax(58px, 1fr) 34px !important;
   column-gap: 1.5px !important;
   align-items: center !important;
+  align-content: center !important;
+  height: 100% !important;
   text-align: left !important;
   padding-left: 4px !important;
   padding-right: 3px !important;
 }
 
 .quote-page .feeStd tbody .fs-std.fs-single {
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  align-content: center !important;
+  justify-content: flex-start !important;
+  height: 100% !important;
   text-align: left !important;
   padding-left: 14px !important;
 }
