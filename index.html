@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-24 14:53 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
+<!-- BUILD_DATE: 2026-05-24 14:59 (보수표 최종값 반영 · 행높이 완전 고정 · 간격 1/2 조정) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -524,10 +524,11 @@ textarea {
   text-align: center;
 }
 
-/* PATCH: Ⅴ. 매출·소득 요약 및 절세효과 - 절세효과 상세표 '구분/금액' 헤더 굵게 */
+/* PATCH: Ⅴ. 매출·소득 요약 및 절세효과 - 절세효과 상세표 '구분/금액' 헤더 검은색 진하게 */
 #sec_income .rp-table.medium thead th,
 #sec_income .rp-table.medium thead th .rp-dist,
 #sec_income .rp-table.medium thead th .rp-dist span {
+  color: #000 !important;
   font-weight: 800 !important;
 }
 
@@ -1726,7 +1727,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-24 14:53</span>
+    <span class="build-date">업데이트 2026-05-24 14:59</span>
   </div>
 </header>
 
