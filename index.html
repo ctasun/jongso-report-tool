@@ -1679,6 +1679,42 @@ textarea {
   margin-top: 8px !important;
 }
 </style>
+<style id="quote-fee-label-fill-same-as-recv">
+/* PATCH: 견적서 출력 — 2025년 수입금액 / 기본보수료 / 합계 / 총용역수수료 셀 색상 통일
+   - 수신·작성일자 좌측 셀과 동일한 색상 적용
+   - 계산 로직 / 입력 로직 / 행높이 / 글자 크기 변경 없음 */
+
+.quote-page .boxA .bA-lab,
+.quote-page .boxB .bB-lab,
+.quote-page .boxB .bB-sum,
+.quote-page .boxB .bB-sumval,
+.quote-page .total-box {
+  background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
+}
+
+@media print {
+  .quote-page .boxA .bA-lab,
+  .quote-page .boxB .bB-lab,
+  .quote-page .boxB .bB-sum,
+  .quote-page .boxB .bB-sumval,
+  .quote-page .total-box {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+</style>
+<style id="quote-left-fee-border-color-same-as-feeStd">
+/* PATCH: 견적서 출력 — 왼쪽 기본보수료/별도항목/합계표 테두리 색상 통일
+   - 대상: 보수표에 의한 기본 보수료, 추가항목, 합계 표
+   - 수입금액·보수기준 표(feeStd)의 테두리 색상 #9c9c9c 와 동일 적용
+   - 테두리 두께, 행높이, 글자 크기, 계산 로직 변경 없음 */
+
+.quote-page .boxB td,
+.quote-page .q-tbl-left .extraStd th,
+.quote-page .q-tbl-left .extraStd td {
+  border-color: #9c9c9c !important;
+}
+</style>
 </head>
 <body>
 
