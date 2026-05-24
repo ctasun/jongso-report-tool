@@ -3021,8 +3021,10 @@ function updatePreview() {
 
   // Ⅴ
   var incomeAfter = parseSignedNum(val('inp_income_after')) || 0;
-  var cost1 = parseNum(val('inp_cost1')) || 0;
-  var cost2 = parseNum(val('inp_cost2')) || 0;
+  var cost1Raw = val('inp_cost1').trim();
+  var cost2Raw = val('inp_cost2').trim();
+  var cost1 = parseNum(cost1Raw) || 0;
+  var cost2 = parseNum(cost2Raw) || 0;
   var cardEnabled = !!((document.getElementById('inp_cardcost_enable') || {}).checked);
   var cost3 = cardEnabled ? (parseNum(val('inp_cardcost')) || 0) : 0;
   var autoSum = incomeAfter + cost1 + cost2 + cost3;
@@ -3042,8 +3044,8 @@ function updatePreview() {
   }
 
   setNum('rp_income_after', incomeAfter || '');
-  setNum('rp_cost1', cost1 || '');
-  setNum('rp_cost2', cost2 || '');
+  setNum('rp_cost1', cost1Raw ? formatNum(cost1) : '-');
+  setNum('rp_cost2', cost2Raw ? formatNum(cost2) : '-');
   setNum('rp_income_before', incomeBefore || '');
 
   var taxBefore = incomeBefore > 0 ? calcTax(incomeBefore) : 0;
