@@ -1729,11 +1729,30 @@ textarea {
   color: #000 !important;
 }
 
-/* Ⅰ. 기본정보 표 본문: 채움 제거 + 글자 검은색 */
-#sec_basic .rp-table.compact tbody td,
-#sec_basic .rp-table.compact tbody td * {
+/* Ⅰ. 기본정보 표:
+   - 값 셀은 채움 제거
+   - 좌우 라벨 셀(대표자명, 상호, 업종, 귀속연도 / 주민등록번호, 사업자등록번호, 기장의무, 신고(예정)일자)은
+     견적서 수신·작성일자 셀과 동일한 채움 적용
+   - 라벨 글자는 더 진하게 */
+#sec_basic .rp-table.compact tbody td.txt,
+#sec_basic .rp-table.compact tbody td.txt * {
   background: transparent !important;
   color: #000 !important;
+}
+
+#sec_basic .rp-table.compact tbody td.lab,
+#sec_basic .rp-table.compact tbody td.lab * {
+  background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
+  color: #111 !important;
+  font-weight: 800 !important;
+}
+
+@media print {
+  #sec_basic .rp-table.compact tbody td.lab,
+  #sec_basic .rp-table.compact tbody td.lab * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
 /* Ⅴ. 1. 소득 정보 표: 채움 제거 + 글자 검은색 */
