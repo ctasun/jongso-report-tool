@@ -849,6 +849,42 @@ textarea {
 #quote_panel .q-toggle input { width:auto; flex:none; margin-right:6px; vertical-align:middle; }
 
 /* 견적서 입력 — 동적 보수료 항목 (UI 시안 반영) */
+/* PATCH: 견적서 수신자 입력칸 — 출력 수신자와 동일하게 표시하되 직접 수정 가능 */
+#quote_panel .q-recipient-field .q-recipient-edit {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+}
+
+#quote_panel .q-recipient-field .q-recipient-edit:focus-within {
+  border-color: #1a2c5b;
+  box-shadow: 0 0 0 2px rgba(26,44,91,0.08);
+}
+
+#quote_panel .q-recipient-field #q_recipient {
+  flex: 1;
+  min-width: 0;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 6px 10px;
+  color: #14264f;
+  font-weight: 600;
+  background: #fff;
+}
+
+#quote_panel .q-recipient-field .q-recipient-suffix {
+  padding: 0 10px 0 4px;
+  color: #14264f;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  border-left: 1px solid #e5e8ef;
+}
 #quote_panel .q-topline { display:flex; gap:9px; align-items:stretch; margin-bottom:14px; }
 #quote_panel .q-topline .q-tcell { flex:1; display:flex; flex-direction:column; justify-content:center; }
 #quote_panel .q-topline .q-tcell > label { font-size:11px; font-weight:600; color:#5f6a82; margin-bottom:3px; }
@@ -1628,8 +1664,17 @@ textarea {
         </label>
       </div>
       <div class="input-row col-half">
-        <div class="field"><label>수신자</label><input type="text" id="q_recipient" data-field="q_recipient" placeholder="비워두면 상호·대표자명 자동입력"></div>
-        <div class="field"><label>작성일자</label><input type="text" id="q_writedate" data-field="q_writedate" data-format="reportdate" placeholder="MMDD" maxlength="14"></div>
+      <div class="field q-recipient-field">
+          <label>수신자</label>
+          <div class="q-recipient-edit">
+            <input type="text" id="q_recipient" data-field="q_recipient" placeholder="">
+            <span class="q-recipient-suffix">대표님</span>
+     </div>
+    </div>
+        <div class="field q-writedate-field">
+           <label>작성일자</label>
+           <input type="text" id="q_writedate" data-field="q_writedate" value="2026년   월   일" placeholder="2026년   월   일 또는 0524" inputmode="numeric">
+    </div>
       </div>
       <div class="input-block">
         <span class="blk-label">제목</span>
@@ -4277,6 +4322,126 @@ function pdfxExtractIndustry(all) {
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[ch];
     });
   }
+// ----- 견적서 수신자: 기본정보 상호·대표자명 자동 표시 + 직접 수정 허용 -----
+function quoteNormalizeRecipient(v) {
+  return String(v == null ? '' : v)
+    .replace(/\s+/g, ' ')
+    .replace(/\s*대표님\s*$/, '')
+    .trim();
+}
+// ----- 견적서 작성일자: 4자리 숫자 입력 시 2026년 M월 D일로 변환 -----
+function quoteFormatWriteDate(v) {
+  var s = String(v == null ? '' : v).trim();
+  if (!s) return '';
+
+  // 연속 4자리 숫자만 입력한 경우: 0524 → 2026년 5월 24일
+  if (/^\d{4}$/.test(s)) {
+    var mm = parseInt(s.slice(0, 2), 10);
+    var dd = parseInt(s.slice(2, 4), 10);
+
+    if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
+      return '2026년 ' + mm + '월 ' + dd + '일';
+    }
+
+    return s;
+  }
+
+  // 그 외는 입력한 그대로 출력
+  return s;
+}
+
+function bindQuoteWriteDateFormat() {
+  var el = $('q_writedate');
+  if (!el || el.dataset.boundWriteDate === '1') return;
+
+  el.dataset.boundWriteDate = '1';
+
+  el.addEventListener('input', function () {
+    if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
+    if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+  });
+
+  el.addEventListener('blur', function () {
+    el.value = quoteFormatWriteDate(el.value);
+
+    if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
+    if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+  });
+}
+
+function quoteAutoRecipientValue() {
+  var compV = (($('inp_company') || {}).value || '').trim();
+  var nameV = (($('inp_name') || {}).value || '').trim();
+  return quoteNormalizeRecipient((compV + ' ' + nameV).trim());
+}
+
+function setQuoteRecipientValue(v, userEdited) {
+  var el = $('q_recipient');
+  if (!el) return;
+
+  var raw = quoteNormalizeRecipient(v);
+  var autoV = quoteAutoRecipientValue();
+  var edited = !!(userEdited === true || userEdited === '1' || (raw && raw !== autoV));
+
+  el.dataset.userEdited = edited ? '1' : '0';
+  el.value = edited ? raw : (autoV || raw || '');
+}
+
+function syncQuoteRecipientFromBasic(force) {
+  var el = $('q_recipient');
+  if (!el) return;
+
+  var autoV = quoteAutoRecipientValue();
+  var edited = el.dataset.userEdited === '1';
+
+  if (force || !edited || !quoteNormalizeRecipient(el.value)) {
+    el.dataset.userEdited = '0';
+    el.value = autoV;
+  }
+}
+
+function bindQuoteRecipientSync() {
+  var rec = $('q_recipient');
+
+  if (rec && rec.dataset.boundRecipient !== '1') {
+    rec.dataset.boundRecipient = '1';
+
+    rec.addEventListener('input', function () {
+      var autoV = quoteAutoRecipientValue();
+      var v = quoteNormalizeRecipient(rec.value);
+      rec.dataset.userEdited = (v && v !== autoV) ? '1' : '0';
+
+      if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+
+    rec.addEventListener('blur', function () {
+      rec.value = quoteNormalizeRecipient(rec.value);
+      if (!rec.value) syncQuoteRecipientFromBasic(true);
+
+      if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+  }
+
+  ['inp_company', 'inp_name'].forEach(function (id) {
+    var el = $(id);
+    if (!el || el.dataset.boundRecipientSource === '1') return;
+
+    el.dataset.boundRecipientSource = '1';
+
+    ['input', 'change'].forEach(function (ev) {
+      el.addEventListener(ev, function () {
+        syncQuoteRecipientFromBasic(false);
+
+        if (typeof quoteUpdatePreview === 'function') quoteUpdatePreview();
+        if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+      });
+    });
+  });
+
+  syncQuoteRecipientFromBasic(false);
+}
 
   // ----- 보수기준표 구간(수입금액 → 강조 행) -----
   function feeTier(income) {
@@ -4567,19 +4732,16 @@ function pdfxExtractIndustry(all) {
     qp.classList.toggle('is-hidden', !enable);
 
     var rc = $('qp_recipient');
-    if (rc) {
-      var rv = ($('q_recipient') || {}).value || '';
-      if (rv.trim()) {
-        rc.textContent = rv;
-      } else {
-        var compV = (($('inp_company') || {}).value || '').trim();
-        var nameV = (($('inp_name') || {}).value || '').trim();
-        var autoV = (compV + ' ' + nameV).trim();
-        rc.textContent = autoV ? autoV : '\u3000';
-      }
-    }
+  if (rc) {
+    var rv = quoteNormalizeRecipient(($('q_recipient') || {}).value || '');
+    var autoV = quoteAutoRecipientValue();
+    rc.textContent = rv || autoV || '\u3000';
+  }
     var wd = $('qp_writedate');
-    if (wd) { var wv = ($('q_writedate') || {}).value || ''; wd.textContent = wv.trim() ? wv : '\u3000'; }
+  if (wd) {
+    var wv = quoteFormatWriteDate((($('q_writedate') || {}).value || ''));
+    wd.textContent = wv ? wv : '\u3000';
+  }
     var tt = $('qp_title');
     if (tt) {
       var tv = (($('q_title') || {}).value || '').trim();
@@ -4670,7 +4832,7 @@ function pdfxExtractIndustry(all) {
     var sv = function (id, v) { var el = $(id); if (el) el.value = (v == null ? '' : v); };
     if ($('q_enable')) $('q_enable').checked = (q.enable === undefined ? true : !!q.enable);
     if ($('q_print_quote_only')) $('q_print_quote_only').checked = !!q.print_quote_only;
-    sv('q_recipient', q.recipient);
+    setQuoteRecipientValue(q.recipient, q.recipient_user_edited);
     sv('q_writedate', q.writedate);
 
     // 제목은 기본값 고정. 사용자가 직접 수정한 경우에만 저장된 수정 제목을 복원한다.
@@ -4699,10 +4861,16 @@ function pdfxExtractIndustry(all) {
     var titleEl = $('q_title');
     var titleRaw = titleEl ? String(titleEl.value || '').trim() : '';
     var titleEdited = !!(titleEl && titleEl.dataset.userEdited === '1' && titleRaw && titleRaw !== QUOTE_TITLE_DEFAULT);
-    return {
+
+    var recipientEl = $('q_recipient');
+    var recipientRaw = quoteNormalizeRecipient(gv('q_recipient'));
+    var recipientEdited = !!(recipientEl && recipientEl.dataset.userEdited === '1' && recipientRaw);
+
+   return {
       enable: $('q_enable') ? $('q_enable').checked : true,
       print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
-      recipient: gv('q_recipient'),
+      recipient: recipientEdited ? recipientRaw : '',
+      recipient_user_edited: recipientEdited,
       writedate: gv('q_writedate'),
       title: titleEdited ? titleRaw : '',
       title_user_edited: titleEdited,
@@ -4795,6 +4963,8 @@ function pdfxExtractIndustry(all) {
       qTitleEl.dataset.userEdited = (v && v !== QUOTE_TITLE_DEFAULT) ? '1' : '0';
     });
   }
+bindQuoteRecipientSync();
+bindQuoteWriteDateFormat();
 
   // ----- 기본보수료 자동산정 입력값 변경 시 기본 행 갱신 -----
   ['q_income', 'q_weight', 'q_adjust'].forEach(function (id) {
