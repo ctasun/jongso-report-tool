@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-23 16:00 (견적서 통합본 v5 · 기본보수료 가중치 자동산정 + 수동수정) -->
+<!-- BUILD_DATE: 2026-05-24 08:55 (보수표 PATCH 11곳 통합 정리 · 헤더 9px·본문 8px) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -798,16 +798,17 @@ textarea {
 .q-band { height:9px; background:#8d8f93; }
 .quote-page .recv-table { width:100%; border-collapse:collapse; }
 .quote-page .recv-table td { border:1px solid #b7b9bd; padding:6px 10px; font-size:12.5px; }
-.quote-page .recv-table .recv-lab { width:92px; background:#ededee; font-weight:700; text-align:center; letter-spacing:1px; color:#222; }
+.quote-page .recv-table .recv-lab { width:184px; background:#ededee; font-weight:700; text-align:center; letter-spacing:1px; color:#222; }
 .q-val { color:#14264f; font-weight:600; }
 .q-val.inc { color:#1a5fb4; }
 .quote-page .body-list { list-style:none; margin:16px 0 14px; padding:0; }
 .quote-page .body-list li { position:relative; padding-left:18px; margin-bottom:13.5px; font-size:12.5px; line-height:1.62; }
 .quote-page .body-list li .bl-no { position:absolute; left:0; top:0; }
 .quote-page .body-list .bl-warn { color:#c0392b; font-weight:700; }
-.q-tbl-row { display:flex; gap:14px; align-items:flex-start; margin:6px 0 4px; }
-.q-tbl-left { width:47%; }
-.q-tbl-right { width:53%; }
+/* 수수료 견적서 본문 2단: 좌측 보수료 항목 구조는 유지, 우측 보수표 가로폭 확대 */
+.q-tbl-row { display:flex; gap:10px; align-items:flex-start; margin:6px 0 4px; }
+.q-tbl-left { flex:0 0 43%; width:43%; }
+.q-tbl-right { flex:1 1 auto; width:auto; min-width:0; }
 .quote-page .boxA { width:100%; border-collapse:collapse; margin-bottom:12px; }
 .quote-page .boxA td { border:1.4px solid #2f2f2f; padding:10px 9px; }
 .quote-page .boxA .bA-lab { width:52%; text-align:center; font-weight:700; font-size:13px; letter-spacing:1px; line-height:1.55; }
@@ -820,15 +821,6 @@ textarea {
 .quote-page .boxB .bB-sumval { background:#c9d6ea; text-align:right; font-weight:700; font-size:13.5px; color:#14264f; }
 .q-dash { color:#555; }
 .quote-page .free-print { margin-top:12px; border:1px solid #9aa9c6; border-radius:2px; padding:8px 10px; font-size:12px; line-height:1.62; color:#14264f; min-height:70px; white-space:pre-wrap; }
-.quote-page .feeStd { width:100%; border-collapse:collapse; }
-.quote-page .feeStd th, .quote-page .feeStd td { border:1px solid #9c9c9c; font-size:9px; padding:3.5px 4px; text-align:center; line-height:1.35; }
-.quote-page .feeStd th { background:#ededee; font-weight:700; font-size:10.5px; letter-spacing:1px; }
-.quote-page .feeStd .fs-rng { white-space:nowrap; }
-.quote-page .feeStd .fs-std { text-align:left; padding-left:7px; }
-.quote-page .feeStd .fs-amt { font-weight:600; }
-.quote-page .feeStd .fs-rate { font-weight:700; }
-.quote-page .feeStd tr.fs-active td { background:#fff8e1; }
-.quote-page .feeStd tr.fs-active .fs-amt, .quote-page .feeStd tr.fs-active .fs-rate { color:#c0392b; }
 .quote-page .total-box { margin:16px 0 6px; background:#d6e3f1; border:1px solid #9fb6d4; padding:11px 14px; text-align:center; font-weight:700; font-size:15px; letter-spacing:2px; color:#14264f; }
 .quote-page .total-box .total-val { color:#0d6e6e; font-size:17px; letter-spacing:0; border-bottom:1.5px solid #0d6e6e; padding:0 14px 1px; }
 .quote-page .total-box .total-tail { font-size:13px; letter-spacing:0; }
@@ -902,7 +894,558 @@ textarea {
 .pdfx-status.pdfx-ok { background:#E1F5EE; color:#0F6E56; }
 .pdfx-status.pdfx-warn { background:#FCEBEB; color:#791F1F; }
 </style>
-</head>
+
+<style>
+/* ===== 견적서 인쇄 디자인 보정: 샘플 상단부 + 보수표 본문 대비 비율 =====
+   내용/입력값/계산 로직은 변경하지 않고, 수수료 견적서 1페이지의 출력 CSS만 보정합니다. */
+.quote-page {
+  padding: 16mm 17mm;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* 상단 로고·주소 영역: 샘플의 얇고 절제된 인쇄 톤 참고 */
+.quote-page .lh-firmtype {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: .4px;
+  margin-bottom: 2px;
+}
+.quote-page .lh-logo {
+  text-align: center;
+  margin: -2px 0 4px;
+  line-height: 1.05;
+}
+.quote-page .lh-mark {
+  font-family: 'Times New Roman', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 30px;
+  color: #111;
+  letter-spacing: 1px;
+}
+.quote-page .lh-cs {
+  font-family: 'Times New Roman', Georgia, serif;
+  font-weight: 700;
+  font-size: 18.5px;
+  color: #111;
+  margin-left: 6px;
+}
+.quote-page .lh-addr {
+  font-size: 10.2px;
+  color: #333;
+  text-align: center;
+  border-bottom: 1px solid #777;
+  padding-bottom: 5px;
+  margin-bottom: 0;
+  line-height: 1.25;
+}
+.quote-page .lh-addr .sep { color: #777; margin: 0 5px; }
+.quote-page .q-band {
+  height: 8px;
+  background: linear-gradient(90deg, #9a9da2 0%, #b6b8bc 52%, #c9cbd0 100%);
+  margin: 0 0 10px;
+}
+
+/* 수신·작성일자·제목 박스: 내용은 그대로, 인쇄 디자인만 샘플 톤으로 보정 */
+.quote-page .recv-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #b9bcc2;
+  margin-bottom: 16px;
+}
+.quote-page .recv-table td {
+  border: 1px solid #c2c5ca;
+  padding: 5px 10px;
+  height: 26px;
+  font-size: 12.2px;
+  line-height: 1.35;
+  background: linear-gradient(90deg, #ffffff 0%, #f9f9f9 100%);
+  vertical-align: middle;
+}
+.quote-page .recv-table .recv-lab {
+  width: 176px;
+  background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%);
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 2.5px;
+  color: #111;
+}
+
+/* 본문 대비 보수표 크기: 샘플 비율에 맞춰 보수표를 보조표처럼 축소 */
+.quote-page .body-list {
+  margin: 16px 0 14px;
+}
+.quote-page .body-list li {
+  font-size: 12.5px;
+  line-height: 1.62;
+}
+.quote-page .q-tbl-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 6px 0 4px;
+}
+.quote-page .q-tbl-left {
+  flex: 0 0 41.8%;
+  width: 41.8%;
+}
+.quote-page .q-tbl-right {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+@media print {
+  .quote-page {
+    padding: 0;
+  }
+  .quote-page .q-band {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .quote-page .recv-table td,
+  .quote-page .recv-table .recv-lab,
+  .quote-page .feeStd th,
+  .quote-page .feeStd tr.fs-active td {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+</style>
+
+
+<style>
+/* PATCH: 수신·작성일자·제목 좌측 라벨칸 너비 100% 확대(기존 88px → 176px). 내용/계산 로직 변경 없음. */
+.quote-page .recv-table .recv-lab {
+  width: 176px !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 주소줄 블로그 URL 제거 후 간격 유지, 수신/작성일자/제목 박스 다음 본문 한 줄 내림, 보수표 본문 5px */
+.quote-page .recv-table + .q-band {
+  margin-bottom: 18px !important;
+}
+.quote-page .recv-table + .q-band + .body-list {
+  margin-top: 0 !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 견적서 인쇄영역 높이 조정 — 수신/작성일자/제목 표와 오른쪽 보수표를 현재 대비 1.5배 높임. 내용/계산 로직 변경 없음. */
+.quote-page .recv-table td {
+  height: 39px !important;
+  padding-top: 7.5px !important;
+  padding-bottom: 7.5px !important;
+}
+.quote-page .recv-table .recv-lab {
+  height: 39px !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 수신/작성일자/제목 표 글자 크기 11pt(=14.67px)로 확대. 굵기 설정은 기존값 유지. */
+.quote-page .recv-table td {
+  font-size: 14.67px !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 견적서 본문 1~4번 문단 글자 크기 16px. 내용/계산 로직 변경 없음. */
+.quote-page .body-list li,
+.quote-page .body-list li .bl-no {
+  font-size: 16px !important;
+}
+.quote-page .body-list li {
+  line-height: 1.55 !important;
+}
+</style>
+
+
+<style>
+.quote-page .recv-table .recv-lab {
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+.quote-page .recv-table .recv-fit {
+  display: inline-flex !important;
+  width: 88px !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+.quote-page .body-list li,
+.quote-page .body-list li .bl-no {
+  line-height: 3.1 !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 수신/작성일자/제목 라벨 균등 배치, 기존 좌우 여백 유지, 본문 1~4번 줄간격 현재의 70%. */
+.quote-page .recv-table .recv-lab {
+  text-align: center !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+}
+.quote-page .recv-table .recv-fit {
+  display: inline-flex !important;
+  width: 88px !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+.quote-page .recv-table .recv-fit span {
+  display: inline-block !important;
+}
+.quote-page .body-list li,
+.quote-page .body-list li .bl-no {
+  line-height: 2.17 !important;
+}
+</style>
+
+
+<style>
+/* PATCH: 견적서 선택 보수표 — 기본보수표 아래 동일 폭 표, 입력값 있을 때만 인쇄 */
+#quote_panel .qextra-wrap {
+  margin-top: 12px;
+  border-top: 1px dashed #d8dde6;
+  padding-top: 10px;
+}
+#quote_panel .qextra-head {
+  display: flex;
+  gap: 7px;
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding: 0 2px;
+}
+#quote_panel .qextra-head .h1 { flex: 1.4; }
+#quote_panel .qextra-head .h2 { width: 130px; }
+#quote_panel .qextra-head .h3 { width: 26px; }
+#quote_panel .qextra-row {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+#quote_panel .qextra-row input {
+  padding: 7px 9px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+#quote_panel .qextra-row .qx-lbl { flex: 1.4; }
+#quote_panel .qextra-row .qx-amt { width: 130px; text-align: right; font-weight: 600; color: #14264f; }
+#quote_panel .qextra-row .qx-del {
+  width: 26px;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+#quote_panel .qextra-row .qx-del:hover { background: #c0392b; color: #fff; }
+#quote_panel .qextra-row.qextra-default-row .qx-del { visibility: hidden; pointer-events: none; }
+#quote_panel .qextra-sum {
+  margin-top: 4px;
+  padding: 7px 10px;
+  background: #f1f4fa;
+  border: 1px solid #c9d3e6;
+  border-radius: 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #14264f;
+  text-align: right;
+}
+.quote-page .extraStd {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-top: 7px;
+}
+.quote-page .extraStd th,
+.quote-page .extraStd td {
+  border: 1px solid #9c9c9c;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.quote-page .extraStd th {
+  height: 31.5px;
+  padding: 3.75px 3px;
+  font-size: 5px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: 0;
+  background: #ededee;
+}
+.quote-page .extraStd td {
+  height: 27px;
+  padding: 2.1px 0.8px;
+  font-size: 4px;
+  line-height: 1.12;
+  letter-spacing: -0.22px;
+  word-spacing: -0.9px;
+  color: #000;
+  font-weight: 400;
+}
+.quote-page .extraStd .qx-lab-print { text-align: left; padding-left: 8px; }
+.quote-page .extraStd .qx-amt-print { text-align: right; padding-right: 4px; }
+.quote-page .extraStd .qx-sum-lab,
+.quote-page .extraStd .qx-sum-val {
+  background: #ededee;
+  font-weight: 700;
+}
+@media print {
+  .quote-page .extraStd th,
+  .quote-page .extraStd .qx-sum-lab,
+  .quote-page .extraStd .qx-sum-val {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+</style>
+
+<style>
+/* PATCH: 견적서만 출력 모드 — 인쇄 시 보고서 페이지를 제외하고 견적서 1장만 출력. */
+@media print {
+  body.print-quote-only .report-page {
+    display: none !important;
+  }
+  body.print-quote-only .quote-page {
+    display: block !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+}
+</style>
+
+
+<style>
+/* PATCH: 별도표 입력 구성 — 기본 보수료 항목과 동일하게 항목명/금액 2열만 사용 */
+#quote_panel .qextra-head .h1 { flex: 1.4 !important; }
+#quote_panel .qextra-head .h2 { width: 130px !important; }
+#quote_panel .qextra-head .h3 { width: 26px !important; }
+#quote_panel .qextra-row .qx-lbl { flex: 1.4 !important; }
+#quote_panel .qextra-row .qx-amt { width: 130px !important; }
+.quote-page .extraStd col:nth-child(1) { width: 52% !important; }
+.quote-page .extraStd col:nth-child(2) { width: 48% !important; }
+</style>
+
+
+<style>
+/* PATCH: 별도표 위치/출력 보정 — 오른쪽 보수기준표가 아니라 왼쪽 기본보수료 표 하단에 표시.
+   입력값이 없으면 미리보기·인쇄 모두 미출력. 표 크기와 톤은 기본보수료 표(boxB)와 맞춤. */
+.quote-page .q-tbl-left .extraStd {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  table-layout: fixed !important;
+  margin-top: 8px !important;
+  margin-bottom: 12px !important;
+}
+.quote-page .q-tbl-left .extraStd th,
+.quote-page .q-tbl-left .extraStd td {
+  border: 1px solid #9aa9c6 !important;
+  height: 36px !important;
+  padding: 9px 9px !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+}
+.quote-page .q-tbl-left .extraStd th {
+  background: #fff !important;
+  color: #1a2c5b !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+}
+.quote-page .q-tbl-left .extraStd .qx-lab-print {
+  text-align: center !important;
+  color: #1a2c5b !important;
+  font-weight: 600 !important;
+  padding-left: 9px !important;
+}
+.quote-page .q-tbl-left .extraStd .qx-amt-print {
+  text-align: right !important;
+  font-size: 13px !important;
+  color: #000 !important;
+  padding-right: 9px !important;
+}
+.quote-page .q-tbl-left .extraStd .qx-sum-lab {
+  background: #c9d6ea !important;
+  color: #14264f !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  letter-spacing: 2px !important;
+}
+.quote-page .q-tbl-left .extraStd .qx-sum-val {
+  background: #c9d6ea !important;
+  color: #14264f !important;
+  font-weight: 700 !important;
+  text-align: right !important;
+  font-size: 13.5px !important;
+  padding-right: 9px !important;
+}
+@media print {
+  .quote-page .q-tbl-left .extraStd th,
+  .quote-page .q-tbl-left .extraStd .qx-sum-lab,
+  .quote-page .q-tbl-left .extraStd .qx-sum-val {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+</style>
+
+
+<style id="feeStd-unified">
+/* 보수표(feeStd) 통합 최종 스타일
+   - 헤더 글자: 6px
+   - 본문 글자: 5.6px
+   - 헤더 높이: 17px
+   - 본문 행 높이: 15px
+   - 보수기준 열: 금액 / + / 초과액 / 요율 4구역 grid 정렬
+   - 글자 줄바꿈·표 밖 밀림 방지
+*/
+
+/* 보수표 좌우 배치 */
+.quote-page .q-tbl-row {
+  gap: 18px !important;
+  align-items: flex-start !important;
+}
+
+.quote-page .q-tbl-left {
+  flex: 0 0 42% !important;
+  width: 42% !important;
+  max-width: 42% !important;
+}
+
+.quote-page .q-tbl-right {
+  flex: 0 0 49% !important;
+  width: 49% !important;
+  max-width: 49% !important;
+  min-width: 0 !important;
+}
+
+/* 보수표 전체 */
+.quote-page .feeStd {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  table-layout: fixed !important;
+}
+
+/* 보수표 열 비율 */
+.quote-page .feeStd col:nth-child(1) { width: 23% !important; }
+.quote-page .feeStd col:nth-child(2) { width: 23% !important; }
+.quote-page .feeStd col:nth-child(3) { width: 54% !important; }
+
+/* 보수표 공통 셀 */
+.quote-page .feeStd th,
+.quote-page .feeStd td,
+.quote-page .feeStd th *,
+.quote-page .feeStd td * {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+/* 보수표 셀 테두리 */
+.quote-page .feeStd th,
+.quote-page .feeStd td {
+  border: 1px solid #9c9c9c !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+/* 보수표 헤더 */
+.quote-page .feeStd th {
+  height: 17px !important;
+  padding: 0.5px 1px !important;
+  background: #ededee !important;
+}
+
+.quote-page .feeStd th,
+.quote-page .feeStd th * {
+  font-size: 6px !important;
+  line-height: 1.05 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+}
+
+/* 보수표 본문 */
+.quote-page .feeStd tbody td {
+  height: 15px !important;
+  padding: 0.4px 1px !important;
+  background: #fff !important;
+}
+
+.quote-page .feeStd tbody td,
+.quote-page .feeStd tbody td * {
+  font-size: 5.6px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.08px !important;
+  word-spacing: -0.4px !important;
+  color: #000 !important;
+  font-weight: 400 !important;
+}
+
+/* 활성행 강조 제거 */
+.quote-page .feeStd tbody tr.fs-active td,
+.quote-page .feeStd tbody tr.fs-active td * {
+  background: #fff !important;
+  color: #000 !important;
+  font-weight: 400 !important;
+}
+
+/* 수입금액 열 오른쪽 정렬 */
+.quote-page .feeStd tbody .fs-rng,
+.quote-page .feeStd tbody td:nth-child(1),
+.quote-page .feeStd tbody td:nth-child(2) {
+  text-align: right !important;
+  padding-right: 3px !important;
+}
+
+/* 보수기준 열: 금액 / + / 초과액 / 요율 */
+.quote-page .feeStd tbody .fs-std {
+  display: grid !important;
+  grid-template-columns: 42px 7px minmax(40px, 1fr) 26px !important;
+  column-gap: 1.5px !important;
+  align-items: center !important;
+  text-align: left !important;
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+}
+
+.quote-page .feeStd tbody .fs-std.fs-single {
+  display: block !important;
+  text-align: left !important;
+  padding-left: 12px !important;
+}
+
+.quote-page .feeStd tbody .fs-amt  { text-align: right !important; }
+.quote-page .feeStd tbody .fs-plus { text-align: center !important; }
+.quote-page .feeStd tbody .fs-base { text-align: left !important; }
+.quote-page .feeStd tbody .fs-rate { text-align: right !important; }
+</style></head>
 <body>
 
 <header class="tool-header">
@@ -913,7 +1456,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-23 23:00</span>
+    <span class="build-date">업데이트 2026-05-24 08:55</span>
   </div>
 </header>
 
@@ -982,6 +1525,10 @@ textarea {
           <input type="checkbox" id="q_enable" data-field="q_enable" checked>
           견적서를 보고서 1페이지로 포함
         </label>
+        <label class="q-toggle" style="margin-left:18px;">
+          <input type="checkbox" id="q_print_quote_only" data-field="q_print_quote_only">
+          인쇄 시 견적서만 출력
+        </label>
       </div>
       <div class="input-row col-half">
         <div class="field"><label>수신자</label><input type="text" id="q_recipient" data-field="q_recipient" placeholder="비워두면 상호·대표자명 자동입력"></div>
@@ -989,7 +1536,7 @@ textarea {
       </div>
       <div class="input-block">
         <span class="blk-label">제목</span>
-        <input type="text" id="q_title" data-field="q_title" value="2025\B144 \uADC0\uC18D \uC885\uD569\uC18C\uB4DD\uC138 \uC2E0\uACE0 \uC218\uC218\uB8CC\uC548\uB0B4 \uBC0F \uC2E0\uACE0 \uBCF4\uACE0" style="width:100%;padding:6px 10px;border:1px solid #ccc;border-radius:4px;font-size:13px;font-family:inherit;background:#fff;">
+        <input type="text" id="q_title" data-field="q_title" value="2025년 귀속 종합소득세 신고 수수료안내 및 신고 보고" style="width:100%;padding:6px 10px;border:1px solid #ccc;border-radius:4px;font-size:13px;font-family:inherit;background:#fff;">
       </div>
       <!-- 견적 합계 라인: CMS·수입금액·자동합계 -->
       <div class="q-topline">
@@ -1018,17 +1565,14 @@ textarea {
          <div class="qauto-bar">
             <span class="qauto-label">수입금액 기준 기본보수료</span>
             <span class="qauto-amt"><span id="q_basefeeView">0</span> 원</span>
-            <label class="qauto-control">가중치
+            <label class="qauto-control">결산조정
               <input type="number" id="q_weight" data-field="q_weight" min="1.2" max="3" step="0.1" value="1.2">
             </label>
-            <label class="qauto-control">조정
-              <select id="q_adjust" data-field="q_adjust">
-                <option value="1" selected>1.0</option>
-                <option value="0.5">0.5</option>
-              </select>
+            <label class="qauto-control">가중치
+              <input type="number" id="q_adjust" data-field="q_adjust" step="0.1" value="1">
             </label>
             <div class="qauto-formula">
-              기본보수료 행 기본값 = 보수기준표 기본보수료 × 1.023 × 가중치 × 조정률
+              기본보수료 행 기본값 = 보수기준표 기본보수료 × 1.023 × 결산조정 × 가중치
               <strong>(자동산정: <span id="q_calcfeeView">0</span> 원)</strong>
             </div>
           </div>
@@ -1037,6 +1581,16 @@ textarea {
           </div>
           <div id="q_feeRows"></div>
           <button type="button" class="btn-add" onclick="addQuoteFeeItem()">＋ 항목 추가</button>
+
+          <div class="qextra-wrap">
+            <div class="q-col-title">기본보수표 하단 별도표(미입력시 미출력)</div>
+            <div class="qextra-head">
+              <span class="h1">항목명</span><span class="h2">금액</span><span class="h3"></span>
+            </div>
+            <div id="q_extraRows"></div>
+            <button type="button" class="btn-add" onclick="addQuoteExtraItem()">＋ 별도 항목 추가</button>
+            <div class="qextra-sum">별도 표 합계: <span id="q_extraSumView">0</span> 원</div>
+          </div>
         </div>
         <div class="q-col-right">
           <div class="q-col-title">자유입력란</div>
@@ -1046,9 +1600,10 @@ textarea {
       <div class="help-text">
         ※ 작성일자는 4자리(MMDD) 입력 시 「2026년 M월 D일」로 자동 변환됩니다.<br>
         ※ 「＋ 항목 추가」로 보수료 항목을 늘리고 「×」로 지웁니다. 항목명과 금액을 직접 입력합니다.<br>
-        ※ 기본보수료 행은 보수료 항목 맨 위에 고정됩니다. 기본값은 「보수기준표 기본보수료 × 1.023 × 가중치 × 조정률」이며, 금액은 직접 수정할 수 있습니다.<br>
+        ※ 기본보수료 행은 보수료 항목 맨 위에 고정됩니다. 기본값은 「보수기준표 기본보수료 × 1.023 × 결산조정 × 가중치」이며, 금액은 직접 수정할 수 있습니다.<br>
         ※ 합계 = 보수료 항목 금액의 합, 총용역수수료 = 합계 × 1.1(부가세 포함). 자동 계산됩니다.<br>
         ※ 자유입력란을 비우면 견적서에서 메모 박스가 사라집니다.<br>
+        ※ 「인쇄 시 견적서만 출력」을 체크하면 인쇄/PDF 저장 시 보고서 본문은 제외되고 견적서만 출력됩니다.<br>
         ※ 「견적서를 보고서 1페이지로 포함」 체크를 해제하면 견적서 없이 보고서만 인쇄됩니다.
       </div>
     </section>
@@ -1209,13 +1764,12 @@ textarea {
         경기도 부천시 길주로 275, 509호(중동, 중동프라자)
         <span class="sep">|</span> Tel:032)719-7052
         <span class="sep">|</span> Fax:032)719-0753
-        <span class="sep">|</span> https://blog.naver.com/cpasun
       </div>
       <div class="q-band"></div>
       <table class="recv-table">
-        <tr><td class="recv-lab">수　　신</td><td><span class="q-val" id="qp_recipient">　</span> 대표님</td></tr>
-        <tr><td class="recv-lab">작 성 일 자</td><td><span class="q-val" id="qp_writedate">　</span></td></tr>
-        <tr><td class="recv-lab">제　　목</td><td id="qp_title">　</td></tr>
+        <tr><td class="recv-lab"><span class="recv-fit"><span>수</span><span>신</span></span></td><td><span class="q-val" id="qp_recipient">　</span> 대표님</td></tr>
+        <tr><td class="recv-lab"><span class="recv-fit"><span>작</span><span>성</span><span>일</span><span>자</span></span></td><td><span class="q-val" id="qp_writedate">　</span></td></tr>
+        <tr><td class="recv-lab"><span class="recv-fit"><span>제</span><span>목</span></span></td><td id="qp_title">　</td></tr>
       </table>
       <div class="q-band"></div>
       <ol class="body-list">
@@ -1233,24 +1787,29 @@ textarea {
             </tr>
           </table>
           <table class="boxB"><tbody id="qp_feeBody"></tbody></table>
+          <table class="extraStd is-hidden" id="qp_extraTable">
+            <colgroup><col style="width:52%"><col style="width:48%"></colgroup>
+            <thead><tr><th>항 목 명</th><th>금 액</th></tr></thead>
+            <tbody id="qp_extraBody"></tbody>
+          </table>
           <div class="free-print is-hidden" id="qp_free_box"></div>
         </div>
         <div class="q-tbl-right">
           <table class="feeStd">
-            <colgroup><col style="width:23%"><col style="width:23%"><col style="width:54%"></colgroup>
+            <colgroup><col style="width:21%"><col style="width:19%"><col style="width:60%"></colgroup>
             <thead><tr><th colspan="2">수 입 금 액</th><th>보 수 기 준</th></tr></thead>
             <tbody>
-              <tr id="fs1"><td colspan="2" class="fs-rng">5천만원 이하</td><td class="fs-std"><span class="fs-amt">250,000</span></td></tr>
-              <tr id="fs2"><td class="fs-rng">5천만원 이상</td><td class="fs-rng">1억원 미만</td><td class="fs-std"><span class="fs-amt">250,000</span> + 5천만원 초과액 × <span class="fs-rate">0.33%</span></td></tr>
-              <tr id="fs3"><td class="fs-rng">1억원 이상</td><td class="fs-rng">3억원 미만</td><td class="fs-std"><span class="fs-amt">415,000</span> + 1억원 초과액 × <span class="fs-rate">0.17%</span></td></tr>
-              <tr id="fs4"><td class="fs-rng">3억원 이상</td><td class="fs-rng">5억원 미만</td><td class="fs-std"><span class="fs-amt">755,000</span> + 3억원 초과액 × <span class="fs-rate">0.085%</span></td></tr>
-              <tr id="fs5"><td class="fs-rng">5억원 이상</td><td class="fs-rng">10억원 미만</td><td class="fs-std"><span class="fs-amt">925,000</span> + 5억원 초과액 × <span class="fs-rate">0.085%</span></td></tr>
-              <tr id="fs6"><td class="fs-rng">10억원 이상</td><td class="fs-rng">20억원 미만</td><td class="fs-std"><span class="fs-amt">1,350,000</span> + 10억원 초과액 × <span class="fs-rate">0.042%</span></td></tr>
-              <tr id="fs7"><td class="fs-rng">20억원 이상</td><td class="fs-rng">30억원 미만</td><td class="fs-std"><span class="fs-amt">1,770,000</span> + 20억원 초과액 × <span class="fs-rate">0.042%</span></td></tr>
-              <tr id="fs8"><td class="fs-rng">30억원 이상</td><td class="fs-rng">40억원 미만</td><td class="fs-std"><span class="fs-amt">2,190,000</span> + 30억원 초과액 × <span class="fs-rate">0.033%</span></td></tr>
-              <tr id="fs9"><td class="fs-rng">40억원 이상</td><td class="fs-rng">50억원 미만</td><td class="fs-std"><span class="fs-amt">2,520,000</span> + 40억원 초과액 × <span class="fs-rate">0.033%</span></td></tr>
-              <tr id="fs10"><td class="fs-rng">50억원 이상</td><td class="fs-rng">100억원 미만</td><td class="fs-std"><span class="fs-amt">2,850,000</span> + 50억원 초과액 × <span class="fs-rate">0.033%</span></td></tr>
-              <tr id="fs11"><td class="fs-rng">100억원 이상</td><td class="fs-rng"></td><td class="fs-std"><span class="fs-amt">4,500,000</span> + 100억원 초과액 × <span class="fs-rate">0.0042%</span></td></tr>
+              <tr id="fs1"><td colspan="2" class="fs-rng">5천만원 이하</td><td class="fs-std fs-single"><span class="fs-amt">250,000</span></td></tr>
+              <tr id="fs2"><td class="fs-rng">5천만원 이상</td><td class="fs-rng">1억원 미만</td><td class="fs-std"><span class="fs-amt">250,000</span><span class="fs-plus">+</span><span class="fs-base">5천만원 초과액 *</span><span class="fs-rate">0.33%</span></td></tr>
+              <tr id="fs3"><td class="fs-rng">1억원 이상</td><td class="fs-rng">3억원 미만</td><td class="fs-std"><span class="fs-amt">415,000</span><span class="fs-plus">+</span><span class="fs-base">1억원 초과액 *</span><span class="fs-rate">0.17%</span></td></tr>
+              <tr id="fs4"><td class="fs-rng">3억원 이상</td><td class="fs-rng">5억원 미만</td><td class="fs-std"><span class="fs-amt">755,000</span><span class="fs-plus">+</span><span class="fs-base">3억원 초과액 *</span><span class="fs-rate">0.085%</span></td></tr>
+              <tr id="fs5"><td class="fs-rng">5억원 이상</td><td class="fs-rng">10억원 미만</td><td class="fs-std"><span class="fs-amt">925,000</span><span class="fs-plus">+</span><span class="fs-base">5억원 초과액 *</span><span class="fs-rate">0.085%</span></td></tr>
+              <tr id="fs6"><td class="fs-rng">10억원 이상</td><td class="fs-rng">20억원 미만</td><td class="fs-std"><span class="fs-amt">1,350,000</span><span class="fs-plus">+</span><span class="fs-base">10억원 초과액 *</span><span class="fs-rate">0.042%</span></td></tr>
+              <tr id="fs7"><td class="fs-rng">20억원 이상</td><td class="fs-rng">30억원 미만</td><td class="fs-std"><span class="fs-amt">1,770,000</span><span class="fs-plus">+</span><span class="fs-base">20억원 초과액 *</span><span class="fs-rate">0.042%</span></td></tr>
+              <tr id="fs8"><td class="fs-rng">30억원 이상</td><td class="fs-rng">40억원 미만</td><td class="fs-std"><span class="fs-amt">2,190,000</span><span class="fs-plus">+</span><span class="fs-base">30억원 초과액 *</span><span class="fs-rate">0.033%</span></td></tr>
+              <tr id="fs9"><td class="fs-rng">40억원 이상</td><td class="fs-rng">50억원 미만</td><td class="fs-std"><span class="fs-amt">2,520,000</span><span class="fs-plus">+</span><span class="fs-base">40억원 초과액 *</span><span class="fs-rate">0.033%</span></td></tr>
+              <tr id="fs10"><td class="fs-rng">50억원 이상</td><td class="fs-rng">100억원 미만</td><td class="fs-std"><span class="fs-amt">2,850,000</span><span class="fs-plus">+</span><span class="fs-base">50억원 초과액 *</span><span class="fs-rate">0.033%</span></td></tr>
+              <tr id="fs11"><td class="fs-rng">100억원 이상</td><td class="fs-rng"></td><td class="fs-std"><span class="fs-amt">4,500,000</span><span class="fs-plus">+</span><span class="fs-base">100억원 초과액 *</span><span class="fs-rate">0.0042%</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -3307,50 +3866,199 @@ function pdfxExtractIndustry(all) {
   return (name && name.length <= 35) ? name : '';
 }
 
-  // ----- 사업장별 수입금액 표의 "총계" 행에서 수입금액 합계 추출 -----
+  // ----- 사업장별 수입금액 표에서 수입금액 합계 추출 -----
+  // 1순위: "수입금액" 열의 각 사업장 금액을 원 단위로 합산
+  // 2순위: 합산 실패 시 기존처럼 "총계" 행의 금액을 보조 추출
   function pdfxExtractTotalIncome(pages) {
+    function onlyDigits(s) {
+      return String(s == null ? '' : s).replace(/[^\d]/g, '');
+    }
+    function isMoneyToken(s) {
+      return /^[\d,]+$/.test(String(s || '').replace(/\s+/g, ''));
+    }
+    function median(arr) {
+      if (!arr || !arr.length) return 0;
+      arr = arr.slice().sort(function (a, b) { return a - b; });
+      return arr[Math.floor(arr.length / 2)];
+    }
+    function lineHeight(lines) {
+      var hs = [];
+      (lines || []).forEach(function (L) {
+        var h = (L.bottom || 0) - (L.top || 0);
+        if (h > 2 && h < 80) hs.push(h);
+      });
+      return median(hs) || 10;
+    }
+    function compactText(L) {
+      return (L && (L.text || L.rawtext) || '').replace(/\s+/g, '');
+    }
+    function itemText(it) {
+      return String((it && it.str) || '').replace(/\s+/g, '');
+    }
+    function overlaps(aL, aR, bL, bR) {
+      return aL <= bR && aR >= bL;
+    }
+
+    // [A] 수입금액 열의 사업장별 금액을 합산한다.
+    // PDF에 따라 143,796,839가 "143,796,83" + "9"처럼 두 줄로 쪼개지므로
+    // 금액 열의 조각을 세로 클러스터로 묶은 뒤 합산한다.
     for (var pi = 0; pi < pages.length; pi++) {
       var lines = pages[pi].lines || [];
-      var startIdx = -1, si;
-      for (si = 0; si < lines.length; si++) {
-        if ((lines[si].text || '').indexOf('사업장별수입금액') >= 0) { startIdx = si; break; }
+      var startIdx = -1;
+      for (var si = 0; si < lines.length; si++) {
+        if (compactText(lines[si]).indexOf('사업장별수입금액') >= 0) {
+          startIdx = si;
+          break;
+        }
       }
       if (startIdx < 0) continue;
-      var anchor = null, li;
-      for (li = startIdx + 1; li < lines.length; li++) {
-        var tt = lines[li].text || '';
-        if (tt.indexOf('총계') >= 0) { anchor = lines[li]; break; }
-        if (li > startIdx + 1 && tt.indexOf('※') >= 0) break; // 표를 벗어남
+
+      var totalIdx = -1;
+      for (var ti = startIdx + 1; ti < lines.length; ti++) {
+        var ttxt = compactText(lines[ti]);
+        if (ttxt.indexOf('총계') >= 0) { totalIdx = ti; break; }
+        if (ti > startIdx + 1 && ttxt.indexOf('※') >= 0) break;
       }
-      if (!anchor) continue;
-      var lh = Math.max(6, anchor.bottom - anchor.top);
-      var cy = (anchor.top + anchor.bottom) / 2;
-      var bandTop = cy - lh * 0.8, bandBot = cy + lh * 1.8;
+      if (totalIdx < 0) continue;
+
+      var headerItem = null;
+      var headerLine = null;
+      for (var hi = startIdx + 1; hi < totalIdx; hi++) {
+        var itemsH = lines[hi].items || [];
+        for (var hj = 0; hj < itemsH.length; hj++) {
+          if (itemText(itemsH[hj]).indexOf('수입금액') >= 0) {
+            headerItem = itemsH[hj];
+            headerLine = lines[hi];
+            break;
+          }
+        }
+        if (headerItem) break;
+      }
+      if (!headerItem) continue;
+
+      var lh = lineHeight(lines);
+      var colL = Math.max(0, headerItem.x - lh * 1.6);
+      var colR = headerItem.right + lh * 1.6;
+      var topLimit = headerLine.bottom;
+      var bottomLimit = lines[totalIdx].top - lh * 0.2;
+
       var toks = [];
-      for (var lj = 0; lj < lines.length; lj++) {
-        (lines[lj].items || []).forEach(function (it) {
-          var s = (it.str || '').replace(/\s+/g, '');
-          if (!/^[\d,]+$/.test(s)) return;
-          if (it.yBase < bandTop || it.yBase > bandBot) return;
-          toks.push({ x: it.x, right: it.right, y: it.yBase, s: s,
-                      len: s.replace(/[^\d]/g, '').length });
+      for (var li = startIdx + 1; li < totalIdx; li++) {
+        var L = lines[li];
+        if (L.bottom < topLimit || L.top > bottomLimit) continue;
+        (L.items || []).forEach(function (it) {
+          var s = itemText(it);
+          if (!isMoneyToken(s)) return;
+          if (!overlaps(it.x, it.right, colL, colR)) return;
+          toks.push({
+            x: it.x,
+            right: it.right,
+            y: it.yBase,
+            s: s,
+            digits: onlyDigits(s)
+          });
         });
       }
-      if (!toks.length) continue;
-      var primary = toks.slice().sort(function (a, b) { return b.len - a.len; })[0];
-      var colL = primary.x - lh * 0.8, colR = primary.right + lh * 0.8;
-      var picked = toks.filter(function (t) { return t.x <= colR && t.right >= colL; });
-      picked.sort(function (a, b) { return a.y - b.y; });
-      var pIdx = picked.indexOf(primary);
-      if (pIdx < 0) pIdx = 0;
-      var lo = pIdx, hi = pIdx;
-      while (lo > 0 && (picked[lo].y - picked[lo - 1].y) < lh * 1.4) lo--;
-      while (hi < picked.length - 1 && (picked[hi + 1].y - picked[hi].y) < lh * 1.4) hi++;
-      var cluster = picked.slice(lo, hi + 1);
-      cluster.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
-      var joined = cluster.map(function (p) { return p.s; }).join('').replace(/[^\d]/g, '');
-      if (joined.length >= 4) return joined;
+
+      if (toks.length) {
+        toks.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+        var clusters = [];
+        var cur = [];
+        var yGapLimit = lh * 0.9;
+
+        toks.forEach(function (tok) {
+          if (!cur.length) {
+            cur.push(tok);
+            return;
+          }
+          var prev = cur[cur.length - 1];
+          if (Math.abs(tok.y - prev.y) <= yGapLimit) {
+            cur.push(tok);
+          } else {
+            clusters.push(cur);
+            cur = [tok];
+          }
+        });
+        if (cur.length) clusters.push(cur);
+
+        var sum = 0;
+        var count = 0;
+        clusters.forEach(function (cl) {
+          cl.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+          var digits = onlyDigits(cl.map(function (p) { return p.s; }).join(''));
+          if (!digits) return;
+          var n = parseInt(digits, 10);
+          if (!isFinite(n)) return;
+          // 업종코드·세율 등 오인 방지: 수입금액 열에서 100원 이상 금액만 합산
+          if (n >= 100) {
+            sum += n;
+            count++;
+          }
+        });
+
+        if (count > 0 && sum > 0) return String(sum);
+      }
     }
+
+    // [B] 보조 로직: "총계" 행의 수입금액 셀을 직접 추출한다.
+    // 수입금액 열 합산이 실패한 예외 PDF에 대비한다.
+    for (var pi2 = 0; pi2 < pages.length; pi2++) {
+      var lines2 = pages[pi2].lines || [];
+      var startIdx2 = -1;
+      for (var si2 = 0; si2 < lines2.length; si2++) {
+        if (compactText(lines2[si2]).indexOf('사업장별수입금액') >= 0) {
+          startIdx2 = si2;
+          break;
+        }
+      }
+      if (startIdx2 < 0) continue;
+
+      var headerItem2 = null;
+      for (var h2 = startIdx2 + 1; h2 < lines2.length; h2++) {
+        if (h2 > startIdx2 + 1 && compactText(lines2[h2]).indexOf('※') >= 0) break;
+        var ih = lines2[h2].items || [];
+        for (var h3 = 0; h3 < ih.length; h3++) {
+          if (itemText(ih[h3]).indexOf('수입금액') >= 0) {
+            headerItem2 = ih[h3];
+            break;
+          }
+        }
+        if (headerItem2) break;
+      }
+
+      var anchor = null;
+      for (var li2 = startIdx2 + 1; li2 < lines2.length; li2++) {
+        var tt = compactText(lines2[li2]);
+        if (tt.indexOf('총계') >= 0) { anchor = lines2[li2]; break; }
+        if (li2 > startIdx2 + 1 && tt.indexOf('※') >= 0) break;
+      }
+      if (!anchor) continue;
+
+      var lh2 = lineHeight(lines2);
+      var cy = (anchor.top + anchor.bottom) / 2;
+      var bandTop = cy - lh2 * 1.0;
+      var bandBot = cy + lh2 * 1.7;
+      var colL2 = headerItem2 ? Math.max(0, headerItem2.x - lh2 * 1.6) : 0;
+      var colR2 = headerItem2 ? (headerItem2.right + lh2 * 1.6) : 1e9;
+
+      var toks2 = [];
+      for (var lj = 0; lj < lines2.length; lj++) {
+        (lines2[lj].items || []).forEach(function (it2) {
+          var s2 = itemText(it2);
+          if (!isMoneyToken(s2)) return;
+          if (it2.yBase < bandTop || it2.yBase > bandBot) return;
+          if (!overlaps(it2.x, it2.right, colL2, colR2)) return;
+          toks2.push({ x: it2.x, y: it2.yBase, s: s2 });
+        });
+      }
+
+      if (toks2.length) {
+        toks2.sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+        var joined = onlyDigits(toks2.map(function (p) { return p.s; }).join(''));
+        if (joined.length >= 4) return joined;
+      }
+    }
+
     return '';
   }
 
@@ -3511,14 +4219,17 @@ function pdfxExtractIndustry(all) {
 
   // ----- 보수료 항목(동적) -----
   var feeRows = null;
+  var extraRows = null;
 
   function quoteRecalc() {
     var sum = 0;
     if (feeRows) feeRows.querySelectorAll('.qf-amt').forEach(function (a) { sum += (qNum(a.value) || 0); });
+    var extraSum = quoteExtraSum();
     var total = Math.round(sum * 1.1);
     var sv = $('q_sumView'); if (sv) sv.textContent = sum ? qFmt(sum) : '0';
     var tv = $('q_totalView'); if (tv) tv.textContent = total ? qFmt(total) : '0';
-    return { sum: sum, total: total };
+    var esv = $('q_extraSumView'); if (esv) esv.textContent = extraSum ? qFmt(extraSum) : '0';
+    return { sum: sum, total: total, extraSum: extraSum };
   }
 
   function quoteFloat(id, def) {
@@ -3537,7 +4248,7 @@ function pdfxExtractIndustry(all) {
 
   function quoteAdjust() {
     var a = quoteFloat('q_adjust', 1);
-    return a === 0.5 ? 0.5 : 1;
+    return isFinite(a) ? a : 1;
   }
 
   function calcWeightedBaseFee(income) {
@@ -3627,6 +4338,101 @@ function pdfxExtractIndustry(all) {
   }
   window.addQuoteFeeItem = addQuoteFeeItem;
 
+
+  // ----- 기본보수표 하단 별도표(미입력시 미출력)(동적) -----
+  function addQuoteExtraItem(label, amt, note, opts) {
+    opts = opts || {};
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (!extraRows) return null;
+    var row = document.createElement('div');
+    row.className = 'qextra-row';
+    row.innerHTML =
+      '<input type="text" class="qx-lbl" placeholder="항목명 입력">' +
+      '<input type="text" class="qx-amt" inputmode="numeric" placeholder="금액 입력">' +
+      '<button type="button" class="qx-del">×</button>';
+    extraRows.appendChild(row);
+    var lblEl = row.querySelector('.qx-lbl');
+    var amtEl = row.querySelector('.qx-amt');
+    if (label != null) lblEl.value = label;
+    if (amt != null && amt !== '') amtEl.value = qFmt(qNum(amt));
+    if (opts.defaultRow) {
+      row.classList.add('qextra-default-row');
+      row.dataset.defaultRow = '1';
+    }
+    lblEl.addEventListener('input', function () {
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+    amtEl.addEventListener('input', function () {
+      var atEnd = (amtEl.selectionStart === amtEl.value.length);
+      amtEl.value = qFmt(qNum(amtEl.value));
+      if (atEnd) { try { amtEl.setSelectionRange(amtEl.value.length, amtEl.value.length); } catch (e) {} }
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+    row.querySelector('.qx-del').addEventListener('click', function () {
+      if (row.classList.contains('qextra-default-row')) return;
+      row.remove();
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+    return row;
+  }
+  window.addQuoteExtraItem = addQuoteExtraItem;
+
+  function ensureQuoteExtraDefaultRow() {
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (!extraRows) return null;
+    var row = extraRows.querySelector('.qextra-default-row');
+    if (!row) row = addQuoteExtraItem('', '', '', { defaultRow: true });
+    if (extraRows.firstChild !== row) extraRows.insertBefore(row, extraRows.firstChild);
+    return row;
+  }
+
+  function collectExtraItems() {
+    var items = [];
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (extraRows) extraRows.querySelectorAll('.qextra-row').forEach(function (r) {
+      items.push({
+        label: r.querySelector('.qx-lbl').value,
+        amt: r.querySelector('.qx-amt').value,
+        note: '',
+        defaultRow: r.classList.contains('qextra-default-row')
+      });
+    });
+    return items;
+  }
+
+  function quoteExtraVisibleItems() {
+    return collectExtraItems().filter(function (it) {
+      var label = (it.label || '').trim();
+      var amt = qNum(it.amt) || 0;
+      // 기본으로 생성되는 빈 줄은 입력 전에는 출력하지 않음.
+      // 이전 파일에서 저장된 기본줄 라벨 '기본'도 금액이 없으면 미출력 처리.
+      if (it.defaultRow && !amt && (!label || label === '기본')) return false;
+      return !!label || !!amt;
+    });
+  }
+
+  function quoteExtraSum() {
+    var sum = 0;
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (extraRows) extraRows.querySelectorAll('.qx-amt').forEach(function (a) { sum += (qNum(a.value) || 0); });
+    return sum;
+  }
+
+  function setExtraItems(items) {
+    if (!extraRows) extraRows = $('q_extraRows');
+    if (extraRows) extraRows.innerHTML = '';
+    if (items && items.length) {
+      items.forEach(function (it, idx) {
+        var exLabel = (it.defaultRow && String(it.label || '').trim() === '기본' && !(qNum(it.amt) || 0)) ? '' : it.label;
+        addQuoteExtraItem(exLabel, it.amt, it.note, { defaultRow: !!it.defaultRow || idx === 0 });
+      });
+    }
+    ensureQuoteExtraDefaultRow();
+  }
+
   function quoteAutoApplyBaseFee() {
     ensureBaseFeeRow(true);
     if (typeof updatePreview === 'function') updatePreview();
@@ -3678,7 +4484,10 @@ function pdfxExtractIndustry(all) {
     var wd = $('qp_writedate');
     if (wd) { var wv = ($('q_writedate') || {}).value || ''; wd.textContent = wv.trim() ? wv : '\u3000'; }
     var tt = $('qp_title');
-    if (tt) { var tv = ($('q_title') || {}).value || ''; tt.textContent = tv.trim() ? tv : '\u3000'; }
+    if (tt) {
+      var tv = (($('q_title') || {}).value || '').trim();
+      tt.textContent = tv ? tv : QUOTE_TITLE_DEFAULT;
+    }
     var cm = $('qp_cmsdate');
     if (cm) { cm.textContent = (($('q_cmsdate') || {}).value || ''); }
 
@@ -3711,6 +4520,28 @@ function pdfxExtractIndustry(all) {
               '<td class="bB-sumval">' + (r.sum ? qFmt(r.sum) : '-') + '</td></tr>';
       body.innerHTML = html;
     }
+
+    var extraTable = $('qp_extraTable');
+    var extraBody = $('qp_extraBody');
+    if (extraTable && extraBody) {
+      var extraItems = quoteExtraVisibleItems();
+      var extraHtml = '';
+      extraItems.forEach(function (it) {
+        var amtN = qNum(it.amt) || 0;
+        extraHtml += '<tr><td class="qx-lab-print">' + escapeHtml((it.label || '').trim() || '\u3000') + '</td>' +
+                     '<td class="qx-amt-print">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
+      });
+      if (extraItems.length) {
+        extraHtml += '<tr><td class="qx-sum-lab">합\u3000\u3000계</td>' +
+                     '<td class="qx-sum-val">' + (r.extraSum ? qFmt(r.extraSum) : '-') + '</td></tr>';
+        extraBody.innerHTML = extraHtml;
+        extraTable.classList.remove('is-hidden');
+      } else {
+        extraBody.innerHTML = '';
+        extraTable.classList.add('is-hidden');
+      }
+    }
+
     var qt = $('qp_total');
     if (qt) qt.textContent = r.total ? qFmt(r.total) : '\u3000';
 
@@ -3730,13 +4561,26 @@ function pdfxExtractIndustry(all) {
   window.quoteUpdatePreview = quoteUpdatePreview;
 
   // ----- 견적서 데이터 적용/수집 -----
+  function setQuoteTitleValue(v, userEdited) {
+    var el = $('q_title');
+    if (!el) return;
+    var title = (v == null ? '' : String(v)).trim();
+    el.value = title ? title : QUOTE_TITLE_DEFAULT;
+    el.dataset.userEdited = (userEdited && title && title !== QUOTE_TITLE_DEFAULT) ? '1' : '0';
+  }
   function quoteApplyData(q) {
     q = q || {};
     var sv = function (id, v) { var el = $(id); if (el) el.value = (v == null ? '' : v); };
     if ($('q_enable')) $('q_enable').checked = (q.enable === undefined ? true : !!q.enable);
+    if ($('q_print_quote_only')) $('q_print_quote_only').checked = !!q.print_quote_only;
     sv('q_recipient', q.recipient);
     sv('q_writedate', q.writedate);
-    sv('q_title', q.title === undefined ? QUOTE_TITLE_DEFAULT : q.title);
+
+    // 제목은 기본값 고정. 사용자가 직접 수정한 경우에만 저장된 수정 제목을 복원한다.
+    // 구버전 슬롯/자동저장에 남은 비정상 제목값은 기본 제목으로 되돌린다.
+    var titleEdited = (q.title_user_edited === true || q.title_user_edited === '1');
+    setQuoteTitleValue(titleEdited ? q.title : QUOTE_TITLE_DEFAULT, titleEdited);
+
     sv('q_cmsdate', q.cmsdate);
     sv('q_income', q.income);
     sv('q_weight', q.weight === undefined ? '1.2' : q.weight);
@@ -3751,20 +4595,27 @@ function pdfxExtractIndustry(all) {
       if (q.explain) items.push({ label: '신고후소명', amt: q.explain });
     }
     setFeeItems(items);
+    setExtraItems(q.extraItems);
   }
   function quoteCollectData() {
     var gv = function (id) { var el = $(id); return el ? el.value : ''; };
+    var titleEl = $('q_title');
+    var titleRaw = titleEl ? String(titleEl.value || '').trim() : '';
+    var titleEdited = !!(titleEl && titleEl.dataset.userEdited === '1' && titleRaw && titleRaw !== QUOTE_TITLE_DEFAULT);
     return {
       enable: $('q_enable') ? $('q_enable').checked : true,
+      print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
       recipient: gv('q_recipient'),
       writedate: gv('q_writedate'),
-      title: gv('q_title'),
+      title: titleEdited ? titleRaw : '',
+      title_user_edited: titleEdited,
       cmsdate: gv('q_cmsdate'),
       income: gv('q_income'),
       weight: gv('q_weight'),
       adjust: gv('q_adjust'),
       free: gv('q_free'),
-      items: collectFeeItems()
+      items: collectFeeItems(),
+      extraItems: collectExtraItems()
     };
   }
 
@@ -3804,14 +4655,26 @@ function pdfxExtractIndustry(all) {
     };
     window.clearAllInputs = clearAllInputs;
   }
-  // ----- override: setTitleAndPrint (인쇄 파일명에 견적서 반영) -----
+  // ----- override: setTitleAndPrint (인쇄 파일명 및 견적서만 출력 모드 반영) -----
   if (typeof setTitleAndPrint === 'function') {
     setTitleAndPrint = function () {
       if (!window._origTitle) window._origTitle = document.title;
       var name = (($('inp_name') || {}).value || '').trim();
       var company = (($('inp_company') || {}).value || '').trim();
+      var qOnly = $('q_print_quote_only') ? $('q_print_quote_only').checked : false;
       var qOn = $('q_enable') ? $('q_enable').checked : false;
-      var fname = qOn ? '수수료견적서 및 종합소득세 신고보고서'
+
+      // 견적서만 출력은 견적서 출력이 전제이므로, 체크 시 인쇄 직전에 견적서를 강제로 표시한다.
+      if (qOnly && $('q_enable') && !qOn) {
+        $('q_enable').checked = true;
+        qOn = true;
+        quoteUpdatePreview();
+      }
+
+      document.body.classList.toggle('print-quote-only', !!(qOnly && qOn));
+
+      var fname = (qOnly && qOn) ? '수수료견적서'
+                : qOn ? '수수료견적서 및 종합소득세 신고보고서'
                       : '종합소득세 신고보고서';
       if (company) fname += '_' + company;
       if (name) fname += '_' + name + ' 대표님';
@@ -3819,6 +4682,21 @@ function pdfxExtractIndustry(all) {
       setTimeout(function () { window.print(); }, 50);
     };
     window.setTitleAndPrint = setTitleAndPrint;
+  }
+
+  window.addEventListener('afterprint', function () {
+    document.body.classList.remove('print-quote-only');
+    if (window._origTitle) document.title = window._origTitle;
+  });
+
+  // ----- 제목 직접 수정 여부 기록 -----
+  var qTitleEl = $('q_title');
+  if (qTitleEl) {
+    qTitleEl.dataset.userEdited = '0';
+    qTitleEl.addEventListener('input', function () {
+      var v = String(qTitleEl.value || '').trim();
+      qTitleEl.dataset.userEdited = (v && v !== QUOTE_TITLE_DEFAULT) ? '1' : '0';
+    });
   }
 
   // ----- 기본보수료 자동산정 입력값 변경 시 기본 행 갱신 -----
@@ -3836,6 +4714,8 @@ function pdfxExtractIndustry(all) {
   // ----- 초기 복원 (보고서 자동복원 직후 견적서 부분만 반영) -----
   (function () {
     feeRows = $('q_feeRows');
+    extraRows = $('q_extraRows');
+    ensureQuoteExtraDefaultRow();
     var applied = false;
     try {
       var key = (typeof currentSlotKey !== 'undefined') ? currentSlotKey : '_draft';
@@ -3846,7 +4726,10 @@ function pdfxExtractIndustry(all) {
         if (data && data.quote) { quoteApplyData(data.quote); applied = true; }
       }
     } catch (e) {}
-    if (!applied) setFeeItems(null);
+    if (!applied) {
+      setFeeItems(null);
+      setExtraItems(null);
+    }
     quoteUpdatePreview();
     try {
       if (typeof autoResizeTextarea === 'function') {
