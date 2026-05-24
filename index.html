@@ -4474,17 +4474,6 @@ function quoteUpdateWriteDateDisplay() {
   }
 }
 
-  if (mmEl) mmEl.classList.remove('q-date-active');
-  if (ddEl) ddEl.classList.remove('q-date-active');
-
-  if (document.activeElement === el) {
-    if (d.length < 2 && mmEl) {
-      mmEl.classList.add('q-date-active');
-    } else if (ddEl) {
-      ddEl.classList.add('q-date-active');
-    }
-  }
-}
 function quoteFormatWriteDate(v) {
   var d = quoteNormalizeWriteDateInput(v);
   if (!/^\d{4}$/.test(d)) return '';
