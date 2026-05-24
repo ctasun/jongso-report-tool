@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-24 18:29 (반영후 음수 입력·절세효과 표·이월결손금 주석·카드 필요경비·반영전 음수 표시) -->
+<!-- BUILD_DATE: 2026-05-24 20:40 (반영후 음수 입력·절세효과 표·이월결손금 주석·카드 필요경비·반영전 음수 표시) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -766,7 +766,10 @@ textarea {
   .rp-subtitle { page-break-after: avoid; }
   .rp-table { page-break-inside: avoid; }
   .rp-image { page-break-inside: avoid; }
-  .rp-opinion { page-break-inside: avoid; }
+  .rp-opinion {
+    page-break-inside: avoid;
+    font-size: 12pt;
+  }
   .rp-op-img { page-break-inside: avoid; }
   .rp-footer { page-break-inside: avoid; page-break-before: avoid; margin-top: 16px; margin-bottom: 8mm; }
 @page samho {
@@ -1867,7 +1870,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-24 18:29</span>
+    <span class="build-date">업데이트 2026-05-24 20:40</span>
   </div>
 </header>
 
