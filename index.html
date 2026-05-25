@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 15:13 (인쇄 끝 빈 페이지 제거 - 잉여 스크립트 삭제) -->
+<!-- BUILD_DATE: 2026-05-25 15:28 (인쇄 헤더 검정굵게 + 보고공문 줄간격 70%) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2004,6 +2004,19 @@ textarea {
   }
 }
 </style>
+<style>
+/* PATCH: 인쇄 시 — 세액공제 표 헤더 검은색·굵게, 보고공문 목록 줄간격 70% */
+@media print {
+  #sec_taxcredit .rp-table th,
+  #sec_taxcredit .rp-table th * {
+    color: #000 !important;
+    font-weight: 800 !important;
+  }
+  .rp-footer .guide-items {
+    line-height: 1.225 !important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -2015,7 +2028,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 15:13</span>
+    <span class="build-date">업데이트 2026-05-25 15:28</span>
   </div>
 </header>
 
