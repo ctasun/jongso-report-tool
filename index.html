@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 17:02 (보수료 항목 줄별 할인 체크 + 기본 항목 빠른 선택 접이식 박스 + 합계표 할인적용총액 줄) -->
+<!-- BUILD_DATE: 2026-05-25 17:31 (보수료 금액 입력식 실시간 계산 + 보수료 항목 입력폭 조정) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1173,14 +1173,13 @@ textarea {
 #quote_panel .q-cols { display:flex; gap:16px; align-items:stretch; }
 #quote_panel .q-col-left { flex:1.3; display:flex; flex-direction:column; }
 #quote_panel .q-col-right { flex:1; display:flex; flex-direction:column; }
-#quote_panel .q-col-title { font-size:12.5px; font-weight:700; color:#1a2c5b; margin-bottom:7px; }
 #quote_panel .qfee-head { display:flex; gap:7px; font-size:11px; color:#999; font-weight:600; margin-bottom:4px; padding:0 2px; }
-#quote_panel .qfee-head .h1 { flex:1.4; }
-#quote_panel .qfee-head .h2 { width:130px; }
+#quote_panel .qfee-head .h1 { flex:0 0 310px; }
+#quote_panel .qfee-head .h2 { flex:1 1 auto; width:auto; min-width:150px; }
 #quote_panel .qfee-head .h3 { width:26px; }
 #quote_panel .qfee-row { display:flex; gap:7px; margin-bottom:6px; }
-#quote_panel .qfee-row .qf-lbl { flex:1.4; padding:7px 9px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-family:inherit; background:#fff; }
-#quote_panel .qfee-row .qf-amt { width:130px; padding:7px 9px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-family:inherit; background:#fff; text-align:right; font-weight:600; color:#14264f; }
+#quote_panel .qfee-row .qf-lbl { flex:0 0 310px; width:310px; min-width:0; padding:7px 9px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-family:inherit; background:#fff; }
+#quote_panel .qfee-row .qf-amt { flex:1 1 auto; width:auto; min-width:150px; padding:7px 9px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-family:inherit; background:#fff; text-align:right; font-weight:600; color:#14264f; }
 #quote_panel .qfee-row .qf-lbl:focus, #quote_panel .qfee-row .qf-amt:focus { outline:none; border-color:#1a2c5b; box-shadow:0 0 0 2px rgba(26,44,91,0.08); }
 #quote_panel .qfee-row .qf-del { width:26px; border:1px solid #c0392b; color:#c0392b; background:#fff; border-radius:4px; cursor:pointer; font-size:14px; line-height:1; font-family:inherit; flex-shrink:0; }
 #quote_panel .qfee-row .qf-del:hover { background:#c0392b; color:#fff; }
@@ -2064,7 +2063,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 17:02</span>
+    <span class="build-date">업데이트 2026-05-25 17:31</span>
   </div>
 </header>
 
@@ -5040,6 +5039,46 @@ function pdfxExtractIndustry(all) {
     if (n == null || isNaN(n)) return '';
     return Number(n).toLocaleString('ko-KR');
   }
+  function qCalcMoneyInput(v, force) {
+    var raw = String(v == null ? '' : v).trim();
+    if (!raw) return '';
+
+    var expr = raw
+      .replace(/,/g, '')
+      .replace(/[×xX]/g, '*')
+      .replace(/÷/g, '/')
+      .replace(/원/g, '')
+      .trim();
+
+    var exprBody = expr.replace(/^\s*[+-]/, '');
+    var hasCalcOp = /[+\-*/]/.test(exprBody);
+
+    if (!hasCalcOp) return qFmt(qNum(raw));
+
+    if (!/^[0-9+\-*/().\s]+$/.test(expr)) return raw;
+    if (!force && /[+\-*/.]$/.test(expr)) return raw;
+    if (!force && /[*\/]\s*0$/.test(expr)) return raw;
+
+    try {
+      var n = Function('"use strict"; return (' + expr + ');')();
+      if (!isFinite(n)) return raw;
+      return qFmt(Math.round(n));
+    } catch (e) {
+      return raw;
+    }
+  }
+
+  function qApplyMoneyInputCalc(el, force) {
+    if (!el) return;
+
+    var atEnd = (el.selectionStart === el.value.length);
+    el.value = qCalcMoneyInput(el.value, !!force);
+
+    if (atEnd) {
+      try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {}
+    }
+  }
+
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (ch) {
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[ch];
@@ -5442,7 +5481,7 @@ function bindQuoteRecipientSync() {
     row.className = 'qfee-row';
     row.innerHTML =
       '<input type="text" class="qf-lbl" placeholder="항목명 입력">' +
-      '<input type="text" class="qf-amt" inputmode="numeric" placeholder="금액 입력">' +
+      '<input type="text" class="qf-amt" inputmode="text" placeholder="금액 입력">' +
       '<label class="qf-disc-wrap"><input type="checkbox" class="qf-disc"></label>' +
       '<button type="button" class="qf-del">×</button>';
     feeRows.appendChild(row);
@@ -5460,9 +5499,16 @@ function bindQuoteRecipientSync() {
     });
     amtEl.addEventListener('input', function () {
       if (row.classList.contains('qfee-base-row')) row.dataset.manual = '1';
-      var atEnd = (amtEl.selectionStart === amtEl.value.length);
-      amtEl.value = qFmt(qNum(amtEl.value));
-      if (atEnd) { try { amtEl.setSelectionRange(amtEl.value.length, amtEl.value.length); } catch (e) {} }
+
+      qApplyMoneyInputCalc(amtEl, false);
+
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+
+    amtEl.addEventListener('blur', function () {
+      qApplyMoneyInputCalc(amtEl, true);
+
       if (typeof updatePreview === 'function') updatePreview();
       if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
     });
@@ -5549,7 +5595,7 @@ function bindQuoteRecipientSync() {
     row.className = 'qextra-row';
     row.innerHTML =
       '<input type="text" class="qx-lbl" placeholder="항목명 입력">' +
-      '<input type="text" class="qx-amt" inputmode="numeric" placeholder="금액 입력">' +
+      '<input type="text" class="qx-amt" inputmode="text" placeholder="금액 입력">' +
       '<button type="button" class="qx-del">×</button>';
     extraRows.appendChild(row);
     var lblEl = row.querySelector('.qx-lbl');
@@ -5565,9 +5611,15 @@ function bindQuoteRecipientSync() {
       if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
     });
     amtEl.addEventListener('input', function () {
-      var atEnd = (amtEl.selectionStart === amtEl.value.length);
-      amtEl.value = qFmt(qNum(amtEl.value));
-      if (atEnd) { try { amtEl.setSelectionRange(amtEl.value.length, amtEl.value.length); } catch (e) {} }
+      qApplyMoneyInputCalc(amtEl, false);
+
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+
+    amtEl.addEventListener('blur', function () {
+      qApplyMoneyInputCalc(amtEl, true);
+
       if (typeof updatePreview === 'function') updatePreview();
       if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
     });
