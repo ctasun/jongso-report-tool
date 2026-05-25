@@ -2702,6 +2702,18 @@ document.querySelectorAll('input[data-format]').forEach(function (inp) {
 });
 
 document.querySelectorAll('input[data-field], select[data-field], textarea[data-field]').forEach(function (el) {
+  if (
+    el.tagName === 'TEXTAREA' &&
+    (
+      el.id === 'inp_caution_opinion' ||
+      el.id === 'inp_guide_opinion' ||
+      el.id === 'inp_analysis_opinion' ||
+      el.id === 'inp_pl_opinion'
+    )
+  ) {
+    el.addEventListener('keydown', handleOpinionNumberingKeydown);
+  }
+
   el.addEventListener('input', function () { updatePreview(); scheduleAutoSave(); });
   el.addEventListener('change', function () { updatePreview(); scheduleAutoSave(); });
   el.addEventListener('blur', function () {
@@ -3007,6 +3019,22 @@ function handleOpinionNumberingKeydown(e) {
 
     e.preventDefault();
     applyOpinionTextareaChange(ta, lineStart2, pos, backMatch[1] || '');
+    return;
+  }
+
+  if (e.key === 'Delete' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    if (ta.selectionStart !== ta.selectionEnd) return;
+
+    var value3 = ta.value;
+    var pos3 = ta.selectionStart;
+    var lineStart3 = value3.lastIndexOf('\n', pos3 - 1) + 1;
+    var afterCursor3 = value3.slice(pos3);
+    var delMatch = afterCursor3.match(/^(\s*)\d+\.\s*/);
+
+    if (pos3 !== lineStart3 || !delMatch) return;
+
+    e.preventDefault();
+    applyOpinionTextareaChange(ta, pos3, pos3 + delMatch[0].length, delMatch[1] || '');
   }
 }
 function addOpinion(values) {
@@ -5694,6 +5722,251 @@ bindQuoteWriteDateFormat();
     } catch (e) {}
   })();
 
+})();
+</script>
+
+<!-- ===== [Ⅴ. 손익계산서] 입력행·계산 블록 ===== -->
+<style id="sec-pl-block">
+#pl_panel .pl-input-head,
+#pl_panel .pl-input-row {
+  display: grid;
+  grid-template-columns: 1.7fr 1.1fr 1.1fr 1.1fr;
+  gap: 8px;
+  align-items: center;
+}
+#pl_panel .pl-input-head {
+  font-size: 11px; color: #888; font-weight: 600;
+  margin-bottom: 6px; padding: 0 2px;
+}
+#pl_panel .pl-input-head span { text-align: center; }
+#pl_panel .pl-input-head span:first-child { text-align: left; }
+#pl_panel .pl-input-row { margin-bottom: 6px; }
+#pl_panel .pl-input-row .pl-label {
+  font-size: 12.5px; font-weight: 600; color: #1a2c5b;
+}
+#pl_panel .pl-input-row input {
+  width: 100%; padding: 6px 8px;
+  border: 1px solid #ccc; border-radius: 4px;
+  font-size: 13px; font-family: inherit; background: #fff;
+  text-align: right;
+}
+#pl_panel .pl-input-row input:focus {
+  outline: none; border-color: #1a2c5b;
+  box-shadow: 0 0 0 2px rgba(26,44,91,0.08);
+}
+#pl_panel .pl-input-row .pl-diff {
+  font-size: 12.5px; font-weight: 700; color: #1a2c5b;
+  text-align: right; padding-right: 4px;
+}
+#pl_panel .pl-input-row .pl-diff.neg { color: #c0392b; }
+#sec_pl .rp-table td.num { padding-right: 12px; }
+</style>
+<script>
+(function () {
+  'use strict';
+
+  var PL_ROWS = [
+    ['sales',    'Ⅰ. 매출액'],
+    ['sga',      'Ⅳ. 판매비와관리비'],
+    ['opinc',    'Ⅴ. 영업이익'],
+    ['nonopinc', 'Ⅵ. 영업외수익'],
+    ['nonopexp', 'Ⅶ. 영업외비용'],
+    ['pretax',   'Ⅷ. 소득세차감전이익'],
+    ['net',      'Ⅹ. 당기순이익'],
+    ['taxdet',   '결정세액'],
+    ['taxpre',   '기납부세액'],
+    ['taxpay',   '실제납부할세액'],
+    ['taxrural', '농어촌특별세액'],
+    ['taxtot',   '총부담할세액']
+  ];
+
+  function plEsc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function plParse(v) {
+    var s = String(v == null ? '' : v);
+    var neg = /-/.test(s);
+    var d = s.replace(/[^\d]/g,'');
+    if (!d) return null;
+    var n = parseInt(d,10);
+    return neg ? -n : n;
+  }
+  function plFmt(n) {
+    if (n == null || isNaN(n)) return '';
+    return (n < 0 ? '-' : '') + Math.abs(n).toLocaleString('ko-KR');
+  }
+  function plFmtInput(v) {
+    var s = String(v == null ? '' : v);
+    var neg = /-/.test(s);
+    var d = s.replace(/[^\d]/g,'');
+    if (!d) return neg ? '-' : '';
+    return (neg ? '-' : '') + parseInt(d,10).toLocaleString('ko-KR');
+  }
+
+  function buildRows() {
+    var wrap = document.getElementById('pl_input_rows');
+    if (!wrap || wrap.dataset.built === '1') return;
+    wrap.dataset.built = '1';
+    wrap.innerHTML = '';
+    PL_ROWS.forEach(function (r) {
+      var key = r[0], label = r[1];
+      var row = document.createElement('div');
+      row.className = 'pl-input-row';
+      row.innerHTML =
+        '<span class="pl-label">' + plEsc(label) + '</span>' +
+        '<input type="text" inputmode="numeric" data-pl="' + key + '_cur" placeholder="당기">' +
+        '<input type="text" inputmode="numeric" data-pl="' + key + '_pre" placeholder="전기">' +
+        '<span class="pl-diff" data-pl-diff="' + key + '">-</span>';
+      wrap.appendChild(row);
+      row.querySelectorAll('input[data-pl]').forEach(function (inp) {
+        inp.addEventListener('input', function () {
+          var atEnd = (inp.selectionStart === inp.value.length);
+          inp.value = plFmtInput(inp.value);
+          if (atEnd) { try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch(e){} }
+          render();
+          if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+        });
+      });
+    });
+  }
+
+  function getInputs() {
+    return document.querySelectorAll('#pl_input_rows input[data-pl]');
+  }
+
+  function render() {
+    var anyValue = false;
+    var bodyHtml = '';
+    PL_ROWS.forEach(function (r) {
+      var key = r[0], label = r[1];
+      var curEl = document.querySelector('#pl_input_rows input[data-pl="'+key+'_cur"]');
+      var preEl = document.querySelector('#pl_input_rows input[data-pl="'+key+'_pre"]');
+      var curRaw = curEl ? curEl.value.trim() : '';
+      var preRaw = preEl ? preEl.value.trim() : '';
+      if (curRaw) anyValue = true;
+      if (preRaw) anyValue = true;
+      var cur = plParse(curRaw);
+      var pre = plParse(preRaw);
+      var diff = (cur != null && pre != null) ? (cur - pre) : null;
+      var diffEl = document.querySelector('[data-pl-diff="'+key+'"]');
+      if (diffEl) {
+        diffEl.textContent = (diff == null) ? '-' : plFmt(diff);
+        diffEl.classList.toggle('neg', diff != null && diff < 0);
+      }
+      bodyHtml +=
+        '<tr>' +
+        '<td class="lab">' + plEsc(label) + '</td>' +
+        '<td class="num">' + (curRaw ? plFmtInput(curRaw) : '-') + '</td>' +
+        '<td class="num">' + (preRaw ? plFmtInput(preRaw) : '-') + '</td>' +
+        '<td class="num">' + (diff == null ? '-' : plFmt(diff)) + '</td>' +
+        '</tr>';
+    });
+
+    var tbody = document.getElementById('rp_pl_body');
+    if (tbody) tbody.innerHTML = bodyHtml;
+
+    var periodEl = document.getElementById('inp_pl_period');
+    var pd = (periodEl ? periodEl.value : '').replace(/[^\d]/g,'');
+    var curHd = '당　기', preHd = '전　기';
+    if (pd) {
+      var n = parseInt(pd,10);
+      curHd = '제' + n + '(당)기';
+      preHd = '제' + (n-1) + '(전)기';
+    }
+    var hc = document.getElementById('rp_pl_th_cur');
+    var hp = document.getElementById('rp_pl_th_pre');
+    if (hc) hc.textContent = curHd;
+    if (hp) hp.textContent = preHd;
+
+    var opEl = document.getElementById('inp_pl_opinion');
+    var opinion = (opEl ? opEl.value : '').trim();
+    var rpOp = document.getElementById('rp_pl_opinion');
+    if (rpOp) {
+      rpOp.textContent = opinion;
+      rpOp.classList.toggle('is-hidden', !opinion);
+    }
+
+    var sec = document.getElementById('sec_pl');
+    if (sec) sec.classList.toggle('is-hidden', !(anyValue || opinion));
+    if (typeof renumberReportSections === 'function') renumberReportSections();
+  }
+
+  function collect() {
+    var o = {};
+    getInputs().forEach(function (inp) {
+      o[inp.getAttribute('data-pl')] = inp.value;
+    });
+    var pp = document.getElementById('inp_pl_period');
+    var po = document.getElementById('inp_pl_opinion');
+    o._period = pp ? pp.value : '';
+    o._opinion = po ? po.value : '';
+    return o;
+  }
+
+  function apply(data) {
+    var d = data || {};
+    getInputs().forEach(function (inp) {
+      inp.value = d[inp.getAttribute('data-pl')] || '';
+    });
+    var pp = document.getElementById('inp_pl_period');
+    var po = document.getElementById('inp_pl_opinion');
+    if (pp) pp.value = d._period || '';
+    if (po) po.value = d._opinion || '';
+  }
+
+  buildRows();
+
+  var periodEl = document.getElementById('inp_pl_period');
+  if (periodEl) periodEl.addEventListener('input', function () {
+    render();
+    if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+  });
+  var opEl = document.getElementById('inp_pl_opinion');
+  if (opEl) opEl.addEventListener('input', function () {
+    render();
+    if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+  });
+
+  if (typeof serializeCurrentState === 'function') {
+    var _ser = serializeCurrentState;
+    serializeCurrentState = function () {
+      var d = _ser();
+      d.pl = collect();
+      return d;
+    };
+    window.serializeCurrentState = serializeCurrentState;
+  }
+  if (typeof applySlotState === 'function') {
+    var _apply = applySlotState;
+    applySlotState = function (data) {
+      _apply(data);
+      apply(data && data.pl);
+      render();
+    };
+    window.applySlotState = applySlotState;
+  }
+  if (typeof clearAllInputs === 'function') {
+    var _clear = clearAllInputs;
+    clearAllInputs = function () {
+      _clear();
+      apply(null);
+      render();
+    };
+    window.clearAllInputs = clearAllInputs;
+  }
+
+  try {
+    var key = (typeof currentSlotKey !== 'undefined') ? currentSlotKey : '_draft';
+    var prefix = (typeof SLOT_PREFIX !== 'undefined') ? SLOT_PREFIX : 'jongso:slot:';
+    var raw = localStorage.getItem(prefix + key);
+    if (raw) {
+      var saved = JSON.parse(raw);
+      if (saved && saved.pl) apply(saved.pl);
+    }
+  } catch (e) {}
+
+  render();
 })();
 </script>
 
