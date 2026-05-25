@@ -5826,25 +5826,34 @@ bindQuoteWriteDateFormat();
   white-space: pre-wrap;
   word-break: keep-all;
 }
+#pl_panel .pl-input-row .pl-label.pl-main-subject {
+  text-align: left;
+  padding-left: 16px;
+}
+
+#sec_pl .rp-table td.lab.pl-main-subject-cell {
+  text-align: left;
+  padding-left: 16px;
+}
 </style>
 
 <script>
 (function () {
   'use strict';
 
-  var PL_ROWS = [
-    ['sales',    '1. 매출액', false],
-    ['sga',      '2. 판매비와 관리비', false],
-    ['opinc',    '3. 영업이익', true],
-    ['nonopinc', '4. 영업외수익', false],
-    ['nonopexp', '5. 영업외비용', false],
-    ['net',      '6. 당기순이익', true],
-    ['taxdet',   '결정세액', false],
-    ['taxpre',   '기납부세액', false],
-    ['taxpay',   '실제납부할세액', true],
-    ['taxrural', '농어촌특별세액', false],
-    ['taxlocal', '지방소득세', false],
-    ['taxtot',   '총부담할세액', true]
+    var PL_ROWS = [
+    ['sales',    '1. 매출액', false, true],
+    ['sga',      '2. 판매비와 관리비', false, true],
+    ['opinc',    '3. 영업이익', false, true],
+    ['nonopinc', '4. 영업외수익', false, true],
+    ['nonopexp', '5. 영업외비용', false, true],
+    ['net',      '6. 당기순이익', true, true],
+    ['taxdet',   '결정세액', false, false],
+    ['taxpre',   '기납부세액', false, false],
+    ['taxpay',   '실제납부할세액', true, false],
+    ['taxrural', '농어촌특별세액', false, false],
+    ['taxlocal', '지방소득세', false, false],
+    ['taxtot',   '총부담할세액', true, false]
   ];
 
   function plEsc(s) {
@@ -6048,7 +6057,7 @@ bindQuoteWriteDateFormat();
       var row = document.createElement('div');
       row.className = 'pl-input-row' + (isAuto ? ' pl-auto-row' : '');
       row.innerHTML =
-        '<span class="pl-label">' + plEsc(label) + '</span>' +
+        '<span class="pl-label' + (r[3] ? ' pl-main-subject' : '') + '">' + plEsc(label) + '</span>' +
         '<input type="text" inputmode="numeric" data-pl="' + key + '_cur" placeholder="당기"' + (isAuto ? ' readonly' : '') + '>' +
         '<input type="text" inputmode="numeric" data-pl="' + key + '_pre" placeholder="전기"' + (isAuto ? ' readonly' : '') + '>' +
         '<span class="pl-diff" data-pl-diff="' + key + '">-</span>' +
@@ -6097,14 +6106,7 @@ bindQuoteWriteDateFormat();
 
   function updateComputedValues() {
     ['cur', 'pre'].forEach(function (side) {
-      var sales = plNum('sales', side);
-      var sga = plNum('sga', side);
-
-      var opinc = null;
-      if (sales != null && sga != null) {
-        opinc = sales - sga;
-      }
-      plSetAuto('opinc', side, opinc);
+      var opinc = plNum('opinc', side);
 
       var net = null;
       if (opinc != null) {
@@ -6160,7 +6162,7 @@ bindQuoteWriteDateFormat();
 
       bodyHtml +=
         '<tr>' +
-          '<td class="lab">' + plEsc(label) + '</td>' +
+          '<td class="lab' + (r[3] ? ' pl-main-subject-cell' : '') + '">' + plEsc(label) + '</td>' +
           '<td class="num">' + (curRaw ? plFmtInput(curRaw) : '-') + '</td>' +
           '<td class="num">' + (preRaw ? plFmtInput(preRaw) : '-') + '</td>' +
           '<td class="num">' + (diff == null ? '-' : plFmt(diff)) + '</td>' +
