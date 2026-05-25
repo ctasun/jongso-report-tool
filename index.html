@@ -2029,6 +2029,30 @@ textarea {
   }
 }
 </style>
+<style id="qfee-discount-and-quickselect">
+/* 보수료 항목 줄별 할인 체크 + 기본 항목 빠른 선택(접이식) 박스 + 합계표 보정 */
+#quote_panel .qfee-head .h-disc { width:40px; flex-shrink:0; text-align:center; }
+#quote_panel .qfee-row .qf-disc-wrap { width:40px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+#quote_panel .qfee-row .qf-disc { width:16px; height:16px; margin:0; cursor:pointer; accent-color:#c0392b; }
+#quote_panel .qfee-row.qfee-disc-row .qf-lbl,
+#quote_panel .qfee-row.qfee-disc-row .qf-amt { color:#c0392b; font-weight:700; text-decoration:line-through; }
+#quote_panel .qsel { margin:9px 0 0; background:#f1f4fa; border:1px solid #c9d3e6; border-radius:4px; }
+#quote_panel .qsel > summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:7px; padding:8px 11px; font-size:12px; font-weight:700; color:#1a2c5b; }
+#quote_panel .qsel > summary::-webkit-details-marker { display:none; }
+#quote_panel .qsel .qsel-chev { display:inline-block; font-size:10px; color:#5f6a82; transition:transform .15s; }
+#quote_panel .qsel[open] .qsel-chev { transform:rotate(90deg); }
+#quote_panel .qsel .qsel-hint { font-size:10.5px; font-weight:400; color:#5f6a82; }
+#quote_panel .qsel .qsel-body { padding:0 11px 10px; }
+#quote_panel .qsel .qsel-guide { font-size:10.5px; color:#5f6a82; margin-bottom:8px; line-height:1.5; }
+#quote_panel .qsel-item { display:flex; align-items:center; gap:8px; padding:4px 5px; border-radius:4px; cursor:pointer; }
+#quote_panel .qsel-item:hover { background:#e3e9f6; }
+#quote_panel .qsel-item input { width:15px; height:15px; margin:0; cursor:pointer; accent-color:#1a2c5b; }
+#quote_panel .qsel-item span { font-size:12.5px; color:#1f2433; }
+#quotePage .boxB .bB-sumval { background:#fff !important; }
+#quotePage .boxB tr.bB-disc-row td,
+#quotePage .boxB tr.bB-disc-row td * { color:#c0392b !important; font-weight:700 !important; text-decoration:line-through !important; }
+#quotePage .boxB tr.bB-disctotal-row td { background:#fff !important; color:#c0392b !important; font-weight:700 !important; }
+</style>
 </head>
 <body>
 
@@ -2177,10 +2201,18 @@ textarea {
             </div>
           </div>
           <div class="qfee-head">
-            <span class="h1">항목명</span><span class="h2">금액</span><span class="h3"></span>
+            <span class="h1">항목명</span><span class="h2">금액</span><span class="h-disc">할인</span><span class="h3"></span>
           </div>
           <div id="q_feeRows"></div>
           <button type="button" class="btn-add" onclick="addQuoteFeeItem()">＋ 항목 추가</button>
+
+          <details class="qsel" id="q_quickSelect">
+            <summary><span class="qsel-chev">▶</span>기본 항목 빠른 선택<span class="qsel-hint">(체크 시 보수료 항목에 줄 추가)</span></summary>
+            <div class="qsel-body">
+              <div class="qsel-guide">필요 없으면 보수료 항목에서 해당 줄의 「×」로 지우세요. 할인 여부는 각 줄의 「할인」 칸에서 정합니다.</div>
+              <div id="q_quickSelectList"></div>
+            </div>
+          </details>
 
           <div class="qextra-wrap">
             <div class="q-col-title">기본보수표 하단 별도표(미입력시 미출력)</div>
