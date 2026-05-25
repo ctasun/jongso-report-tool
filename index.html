@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 09:28 (반영후 음수 입력·절세효과 표·이월결손금 주석·카드 필요경비·반영전 음수 표시) -->
+<!-- BUILD_DATE: 2026-05-25 10:10 (자동번호함수추가·비교손익계산서 추가) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1941,7 +1941,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 09:28</span>
+    <span class="build-date">업데이트 2026-05-25 10:10</span>
   </div>
 </header>
 
@@ -2210,8 +2210,30 @@ textarea {
       </div>
     </section>
 
+    <section class="input-section" id="pl_panel">
+      <h3>5. 손익계산서</h3>
+      <div class="field" style="margin-bottom:10px;">
+        <label>당기 기수</label>
+        <input type="text" id="inp_pl_period" data-field="pl_period" inputmode="numeric" placeholder="예: 5  (비우면 머리글이 '당기/전기'로 표시)">
+      </div>
+      <div class="pl-input-head">
+        <span>과목</span><span>당기</span><span>전기</span><span>증감(자동)</span>
+      </div>
+      <div id="pl_input_rows"></div>
+      <div class="input-block" style="margin-top:12px;">
+        <span class="blk-label">의견</span>
+        <textarea id="inp_pl_opinion" data-field="pl_opinion"></textarea>
+      </div>
+      <div class="help-text">
+        ※ 당기·전기 금액을 입력하면 증감(당기 − 전기)이 자동 계산됩니다. 손실 등 음수는 앞에 「-」를 붙여 입력하세요.<br>
+        ※ 증감은 당기·전기가 모두 입력된 항목에서만 계산됩니다.<br>
+        ※ 「당기 기수」에 숫자를 넣으면 표 머리글이 「제N(당)기 / 제N-1(전)기」로 표시되고, 비우면 「당기 / 전기」로 표시됩니다.<br>
+        ※ 당기·전기·의견이 모두 비어 있으면 보고서에서 Ⅴ. 손익계산서 섹션이 출력되지 않고 이후 섹션 번호가 자동으로 당겨집니다.
+      </div>
+    </section>
+
     <section class="input-section section-income">
-      <h3>5. 매출·소득 요약 및 절세효과</h3>
+      <h3>6. 매출·소득 요약 및 절세효과</h3>
       <div class="field" style="margin-bottom:8px;">
         <label>종합소득금액(반영후)</label>
         <input type="text" id="inp_income_after" data-field="income_after" data-format="num" inputmode="numeric">
@@ -2246,7 +2268,7 @@ textarea {
     </section>
 
     <section class="input-section">
-      <h3>6. 세액공제·감면 상세표</h3>
+      <h3>7. 세액공제·감면 상세표</h3>
       <div class="dyn-head taxcredit">
         <div>항목</div><div>당기 신청액</div><div>최초연도</div><div>적용기수</div><div>감면율</div><div>종료</div><div>유의사항</div><div></div>
       </div>
@@ -2255,7 +2277,7 @@ textarea {
     </section>
 
     <section class="input-section">
-      <h3>7. 종합 검토의견</h3>
+      <h3>8. 종합 검토의견</h3>
       <div id="opinions_list"></div>
       <button type="button" class="btn-add" onclick="addOpinion()">＋ 항목 추가</button>
       <div class="help-text">※ 각 의견 박스에 이미지 또는 텍스트 중 하나라도 입력하면 보고서에 출력됩니다. 모두 비어 있으면 Ⅶ 종합 검토의견 섹션 자체가 출력되지 않습니다.</div>
@@ -2392,6 +2414,23 @@ textarea {
           <h2 class="rp-title">Ⅳ. 최근 3년간 종합소득세 신고상황</h2>
           <div class="rp-image" id="rp_analysis_img"></div>
           <div class="rp-opinion" id="rp_analysis_opinion"></div>
+        </section>
+
+        <section id="sec_pl" class="is-hidden">
+          <h2 class="rp-title">Ⅴ. 손익계산서<span class="unit">(단위: 원)</span></h2>
+          <table class="rp-table compact">
+            <colgroup><col style="width:34%"><col style="width:22%"><col style="width:22%"><col style="width:22%"></colgroup>
+            <thead>
+              <tr>
+                <th>과　목</th>
+                <th id="rp_pl_th_cur">당　기</th>
+                <th id="rp_pl_th_pre">전　기</th>
+                <th>증　감</th>
+              </tr>
+            </thead>
+            <tbody id="rp_pl_body"></tbody>
+          </table>
+          <div class="rp-opinion is-hidden" id="rp_pl_opinion"></div>
         </section>
 
         <section id="sec_income">
@@ -2913,6 +2952,63 @@ function renumberOpinions() {
     if (no) no.textContent = '의견 ' + getCircled(idx + 1);
   });
 }
+function applyOpinionTextareaChange(ta, start, end, text) {
+  var nextPos = start + text.length;
+
+  ta.value = ta.value.slice(0, start) + text + ta.value.slice(end);
+  ta.selectionStart = nextPos;
+  ta.selectionEnd = nextPos;
+
+  updatePreview();
+  scheduleAutoSave();
+}
+
+function handleOpinionNumberingKeydown(e) {
+  var ta = e.target;
+  if (!ta || ta.tagName !== 'TEXTAREA') return;
+  if (e.isComposing) return;
+
+  if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    var value = ta.value;
+    var start = ta.selectionStart;
+    var end = ta.selectionEnd;
+    var lineStart = value.lastIndexOf('\n', start - 1) + 1;
+    var lineEnd = value.indexOf('\n', start);
+
+    if (lineEnd === -1) lineEnd = value.length;
+
+    var line = value.slice(lineStart, lineEnd);
+    var beforeCursor = value.slice(lineStart, start);
+    var numbered = beforeCursor.match(/^(\s*)(\d+)\.\s*(.*)$/);
+
+    if (!numbered) return;
+
+    if (/^\s*\d+\.\s*$/.test(line)) {
+      e.preventDefault();
+      applyOpinionTextareaChange(ta, lineStart, lineEnd, '');
+      return;
+    }
+
+    e.preventDefault();
+    applyOpinionTextareaChange(ta, start, end, '\n' + numbered[1] + (parseInt(numbered[2], 10) + 1) + '. ');
+    return;
+  }
+
+  if (e.key === 'Backspace' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    if (ta.selectionStart !== ta.selectionEnd) return;
+
+    var value2 = ta.value;
+    var pos = ta.selectionStart;
+    var lineStart2 = value2.lastIndexOf('\n', pos - 1) + 1;
+    var beforeCursor2 = value2.slice(lineStart2, pos);
+    var backMatch = beforeCursor2.match(/^(\s*)\d+\.\s*$/);
+
+    if (!backMatch) return;
+
+    e.preventDefault();
+    applyOpinionTextareaChange(ta, lineStart2, pos, backMatch[1] || '');
+  }
+}
 function addOpinion(values) {
   opinionSeq++;
   var oid = 'op_' + opinionSeq;
@@ -2941,6 +3037,7 @@ function addOpinion(values) {
   attachImageDropHandlers(item.querySelector('.image-drop'));
 
   var ta = item.querySelector('textarea');
+  ta.addEventListener('keydown', handleOpinionNumberingKeydown);
   ta.addEventListener('input', function () { updatePreview(); scheduleAutoSave(); });
   ta.addEventListener('blur', function () {
     if (ta.value && /^[\u3131-\u318E\u1100-\u11FF\s]+$/.test(ta.value)) {
@@ -3001,6 +3098,7 @@ function renumberReportSections() {
     { id: 'sec_caution', title: '종합소득세 신고도움서비스 개별안내' },
     { id: 'sec_guide', title: '사업장별 수입금액 및 합산대상 자료유무' },
     { id: 'sec_analysis', title: '최근 3년간 종합소득세 신고상황' },
+    { id: 'sec_pl', title: '손익계산서', unit: '<span class="unit">(단위: 원)</span>' },
     { id: 'sec_income', title: '매출·소득 요약 및 절세효과', unit: '<span class="unit">(단위: 원)</span>' },
     { id: 'sec_taxcredit', title: '세액공제·감면 상세표', unit: '<span class="unit">(단위: 원)</span>' },
     { id: 'sec_opinions', title: '종합 검토의견' }
