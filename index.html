@@ -700,18 +700,25 @@ textarea {
   color: #000;
 }
 
-.rp-footer .guide-title {
-  margin: 0 0 6px;
-  font-weight: 700;
-  text-align: left;
-}
-
-.rp-footer .guide-items {
+.rp-footer .guide-text {
   margin: 0;
   text-align: left;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #000;
+  word-break: keep-all;
+}
+
+.rp-footer .guide-text strong {
+  display: block;
+  margin: 0;
+  font-weight: 700;
+}
+
+.rp-footer .guide-line {
+  display: block;
   padding-left: 1.4em;
   text-indent: -1.4em;
-  line-height: 1.75;
 }
 
 .footer-taxnote-input {
@@ -860,7 +867,31 @@ textarea {
 
 @media print {
   body { background: #fff; }
-  .quote-page { width:100%; min-height:auto; box-shadow:none; padding:0; margin:0; display:block; page:quote; page-break-after:always; }
+  .quote-page {
+    width: 100%;
+    min-height: auto;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    display: block;
+    page: quote;
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  body:not(.print-quote-only) .quote-page:not(.is-hidden) {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  body.print-quote-only .report-page {
+    display: none !important;
+  }
+
+  body.print-quote-only .quote-page {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
   .quote-page.is-hidden { display:none !important; }
   .quote-page .q-page-bottom { margin-top:24px; }
   .q-tbl-row, .quote-page .feeStd, .quote-page .boxA, .quote-page .boxB { page-break-inside:avoid; }
@@ -1540,21 +1571,6 @@ textarea {
   }
 }
 </style>
-
-<style>
-/* PATCH: 견적서만 출력 모드 — 인쇄 시 보고서 페이지를 제외하고 견적서 1장만 출력. */
-@media print {
-  body.print-quote-only .report-page {
-    display: none !important;
-  }
-  body.print-quote-only .quote-page {
-    display: block !important;
-    page-break-after: auto !important;
-    break-after: auto !important;
-  }
-}
-</style>
-
 
 <style>
 /* PATCH: 별도표 입력 구성 — 기본 보수료 항목과 동일하게 항목명/금액 2열만 사용 */
@@ -2624,11 +2640,11 @@ textarea {
   </div>
 
   <div class="guide-box">
-    <p class="guide-title">종합소득세 신고시 개별 보고공문을 드리는 대상자는 아래와 같습니다.</p>
-    <p class="guide-items">
-      ① 종합소득세 신고수수료 2,000,000원(부가세 별도) 이상 고객<br>
-      ② 모의 세무조사 대상 고객<br>
-      ③ 기장계약 후 당사에서 외부조정대상자(신고 의무)로 최초 종합소득세 신고한 고객
+    <p class="guide-text">
+      <strong>종합소득세 신고시 개별 보고공문을 드리는 대상자는 아래와 같습니다.</strong>
+      <span class="guide-line">① 종합소득세 신고수수료 2,000,000원(부가세 별도) 이상 고객</span>
+      <span class="guide-line">② 모의 세무조사 대상 고객</span>
+      <span class="guide-line">③ 기장계약 후 당사에서 외부조정대상자(신고 의무)로 최초 종합소득세 신고한 고객</span>
     </p>
   </div>
 
