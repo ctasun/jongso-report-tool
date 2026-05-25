@@ -713,6 +713,69 @@ textarea {
   text-indent: -1.4em;
 }
 
+.footer-taxnote-input {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #d8dde6;
+  border-radius: 4px;
+  background: #fafbfc;
+}
+
+.footer-taxnote-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1a2c5b;
+  cursor: pointer;
+}
+
+.footer-taxnote-toggle input {
+  width: auto;
+  flex: none;
+  margin: 0;
+}
+
+.footer-taxnote-preview {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid #c9d3e6;
+  border-radius: 3px;
+  background: #fff;
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: #000;
+  word-break: keep-all;
+}
+
+.footer-taxnote-preview p {
+  margin: 0 0 8px;
+}
+
+.footer-taxnote-preview p:last-child {
+  margin-bottom: 0;
+}
+
+.rp-footer .taxcredit-note-report {
+  margin: 0 0 14px;
+  padding: 0 0 12px;
+  border-bottom: 0.7px solid #bbb;
+  text-align: left;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: #000;
+  word-break: keep-all;
+}
+
+.rp-footer .taxcredit-note-report p {
+  margin: 0 0 8px;
+}
+
+.rp-footer .taxcredit-note-report p:last-child {
+  margin-bottom: 0;
+}
+
 .rp-footer .firm {
   text-align: right;
   font-size: 13px;
@@ -1764,54 +1827,6 @@ textarea {
 }
 .quote-page .feeStd tbody .fs-rategrp .fs-mul { transform-origin: right center !important; }
 .quote-page .feeStd tbody .fs-rategrp .fs-rate { transform-origin: left center !important; }
-#quote_panel .qtaxnote-wrap {
-  margin-top: 12px;
-  border-top: 1px dashed #d8dde6;
-  padding-top: 10px;
-}
-
-#quote_panel .qtaxnote-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #1a2c5b;
-  cursor: pointer;
-}
-
-#quote_panel .qtaxnote-toggle input {
-  width: auto;
-  flex: none;
-  margin: 0;
-}
-
-#quote_panel .qtaxnote-help {
-  margin-top: 5px;
-  font-size: 11px;
-  line-height: 1.5;
-  color: #777;
-}
-
-.quote-page .taxcredit-note-print {
-  margin-top: 8px;
-  border: 1px solid #9aa9c6;
-  border-radius: 2px;
-  padding: 8px 9px;
-  font-size: 10.5px;
-  line-height: 1.55;
-  color: #000;
-  word-break: keep-all;
-  white-space: normal;
-}
-
-.quote-page .taxcredit-note-print p {
-  margin: 0 0 7px;
-}
-
-.quote-page .taxcredit-note-print p:last-child {
-  margin-bottom: 0;
-}
 </style>
 
 <style id="total-service-fee-gap-half">
@@ -2139,16 +2154,7 @@ textarea {
             <div id="q_extraRows"></div>
             <button type="button" class="btn-add" onclick="addQuoteExtraItem()">＋ 별도 항목 추가</button>
             <div class="qextra-sum">별도 표 합계: <span id="q_extraSumView">0</span> 원</div>
-            <div class="qtaxnote-wrap">
-              <label class="qtaxnote-toggle">
-                <input type="checkbox" id="q_taxcredit_note" data-field="q_taxcredit_note">
-                세액공제·감면 추가멘트 표시
-              </label>
-              <div class="qtaxnote-help">
-                체크 시 견적서 오른쪽 보수표 바로 아래에 출력·인쇄됩니다.
-              </div>
-            </div> 
-          </div>
+            </div>
         </div>
         <div class="q-col-right">
           <div class="q-col-title">자유입력란</div>
@@ -2340,6 +2346,22 @@ textarea {
       <div class="help-text">※ 각 의견 박스에 이미지 또는 텍스트 중 하나라도 입력하면 보고서에 출력됩니다. 모두 비어 있으면 Ⅶ 종합 검토의견 섹션 자체가 출력되지 않습니다.</div>
     </section>
 
+    <section class="input-section">
+      <h3>9. 보고서 푸터 추가멘트</h3>
+      <div class="footer-taxnote-input">
+        <label class="footer-taxnote-toggle">
+          <input type="checkbox" id="inp_footer_taxcredit_note" data-field="inp_footer_taxcredit_note">
+          세액공제·감면 검토 수수료 안내문을 보고서 마지막 푸터에 표시
+        </label>
+        <div class="footer-taxnote-preview">
+          <p>외부 경정청구 전문업체는 통상 세액공제·감면 신청분의 30%를 수수료로 청구하고 있으나, 이는 사후관리가 배제된 일회성 신청 비용입니다. 국세청으로부터 소명요청이 필요한 시점에는 담당자 퇴사나 연락 부재로 서비스가 제대로 이루어지지 않거나, 사후관리 요청 시 최대 30%의 추가 수수료를 별도로 요구하는 사례도 있습니다.</p>
+          <p>세액공제·감면 검토 비용은 월정 기장수수료를 지불하시는 기장 고객님께 최소한의 금액만 가산하여 청구하고 있습니다. 여기에는 고객별로 가장 유리한 세액공제·감면 검토부터 신청, 그리고 철저한 사후관리까지 모두 포함되어 있습니다.</p>
+          <p>당사는 제공되는 서비스의 전문성에 기반한 정직한 수수료 체계를 운영하고 있습니다. 언제나 그렇듯 최선을 다하겠습니다. 믿고 맡겨 주셔서 감사합니다.</p>
+        </div>
+      </div>
+      <div class="help-text">※ 체크 시 보고서 마지막 푸터의 「종합소득세 신고시 개별 보고공문」 안내문 바로 위에 출력됩니다.</div>
+    </section>
+
     <div style="text-align:center; margin: 12px 0 20px;">
       <button class="btn-add" style="background:#c0392b; padding:8px 20px; font-size:13px;" onclick="setTitleAndPrint()">🖨 인쇄 / PDF 저장</button>
     </div>
@@ -2402,12 +2424,7 @@ textarea {
               <tr id="fs11"><td class="fs-rng"><span class="fs-txt">100억원 이상</span></td><td class="fs-rng"><span class="fs-txt"></span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">4,500,000</span><span class="fs-plus">+</span><span class="fs-base">100억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.0042%</span></span></span></td></tr>
             </tbody>
           </table>
-          <div class="taxcredit-note-print is-hidden" id="qp_taxcredit_note_box">
-            <p>외부 경정청구 전문업체는 통상 세액공제·감면 신청분의 30%를 수수료로 청구하고 있으나, 이는 사후관리 없는 일회성 신청 비용입니다. 국세청으로부터 소명요청이 필요한 시점에는 담당자 퇴사나 연락 부재로 서비스가 제대로 되지 않고, 사후관리 요청 시 최대 30%의 추가 수수료를 별도로 요구하고 있습니다.</p>
-            <p>당사는 월정 수수료를 지불하시는 기장 고객님에 한하여 최소한의 수수료만을 가산하여 청구합니다. 여기에는 고객별로 가장 유리한 세액공제·감면 검토부터 신청, 그리고 철저한 사후관리까지 모두 포함되어 있습니다.</p>
-            <p>당사는 제공되는 서비스의 전문성에 기반한 정직한 수수료 체계를 운영하고 있습니다. 언제나 그렇듯 최선을 다하겠습니다. 믿고 맡겨 주셔서 감사합니다.</p>
           </div>
-        </div>
       </div>
       <div class="q-page-bottom">
         <div class="total-box">
@@ -2596,6 +2613,12 @@ textarea {
       </div>
 
 <div class="rp-footer">
+  <div class="taxcredit-note-report is-hidden" id="rp_footer_taxcredit_note_box">
+    <p>외부 경정청구 전문업체는 통상 세액공제·감면 신청분의 30%를 수수료로 청구하고 있으나, 이는 사후관리가 배제된 일회성 신청 비용입니다. 국세청으로부터 소명요청이 필요한 시점에는 담당자 퇴사나 연락 부재로 서비스가 제대로 이루어지지 않거나, 사후관리 요청 시 최대 30%의 추가 수수료를 별도로 요구하는 사례도 있습니다.</p>
+    <p>세액공제·감면 검토 비용은 월정 기장수수료를 지불하시는 기장 고객님께 최소한의 금액만 가산하여 청구하고 있습니다. 여기에는 고객별로 가장 유리한 세액공제·감면 검토부터 신청, 그리고 철저한 사후관리까지 모두 포함되어 있습니다.</p>
+    <p>당사는 제공되는 서비스의 전문성에 기반한 정직한 수수료 체계를 운영하고 있습니다. 언제나 그렇듯 최선을 다하겠습니다. 믿고 맡겨 주셔서 감사합니다.</p>
+  </div>
+
   <div class="guide-box">
     <p class="guide-title">종합소득세 신고시 개별 보고공문을 드리는 대상자는 아래와 같습니다.</p>
     <p class="guide-item">① 종합소득세 신고수수료 2,000,000원(부가세 별도) 이상 고객</p>
@@ -3385,6 +3408,12 @@ function updatePreview() {
 
   toggleSection('sec_opinions', visibleOpinions.length > 0);
 
+  var footerTaxNoteBox = document.getElementById('rp_footer_taxcredit_note_box');
+  var footerTaxNoteOn = !!((document.getElementById('inp_footer_taxcredit_note') || {}).checked);
+  if (footerTaxNoteBox) {
+    footerTaxNoteBox.classList.toggle('is-hidden', !footerTaxNoteOn);
+  }
+
   renumberReportSections();
 }
 
@@ -3478,6 +3507,7 @@ function serializeCurrentState() {
       income_before: val('inp_income_before'),
       cardcost: val('inp_cardcost'),
       cardcost_enable: !!((document.getElementById('inp_cardcost_enable') || {}).checked),
+      footer_taxcredit_note: !!((document.getElementById('inp_footer_taxcredit_note') || {}).checked),
       caution_opinion: val('inp_caution_opinion'),
       guide_opinion: val('inp_guide_opinion'),
       analysis_opinion: val('inp_analysis_opinion')
@@ -3524,6 +3554,7 @@ function applySlotState(data) {
     setVal('inp_income_before', f.income_before);
     setVal('inp_cardcost', f.cardcost);
     var _cce1 = document.getElementById('inp_cardcost_enable'); if (_cce1) _cce1.checked = !!f.cardcost_enable;
+       var _ftn1 = document.getElementById('inp_footer_taxcredit_note'); if (_ftn1) _ftn1.checked = !!f.footer_taxcredit_note;
     setVal('inp_caution_opinion', f.caution_opinion);
     setVal('inp_guide_opinion', f.guide_opinion);
     setVal('inp_analysis_opinion', f.analysis_opinion);
@@ -3726,6 +3757,7 @@ function clearAllInputs() {
                'inp_caution_opinion','inp_guide_opinion','inp_analysis_opinion'];
     ids.forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
     var _cce0 = document.getElementById('inp_cardcost_enable'); if (_cce0) _cce0.checked = false;
+    var _ftn0 = document.getElementById('inp_footer_taxcredit_note'); if (_ftn0) _ftn0.checked = false;
     document.getElementById('inp_period').value = '2025.01.01. ~ 2025.12.31.';
     document.getElementById('inp_reportdate').value = formatReportDate('0531');
 
@@ -5587,11 +5619,6 @@ function bindQuoteRecipientSync() {
       if (freeV.trim()) { fb.textContent = freeV; fb.classList.remove('is-hidden'); }
       else { fb.textContent = ''; fb.classList.add('is-hidden'); }
     }
-    var taxNoteBox = $('qp_taxcredit_note_box');
-    var taxNoteOn = $('q_taxcredit_note') ? $('q_taxcredit_note').checked : false;
-    if (taxNoteBox) {
-      taxNoteBox.classList.toggle('is-hidden', !taxNoteOn);
-    }
     var tier = feeTier(income);
     for (var n = 1; n <= 11; n++) {
       var row = $('fs' + n);
@@ -5614,7 +5641,6 @@ function bindQuoteRecipientSync() {
     if ($('q_enable')) $('q_enable').checked = (q.enable === undefined ? true : !!q.enable);
     if ($('q_print_quote_only')) $('q_print_quote_only').checked = !!q.print_quote_only;
       if ($('q_taxcredit_note')) $('q_taxcredit_note').checked = !!q.taxcredit_note;
-    setQuoteRecipientValue(q.recipient, q.recipient_user_edited);
     sv('q_writedate', quoteNormalizeWriteDateInput(q.writedate));
     quoteUpdateWriteDateDisplay();
 
@@ -5652,7 +5678,6 @@ function bindQuoteRecipientSync() {
    return {
       enable: $('q_enable') ? $('q_enable').checked : true,
       print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
-          taxcredit_note: $('q_taxcredit_note') ? $('q_taxcredit_note').checked : false,
       recipient: recipientEdited ? recipientRaw : '',
       recipient_user_edited: recipientEdited,
       writedate: quoteNormalizeWriteDateInput(gv('q_writedate')),
