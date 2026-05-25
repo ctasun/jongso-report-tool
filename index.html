@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 14:42 (푸터 안내문 글자 16px) -->
+<!-- BUILD_DATE: 2026-05-25 15:10 (푸터 안내문 글자 16px) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -867,31 +867,7 @@ textarea {
 
 @media print {
   body { background: #fff; }
-  .quote-page {
-    width: 100%;
-    min-height: auto;
-    box-shadow: none;
-    padding: 0;
-    margin: 0;
-    display: block;
-    page: quote;
-    page-break-after: auto;
-    break-after: auto;
-  }
-
-  body:not(.print-quote-only) .quote-page:not(.is-hidden) {
-    page-break-after: always;
-    break-after: page;
-  }
-
-  body.print-quote-only .report-page {
-    display: none !important;
-  }
-
-  body.print-quote-only .quote-page {
-    page-break-after: auto !important;
-    break-after: auto !important;
-  }
+  .quote-page { width:100%; min-height:auto; box-shadow:none; padding:0; margin:0; display:block; page:quote; page-break-after:always; }
   .quote-page.is-hidden { display:none !important; }
   .quote-page .q-page-bottom { margin-top:24px; }
   .q-tbl-row, .quote-page .feeStd, .quote-page .boxA, .quote-page .boxB { page-break-inside:avoid; }
@@ -1573,6 +1549,21 @@ textarea {
 </style>
 
 <style>
+/* PATCH: 견적서만 출력 모드 — 인쇄 시 보고서 페이지를 제외하고 견적서 1장만 출력. */
+@media print {
+  body.print-quote-only .report-page {
+    display: none !important;
+  }
+  body.print-quote-only .quote-page {
+    display: block !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+}
+</style>
+
+
+<style>
 /* PATCH: 별도표 입력 구성 — 기본 보수료 항목과 동일하게 항목명/금액 2열만 사용 */
 #quote_panel .qextra-head .h1 { flex: 1.4 !important; }
 #quote_panel .qextra-head .h2 { width: 130px !important; }
@@ -2024,7 +2015,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 14:42</span>
+    <span class="build-date">업데이트 2026-05-25 15:10</span>
   </div>
 </header>
 
