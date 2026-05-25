@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 19:37 (이관 안내문구 글자 크기 조정) -->
+<!-- BUILD_DATE: 2026-05-26 08:41 (견적서 금액란 소숫점 연산 및 입력 중 계산식 표시) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2148,7 +2148,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 19:37</span>
+    <span class="build-date">업데이트 2026-05-26 08:41</span>
   </div>
 </header>
 
@@ -5165,7 +5165,14 @@ function pdfxExtractIndustry(all) {
 
     if (!/^[0-9+\-*/().\s]+$/.test(expr)) return raw;
     if (!force && /[+\-*/.]$/.test(expr)) return raw;
-    if (!force && /[*\/]\s*0$/.test(expr)) return raw;
+
+    /*
+      소숫점 배율 입력 중간값 보존
+      예: 100000*0, 100000*0.0, 11000000*0.000 입력 단계에서는
+      아직 최종 배율이 아닐 수 있으므로 즉시 0으로 계산하지 않음.
+      100000*0.05, 11000000*0.0005처럼 0이 아닌 소숫점 숫자가 들어오면 계산 가능.
+    */
+    if (!force && /[*\/]\s*[+-]?0(?:\.0*)?$/.test(expr)) return raw;
 
     try {
       var n = Function('"use strict"; return (' + expr + ');')();
@@ -5174,6 +5181,18 @@ function pdfxExtractIndustry(all) {
     } catch (e) {
       return raw;
     }
+  }
+
+  function qMoneyInputHasCalcExpr(v) {
+    var expr = String(v == null ? '' : v)
+      .replace(/,/g, '')
+      .replace(/[×xX]/g, '*')
+      .replace(/÷/g, '/')
+      .replace(/원/g, '')
+      .trim();
+
+    var exprBody = expr.replace(/^\s*[+-]/, '');
+    return /[+\-*/]/.test(exprBody);
   }
 
   function qApplyMoneyInputCalc(el, force) {
@@ -5608,7 +5627,23 @@ function bindQuoteRecipientSync() {
     amtEl.addEventListener('input', function () {
       if (row.classList.contains('qfee-base-row')) row.dataset.manual = '1';
 
-      qApplyMoneyInputCalc(amtEl, false);
+      /*
+        입력 중에는 계산식 자체를 보존합니다.
+        예: 100000*0.05 입력 중에는 그대로 보이고,
+        Enter 또는 다른 칸 이동 시 계산됩니다.
+      */
+      if (!qMoneyInputHasCalcExpr(amtEl.value)) {
+        if (typeof updatePreview === 'function') updatePreview();
+      }
+
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+
+    amtEl.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+
+      e.preventDefault();
+      qApplyMoneyInputCalc(amtEl, true);
 
       if (typeof updatePreview === 'function') updatePreview();
       if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
@@ -5719,7 +5754,22 @@ function bindQuoteRecipientSync() {
       if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
     });
     amtEl.addEventListener('input', function () {
-      qApplyMoneyInputCalc(amtEl, false);
+      /*
+        별도표 금액칸도 입력 중에는 계산식 자체를 보존합니다.
+        Enter 또는 다른 칸 이동 시 계산됩니다.
+      */
+      if (!qMoneyInputHasCalcExpr(amtEl.value)) {
+        if (typeof updatePreview === 'function') updatePreview();
+      }
+
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+
+    amtEl.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+
+      e.preventDefault();
+      qApplyMoneyInputCalc(amtEl, true);
 
       if (typeof updatePreview === 'function') updatePreview();
       if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
