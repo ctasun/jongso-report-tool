@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 16:06 (푸터 글자 화면 12px + 손익계산서 제목 기수통합 + 세액공제항목 어절 줄바꿈) -->
+<!-- BUILD_DATE: 2026-05-25 17:02 (보수료 항목 줄별 할인 체크 + 기본 항목 빠른 선택 접이식 박스 + 합계표 할인적용총액 줄) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2029,30 +2029,6 @@ textarea {
   }
 }
 </style>
-<style id="qfee-discount-and-quickselect">
-/* 보수료 항목 줄별 할인 체크 + 기본 항목 빠른 선택(접이식) 박스 + 합계표 보정 */
-#quote_panel .qfee-head .h-disc { width:40px; flex-shrink:0; text-align:center; }
-#quote_panel .qfee-row .qf-disc-wrap { width:40px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-#quote_panel .qfee-row .qf-disc { width:16px; height:16px; margin:0; cursor:pointer; accent-color:#c0392b; }
-#quote_panel .qfee-row.qfee-disc-row .qf-lbl,
-#quote_panel .qfee-row.qfee-disc-row .qf-amt { color:#c0392b; font-weight:700; text-decoration:line-through; }
-#quote_panel .qsel { margin:9px 0 0; background:#f1f4fa; border:1px solid #c9d3e6; border-radius:4px; }
-#quote_panel .qsel > summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:7px; padding:8px 11px; font-size:12px; font-weight:700; color:#1a2c5b; }
-#quote_panel .qsel > summary::-webkit-details-marker { display:none; }
-#quote_panel .qsel .qsel-chev { display:inline-block; font-size:10px; color:#5f6a82; transition:transform .15s; }
-#quote_panel .qsel[open] .qsel-chev { transform:rotate(90deg); }
-#quote_panel .qsel .qsel-hint { font-size:10.5px; font-weight:400; color:#5f6a82; }
-#quote_panel .qsel .qsel-body { padding:0 11px 10px; }
-#quote_panel .qsel .qsel-guide { font-size:10.5px; color:#5f6a82; margin-bottom:8px; line-height:1.5; }
-#quote_panel .qsel-item { display:flex; align-items:center; gap:8px; padding:4px 5px; border-radius:4px; cursor:pointer; }
-#quote_panel .qsel-item:hover { background:#e3e9f6; }
-#quote_panel .qsel-item input { width:15px; height:15px; margin:0; cursor:pointer; accent-color:#1a2c5b; }
-#quote_panel .qsel-item span { font-size:12.5px; color:#1f2433; }
-#quotePage .boxB .bB-sumval { background:#fff !important; }
-#quotePage .boxB tr.bB-disc-row td,
-#quotePage .boxB tr.bB-disc-row td * { color:#c0392b !important; font-weight:700 !important; text-decoration:line-through !important; }
-#quotePage .boxB tr.bB-disctotal-row td { background:#fff !important; color:#c0392b !important; font-weight:700 !important; }
-</style>
 </head>
 <body>
 
@@ -2064,7 +2040,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 16:06</span>
+    <span class="build-date">업데이트 2026-05-25 17:02</span>
   </div>
 </header>
 
@@ -2201,18 +2177,10 @@ textarea {
             </div>
           </div>
           <div class="qfee-head">
-            <span class="h1">항목명</span><span class="h2">금액</span><span class="h-disc">할인</span><span class="h3"></span>
+            <span class="h1">항목명</span><span class="h2">금액</span><span class="h3"></span>
           </div>
           <div id="q_feeRows"></div>
           <button type="button" class="btn-add" onclick="addQuoteFeeItem()">＋ 항목 추가</button>
-
-          <details class="qsel" id="q_quickSelect">
-            <summary><span class="qsel-chev">▶</span>기본 항목 빠른 선택<span class="qsel-hint">(체크 시 보수료 항목에 줄 추가)</span></summary>
-            <div class="qsel-body">
-              <div class="qsel-guide">필요 없으면 보수료 항목에서 해당 줄의 「×」로 지우세요. 할인 여부는 각 줄의 「할인」 칸에서 정합니다.</div>
-              <div id="q_quickSelectList"></div>
-            </div>
-          </details>
 
           <div class="qextra-wrap">
             <div class="q-col-title">기본보수표 하단 별도표(미입력시 미출력)</div>
@@ -5340,14 +5308,21 @@ function bindQuoteRecipientSync() {
   var extraRows = null;
 
   function quoteRecalc() {
-    var sum = 0;
-    if (feeRows) feeRows.querySelectorAll('.qf-amt').forEach(function (a) { sum += (qNum(a.value) || 0); });
+    var sum = 0, discSum = 0;
+    if (feeRows) feeRows.querySelectorAll('.qfee-row').forEach(function (r) {
+      var amtEl = r.querySelector('.qf-amt');
+      var discEl = r.querySelector('.qf-disc');
+      var amt = amtEl ? (qNum(amtEl.value) || 0) : 0;
+      if (discEl && discEl.checked) discSum += amt;
+      else sum += amt;
+    });
     var extraSum = quoteExtraSum();
     var total = Math.round(sum * 1.1);
+    var discTotal = Math.round(discSum * 1.1);
     var sv = $('q_sumView'); if (sv) sv.textContent = sum ? qFmt(sum) : '0';
     var tv = $('q_totalView'); if (tv) tv.textContent = total ? qFmt(total) : '0';
     var esv = $('q_extraSumView'); if (esv) esv.textContent = extraSum ? qFmt(extraSum) : '0';
-    return { sum: sum, total: total, extraSum: extraSum };
+    return { sum: sum, total: total, extraSum: extraSum, discSum: discSum, discTotal: discTotal };
   }
 
   function quoteFloat(id, def) {
@@ -5436,12 +5411,16 @@ function bindQuoteRecipientSync() {
     row.innerHTML =
       '<input type="text" class="qf-lbl" placeholder="항목명 입력">' +
       '<input type="text" class="qf-amt" inputmode="numeric" placeholder="금액 입력">' +
+      '<label class="qf-disc-wrap"><input type="checkbox" class="qf-disc"></label>' +
       '<button type="button" class="qf-del">×</button>';
     feeRows.appendChild(row);
     var lblEl = row.querySelector('.qf-lbl');
     var amtEl = row.querySelector('.qf-amt');
+    var discEl = row.querySelector('.qf-disc');
     if (label != null) lblEl.value = label;
     if (amt != null && amt !== '') amtEl.value = qFmt(qNum(amt));
+    if (opts.presetKey) row.dataset.presetKey = opts.presetKey;
+    if (opts.disc) { discEl.checked = true; row.classList.add('qfee-disc-row'); }
     if (opts.baseRow || quoteIsBaseFeeLabel(label)) markAsBaseFeeRow(row);
     lblEl.addEventListener('input', function () {
       if (typeof updatePreview === 'function') updatePreview();
@@ -5455,8 +5434,14 @@ function bindQuoteRecipientSync() {
       if (typeof updatePreview === 'function') updatePreview();
       if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
     });
+    discEl.addEventListener('change', function () {
+      row.classList.toggle('qfee-disc-row', discEl.checked);
+      if (typeof updatePreview === 'function') updatePreview();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
     row.querySelector('.qf-del').addEventListener('click', function () {
       if (row.classList.contains('qfee-base-row')) return;
+      if (row.dataset.presetKey) quoteSyncPresetCheckbox(row.dataset.presetKey, false);
       row.remove();
       if (typeof updatePreview === 'function') updatePreview();
       if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
@@ -5464,6 +5449,63 @@ function bindQuoteRecipientSync() {
     return row;
   }
   window.addQuoteFeeItem = addQuoteFeeItem;
+
+  // ----- 기본 항목 빠른 선택 -----
+  var QUOTE_PRESETS = [
+    { key: 'settle', label: '결산할증적용' },
+    { key: 'credit', label: '세액공제적용' },
+    { key: 'honest', label: '성실신고확인' },
+    { key: 'joint',  label: '공동사업장' },
+    { key: 'mfg',    label: '제조원가명세서 작성' },
+    { key: 'cons',   label: '건설원가명세서 작성' },
+    { key: 'rnd',    label: '연구인력개발검토' }
+  ];
+
+  function quoteFindPresetRow(key) {
+    if (!feeRows) feeRows = $('q_feeRows');
+    if (!feeRows) return null;
+    return feeRows.querySelector('.qfee-row[data-preset-key="' + key + '"]');
+  }
+
+  function quoteSyncPresetCheckbox(key, checked) {
+    var cb = document.querySelector('#q_quickSelectList input[data-preset="' + key + '"]');
+    if (cb) cb.checked = !!checked;
+  }
+  window.quoteSyncPresetCheckbox = quoteSyncPresetCheckbox;
+
+  function quoteSyncAllPresetCheckboxes() {
+    QUOTE_PRESETS.forEach(function (p) {
+      quoteSyncPresetCheckbox(p.key, !!quoteFindPresetRow(p.key));
+    });
+  }
+  window.quoteSyncAllPresetCheckboxes = quoteSyncAllPresetCheckboxes;
+
+  function quoteRenderPresetList() {
+    var wrap = $('q_quickSelectList');
+    if (!wrap || wrap.dataset.built === '1') return;
+    wrap.dataset.built = '1';
+    QUOTE_PRESETS.forEach(function (p) {
+      var lab = document.createElement('label');
+      lab.className = 'qsel-item';
+      lab.innerHTML = '<input type="checkbox" data-preset="' + p.key + '"><span>' + escapeHtml(p.label) + '</span>';
+      var cb = lab.querySelector('input');
+      cb.addEventListener('change', function () {
+        if (cb.checked) {
+          if (!quoteFindPresetRow(p.key)) {
+            addQuoteFeeItem(p.label, '', { presetKey: p.key });
+          }
+        } else {
+          var row = quoteFindPresetRow(p.key);
+          if (row) row.remove();
+        }
+        if (typeof updatePreview === 'function') updatePreview();
+        if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+      });
+      wrap.appendChild(lab);
+    });
+    quoteSyncAllPresetCheckboxes();
+  }
+  quoteRenderPresetList();
 
 
   // ----- 기본보수표 하단 별도표(미입력시 미출력)(동적) -----
@@ -5571,7 +5613,8 @@ function bindQuoteRecipientSync() {
     var items = [];
     if (!feeRows) feeRows = $('q_feeRows');
     if (feeRows) feeRows.querySelectorAll('.qfee-row').forEach(function (r) {
-      items.push({ label: r.querySelector('.qf-lbl').value, amt: r.querySelector('.qf-amt').value, base: r.classList.contains('qfee-base-row'), manual: r.dataset.manual === '1' });
+      var discEl = r.querySelector('.qf-disc');
+      items.push({ label: r.querySelector('.qf-lbl').value, amt: r.querySelector('.qf-amt').value, base: r.classList.contains('qfee-base-row'), manual: r.dataset.manual === '1', disc: !!(discEl && discEl.checked), presetKey: r.dataset.presetKey || '' });
     });
     return items;
   }
@@ -5581,12 +5624,13 @@ function bindQuoteRecipientSync() {
     if (feeRows) feeRows.innerHTML = '';
     if (items && items.length) {
       items.forEach(function (it) {
-        var row = addQuoteFeeItem(it.label, it.amt, { baseRow: !!it.base || quoteIsBaseFeeLabel(it.label) });
+        var row = addQuoteFeeItem(it.label, it.amt, { baseRow: !!it.base || quoteIsBaseFeeLabel(it.label), disc: !!it.disc, presetKey: it.presetKey || '' });
         if (row && it.manual) row.dataset.manual = '1';
       });
     }
     ensureBaseFeeRow(false);
     if (!items || !items.length) addQuoteFeeItem();
+    quoteSyncAllPresetCheckboxes();
   }
 
   // ----- 견적서 미리보기 갱신 -----
@@ -5638,6 +5682,7 @@ function bindQuoteRecipientSync() {
         var lbl = (it.label || '').trim();
         if (!lbl && !amtN) return;   // 빈 행은 견적서에 출력하지 않음
         var isBaseRow = !!it.base || quoteIsBaseFeeLabel(lbl);
+        var rowCls = (isBaseRow ? ' q-basefee-row' : '') + (it.disc ? ' bB-disc-row' : '');
         var labelHtml = isBaseRow
           ? '<span class="q-basefee-print">' +
             '<span class="q-basefee-line">보수표에 의한</span>' +
@@ -5646,12 +5691,16 @@ function bindQuoteRecipientSync() {
             '</span>'
           : escapeHtml(lbl || '\u3000');
 
-        html += '<tr' + (isBaseRow ? ' class="q-basefee-row"' : '') + '><td class="bB-lab' + (isBaseRow ? ' q-basefee-lab' : '') + '">' + labelHtml + '</td>' +
+        html += '<tr' + (rowCls ? ' class="' + rowCls.trim() + '"' : '') + '><td class="bB-lab' + (isBaseRow ? ' q-basefee-lab' : '') + '">' + labelHtml + '</td>' +
                 '<td class="bB-val' + (isBaseRow ? ' q-basefee-val' : '') + '">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
 
       });
       html += '<tr><td class="bB-lab bB-sum">합\u3000\u3000계</td>' +
               '<td class="bB-sumval">' + (r.sum ? qFmt(r.sum) : '-') + '</td></tr>';
+      if (r.discSum > 0) {
+        html += '<tr class="bB-disctotal-row"><td class="bB-lab">할인적용총액(부가세 포함)</td>' +
+                '<td class="bB-val">' + qFmt(r.discTotal) + '</td></tr>';
+      }
       body.innerHTML = html;
     }
 
