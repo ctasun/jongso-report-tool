@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 17:31 (보수료 금액 입력식 실시간 계산 + 보수료 항목 입력폭 조정) -->
+<!-- BUILD_DATE: 2026-05-25 18:19 (견적서 이관 안내문구 체크값 저장 누락 보완) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1496,6 +1496,54 @@ textarea {
   color: #14264f;
   text-align: right;
 }
+
+#quote_panel .q-transfer-note-input {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid #d8dde6;
+  border-radius: 4px;
+  background: #fafbfc;
+}
+
+#quote_panel .q-transfer-note-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1a2c5b;
+  cursor: pointer;
+}
+
+#quote_panel .q-transfer-note-toggle input {
+  width: auto;
+  flex: none;
+  margin: 0;
+}
+
+#quote_panel .q-transfer-note-preview {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid #c9d3e6;
+  border-radius: 3px;
+  background: #fff;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #000;
+  word-break: keep-all;
+}
+
+.quote-page .q-transfer-note {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border: 1px solid #9aa9c6;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #000;
+  word-break: keep-all;
+  white-space: normal;
+}
 .quote-page .extraStd {
   width: 100%;
   border-collapse: collapse;
@@ -2063,7 +2111,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 17:31</span>
+    <span class="build-date">업데이트 2026-05-25 18:19</span>
   </div>
 </header>
 
@@ -2224,6 +2272,16 @@ textarea {
             </div>
         </div>
         <div class="q-col-right">
+          <div class="q-transfer-note-input">
+            <label class="q-transfer-note-toggle">
+              <input type="checkbox" id="q_transfer_note" data-field="q_transfer_note" checked>
+              기본 보수표 밑에 안내문구 인쇄
+            </label>
+            <div class="q-transfer-note-preview">
+              귀하는 수임 기간 동안 보고서에 추가증빙이 필요한 금액이 1회 이상 안내된 고객으로서 타 세무대리인 이관시 전산파일 없이 조정계산서만 PDF파일로 이관됩니다.
+            </div>
+          </div>
+
           <div class="q-col-title">자유입력란</div>
           <textarea id="q_free" data-field="q_free" placeholder="견적서 합계 박스 아래에 인쇄될 메모·특이사항을 자유롭게 입력하세요. (비워 두면 인쇄물에 표시되지 않습니다)"></textarea>
         </div>
@@ -2448,10 +2506,9 @@ textarea {
       </table>
       <div class="q-band"></div>
       <ol class="body-list">
-        <li><span class="bl-no">1.</span> 귀하의 일익 번창을 기원하며, 저희 세무법인삼호 남부지점이 귀하의 세무대리인으로서 전문적인 서비스를 제공할 수 있는 기회를 주신것에 무한한 감사의 말씀을 드립니다.</li>
-        <li><span class="bl-no">2.</span> 첨부된 【종합소득세 신고보고서】는 귀하의 자료 검토 및 종합소득세 신고 후 신고총평 및 향후 주의사항입니다. <span class="bl-warn">외부로 유출되지 않도록</span> 각별히 주의 부탁드립니다.</li>
-        <li><span class="bl-no">3.</span> 수임 기간 동안 보고서에 추가증빙이 필요한 금액이 1회 이상 안내된 고객은 타 세무대리인 이관시 전산파일 없이 조정계산서만 PDF파일로 이관됩니다.</li>
-        <li><span class="bl-no">4.</span> 2025년도 종합소득세 신고 및 세무조정에 대한 보수료를 안내해 드리겠습니다. 보수료는 <span class="q-val" id="qp_cmsdate"></span> CMS로 이체되오니 확인부탁드립니다.</li>
+        <li id="qp_body_intro"><span class="bl-no">1.</span> 귀하의 일익 번창을 기원하며, 저희 세무법인삼호 남부지점이 귀하의 세무대리인으로서 전문적인 서비스를 제공할 수 있는 기회를 주신것에 무한한 감사의 말씀을 드립니다.</li>
+        <li id="qp_body_report"><span class="bl-no" id="qp_report_no">2.</span> 첨부된 【종합소득세 신고보고서】는 귀하의 자료 검토 및 종합소득세 신고 후 신고총평 및 향후 주의사항입니다. <span class="bl-warn">외부로 유출되지 않도록</span> 각별히 주의 부탁드립니다.</li>
+        <li id="qp_body_fee"><span class="bl-no" id="qp_fee_no">3.</span> 2025년도 종합소득세 신고 및 세무조정에 대한 보수료를 안내해 드리겠습니다. 보수료는 <span class="q-val" id="qp_cmsdate"></span> CMS로 이체되오니 확인부탁드립니다.</li>
       </ol>
       <div class="q-tbl-row">
         <div class="q-tbl-left">
@@ -2462,7 +2519,10 @@ textarea {
             </tr>
           </table>
           <table class="boxB"><tbody id="qp_feeBody"></tbody></table>
-          <table class="extraStd is-hidden" id="qp_extraTable">
+                 <div class="q-transfer-note is-hidden" id="qp_transfer_note">
+                       귀하는 수임 기간 동안 보고서에 추가증빙이 필요한 금액이 1회 이상 안내된 고객으로서 타 세무대리인 이관시 전산파일 없이 조정계산서만 PDF파일로 이관됩니다.
+                </div>
+                <table class="extraStd is-hidden" id="qp_extraTable">
             <colgroup><col style="width:52%"><col style="width:48%"></colgroup>
             <thead><tr><th>항 목 명</th><th>금 액</th></tr></thead>
             <tbody id="qp_extraBody"></tbody>
@@ -5731,17 +5791,40 @@ function bindQuoteRecipientSync() {
     rc.textContent = rv || autoV || '\u3000';
   }
     var wd = $('qp_writedate');
-  if (wd) {
-    var wv = quoteFormatWriteDate((($('q_writedate') || {}).value || ''));
-    wd.textContent = wv ? wv : '\u3000';
-  }
+    if (wd) {
+      var w = quoteFormatWriteDate((($('q_writedate') || {}).value || ''));
+      wd.textContent = w ? w : '\u3000';
+    }
+
     var tt = $('qp_title');
     if (tt) {
       var tv = (($('q_title') || {}).value || '').trim();
       tt.textContent = tv ? tv : QUOTE_TITLE_DEFAULT;
     }
+
     var cm = $('qp_cmsdate');
-    if (cm) { cm.textContent = (($('q_cmsdate') || {}).value || ''); }
+    if (cm) {
+      cm.textContent = (($('q_cmsdate') || {}).value || '');
+    }
+
+    var qOnly = $('q_print_quote_only') ? $('q_print_quote_only').checked : false;
+    var reportLi = $('qp_body_report');
+    var feeNo = $('qp_fee_no');
+
+    if (reportLi) {
+      reportLi.classList.toggle('is-hidden', !!qOnly);
+    }
+
+    if (feeNo) {
+      feeNo.textContent = qOnly ? '2.' : '3.';
+    }
+
+    var transferNoteOn = $('q_transfer_note') ? $('q_transfer_note').checked : true;
+    var transferNoteBox = $('qp_transfer_note');
+
+    if (transferNoteBox) {
+      transferNoteBox.classList.toggle('is-hidden', !transferNoteOn);
+    }
 
     var income = qNum(($('q_income') || {}).value) || 0;
     var qi = $('qp_income');
@@ -5839,7 +5922,7 @@ function bindQuoteRecipientSync() {
     var sv = function (id, v) { var el = $(id); if (el) el.value = (v == null ? '' : v); };
     if ($('q_enable')) $('q_enable').checked = (q.enable === undefined ? true : !!q.enable);
     if ($('q_print_quote_only')) $('q_print_quote_only').checked = !!q.print_quote_only;
-      if ($('q_taxcredit_note')) $('q_taxcredit_note').checked = !!q.taxcredit_note;
+      if ($('q_transfer_note')) $('q_transfer_note').checked = (q.transfer_note === undefined ? true : !!q.transfer_note);
     sv('q_writedate', quoteNormalizeWriteDateInput(q.writedate));
     quoteUpdateWriteDateDisplay();
 
@@ -5865,32 +5948,33 @@ function bindQuoteRecipientSync() {
     setExtraItems(q.extraItems);
   }
   function quoteCollectData() {
-    var gv = function (id) { var el = $(id); return el ? el.value : ''; };
-    var titleEl = $('q_title');
-    var titleRaw = titleEl ? String(titleEl.value || '').trim() : '';
-    var titleEdited = !!(titleEl && titleEl.dataset.userEdited === '1' && titleRaw && titleRaw !== QUOTE_TITLE_DEFAULT);
+       var gv = function (id) { var el = $(id); return el ? el.value : ''; };
+       var titleEl = $('q_title');
+       var titleRaw = titleEl ? String(titleEl.value || '').trim() : '';
+       var titleEdited = !!(titleEl && titleEl.dataset.userEdited === '1' && titleRaw && titleRaw !== QUOTE_TITLE_DEFAULT);
 
-    var recipientEl = $('q_recipient');
-    var recipientRaw = quoteNormalizeRecipient(gv('q_recipient'));
-    var recipientEdited = !!(recipientEl && recipientEl.dataset.userEdited === '1' && recipientRaw);
+       var recipientEl = $('q_recipient');
+       var recipientRaw = quoteNormalizeRecipient(gv('q_recipient'));
+       var recipientEdited = !!(recipientEl && recipientEl.dataset.userEdited === '1' && recipientRaw);
 
-   return {
-      enable: $('q_enable') ? $('q_enable').checked : true,
-      print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
-      recipient: recipientEdited ? recipientRaw : '',
-      recipient_user_edited: recipientEdited,
-      writedate: quoteNormalizeWriteDateInput(gv('q_writedate')),
-      title: titleEdited ? titleRaw : '',
-      title_user_edited: titleEdited,
-      cmsdate: gv('q_cmsdate'),
-      income: gv('q_income'),
-      weight: gv('q_weight'),
-      adjust: gv('q_adjust'),
-      free: gv('q_free'),
-      items: collectFeeItems(),
-      extraItems: collectExtraItems()
-    };
-  }
+       return {
+          enable: $('q_enable') ? $('q_enable').checked : true,
+          print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
+          transfer_note: $('q_transfer_note') ? $('q_transfer_note').checked : true,
+          recipient: recipientEdited ? recipientRaw : '',
+          recipient_user_edited: recipientEdited,
+          writedate: quoteNormalizeWriteDateInput(gv('q_writedate')),
+          title: titleEdited ? titleRaw : '',
+          title_user_edited: titleEdited,
+          cmsdate: gv('q_cmsdate'),
+          income: gv('q_income'),
+          weight: gv('q_weight'),
+          adjust: gv('q_adjust'),
+          free: gv('q_free'),
+          items: collectFeeItems(),
+          extraItems: collectExtraItems()
+       };
+    }
 
   // ----- override: updatePreview -----
   if (typeof updatePreview === 'function') {
