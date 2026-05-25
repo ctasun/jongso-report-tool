@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-24 22:19 (반영후 음수 입력·절세효과 표·이월결손금 주석·카드 필요경비·반영전 음수 표시) -->
+<!-- BUILD_DATE: 2026-05-25 09:28 (반영후 음수 입력·절세효과 표·이월결손금 주석·카드 필요경비·반영전 음수 표시) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1941,7 +1941,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-24 22:19</span>
+    <span class="build-date">업데이트 2026-05-25 09:28</span>
   </div>
 </header>
 
@@ -3161,26 +3161,41 @@ function updatePreview() {
   var opItems = document.querySelectorAll('#opinions_list .opinion-item');
   var rpOpBody = document.getElementById('rp_opinions_body');
   rpOpBody.innerHTML = '';
-  var opShown = 0;
-  opItems.forEach(function (item, idx) {
+
+  var visibleOpinions = [];
+  opItems.forEach(function (item) {
     var oid = item.dataset.oid;
     var img = imageStore[oid];
     var txt = (item.querySelector('textarea').value || '').trim();
+
     if (!img && !txt) return;
-    opShown++;
+
+    visibleOpinions.push({
+      img: img,
+      txt: txt
+    });
+  });
+
+  visibleOpinions.forEach(function (op, idx) {
+    var showLabel = visibleOpinions.length > 1;
     var no = getCircled(idx + 1);
+    var labelHtml = showLabel ? '<span class="rp-opinion-label">의견 ' + no + '</span>' : '';
     var html = '';
-    if (img) {
-      html += '<div class="rp-op-img"><img src="' + img + '" alt=""></div>';
+
+    if (op.img) {
+      html += '<div class="rp-op-img"><img src="' + op.img + '" alt=""></div>';
     }
-    if (txt) {
-      html += '<div class="rp-opinion"><span class="rp-opinion-label">의견 ' + no + '</span>' + escapeHtml(txt) + '</div>';
+
+    if (op.txt) {
+      html += '<div class="rp-opinion">' + labelHtml + escapeHtml(op.txt) + '</div>';
     } else {
-      html += '<div class="rp-opinion"><span class="rp-opinion-label">의견 ' + no + '</span></div>';
+      html += '<div class="rp-opinion">' + labelHtml + '</div>';
     }
+
     rpOpBody.insertAdjacentHTML('beforeend', html);
   });
-  toggleSection('sec_opinions', opShown > 0);
+
+  toggleSection('sec_opinions', visibleOpinions.length > 0);
 
   renumberReportSections();
 }
