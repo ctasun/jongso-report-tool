@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 15:28 (인쇄 헤더 검정굵게 + 보고공문 줄간격 70%) -->
+<!-- BUILD_DATE: 2026-05-25 16:06 (푸터 글자 화면 12px + 손익계산서 제목 기수통합 + 세액공제항목 어절 줄바꿈) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -614,7 +614,8 @@ textarea {
 
 .rp-table td.item-cell {
   text-align: center;
-  word-break: break-all;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
   white-space: normal;
   line-height: 1.45;
   padding: 8px 4px;
@@ -2017,6 +2018,17 @@ textarea {
   }
 }
 </style>
+<style>
+/* PATCH: 보고서 푸터(보고공문·수수료 안내문) — 화면 표시만 12px, 인쇄는 16px 유지 */
+@media screen {
+  .rp-footer .guide-box,
+  .rp-footer .guide-text,
+  .rp-footer .taxcredit-note-report,
+  .rp-footer .taxcredit-note-report p {
+    font-size: 12px;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -2028,7 +2040,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 15:28</span>
+    <span class="build-date">업데이트 2026-05-25 16:06</span>
   </div>
 </header>
 
@@ -2298,11 +2310,7 @@ textarea {
     </section>
 
     <section class="input-section" id="pl_panel">
-      <h3>5. 손익계산서</h3>
-      <div class="field" style="margin-bottom:10px;">
-        <label>당기 기수</label>
-        <input type="text" id="inp_pl_period" data-field="pl_period" inputmode="numeric" placeholder="예: 5  (비우면 머리글이 '당기/전기'로 표시)">
-      </div>
+      <h3>5. 손익계산서(당기 <input type="text" id="inp_pl_period" data-field="pl_period" inputmode="numeric" placeholder="5" style="width:54px; padding:3px 6px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-weight:400; font-family:inherit; text-align:center; vertical-align:middle;"> 기)</h3>
       <div class="pl-input-head">
         <span>과목</span><span>당기</span><span>전기</span><span>증감(자동)</span>
       </div>
