@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 11:09 (견적서 본문 문구 수정·자동번호함수추가·비교손익계산서 추가) -->
+<!-- BUILD_DATE: 2026-05-25 13:09 (보수표아래 멘트 추가) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1585,7 +1585,7 @@ textarea {
 .quote-page .q-tbl-row {
   gap: 14px !important;
   align-items: flex-start !important;
-  margin: 24px 0 6px !important;
+  margin: 12px 0 6px !important;
 }
 
 .quote-page .q-tbl-left {
@@ -1764,6 +1764,54 @@ textarea {
 }
 .quote-page .feeStd tbody .fs-rategrp .fs-mul { transform-origin: right center !important; }
 .quote-page .feeStd tbody .fs-rategrp .fs-rate { transform-origin: left center !important; }
+#quote_panel .qtaxnote-wrap {
+  margin-top: 12px;
+  border-top: 1px dashed #d8dde6;
+  padding-top: 10px;
+}
+
+#quote_panel .qtaxnote-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1a2c5b;
+  cursor: pointer;
+}
+
+#quote_panel .qtaxnote-toggle input {
+  width: auto;
+  flex: none;
+  margin: 0;
+}
+
+#quote_panel .qtaxnote-help {
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #777;
+}
+
+.quote-page .taxcredit-note-print {
+  margin-top: 8px;
+  border: 1px solid #9aa9c6;
+  border-radius: 2px;
+  padding: 8px 9px;
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: #000;
+  word-break: keep-all;
+  white-space: normal;
+}
+
+.quote-page .taxcredit-note-print p {
+  margin: 0 0 7px;
+}
+
+.quote-page .taxcredit-note-print p:last-child {
+  margin-bottom: 0;
+}
 </style>
 
 <style id="total-service-fee-gap-half">
@@ -1941,7 +1989,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 11:09</span>
+    <span class="build-date">업데이트 2026-05-25 13:09</span>
   </div>
 </header>
 
@@ -2091,6 +2139,15 @@ textarea {
             <div id="q_extraRows"></div>
             <button type="button" class="btn-add" onclick="addQuoteExtraItem()">＋ 별도 항목 추가</button>
             <div class="qextra-sum">별도 표 합계: <span id="q_extraSumView">0</span> 원</div>
+            <div class="qtaxnote-wrap">
+              <label class="qtaxnote-toggle">
+                <input type="checkbox" id="q_taxcredit_note" data-field="q_taxcredit_note">
+                세액공제·감면 추가멘트 표시
+              </label>
+              <div class="qtaxnote-help">
+                체크 시 견적서 오른쪽 보수표 바로 아래에 출력·인쇄됩니다.
+              </div>
+            </div> 
           </div>
         </div>
         <div class="q-col-right">
@@ -2345,6 +2402,11 @@ textarea {
               <tr id="fs11"><td class="fs-rng"><span class="fs-txt">100억원 이상</span></td><td class="fs-rng"><span class="fs-txt"></span></td><td class="fs-std"><span class="fs-line"><span class="fs-amt">4,500,000</span><span class="fs-plus">+</span><span class="fs-base">100억원 초과액</span><span class="fs-rategrp"><span class="fs-mul">*</span><span class="fs-rate">0.0042%</span></span></span></td></tr>
             </tbody>
           </table>
+          <div class="taxcredit-note-print is-hidden" id="qp_taxcredit_note_box">
+            <p>외부 경정청구 전문업체는 통상 세액공제·감면 신청분의 30%를 수수료로 청구하고 있으나, 이는 사후관리 없는 일회성 신청 비용입니다. 국세청으로부터 소명요청이 필요한 시점에는 담당자 퇴사나 연락 부재로 서비스가 제대로 되지 않고, 사후관리 요청 시 최대 30%의 추가 수수료를 별도로 요구하고 있습니다.</p>
+            <p>당사는 월정 수수료를 지불하시는 기장 고객님에 한하여 최소한의 수수료만을 가산하여 청구합니다. 여기에는 고객별로 가장 유리한 세액공제·감면 검토부터 신청, 그리고 철저한 사후관리까지 모두 포함되어 있습니다.</p>
+            <p>당사는 제공되는 서비스의 전문성에 기반한 정직한 수수료 체계를 운영하고 있습니다. 언제나 그렇듯 최선을 다하겠습니다. 믿고 맡겨 주셔서 감사합니다.</p>
+          </div>
         </div>
       </div>
       <div class="q-page-bottom">
@@ -5525,7 +5587,11 @@ function bindQuoteRecipientSync() {
       if (freeV.trim()) { fb.textContent = freeV; fb.classList.remove('is-hidden'); }
       else { fb.textContent = ''; fb.classList.add('is-hidden'); }
     }
-
+    var taxNoteBox = $('qp_taxcredit_note_box');
+    var taxNoteOn = $('q_taxcredit_note') ? $('q_taxcredit_note').checked : false;
+    if (taxNoteBox) {
+      taxNoteBox.classList.toggle('is-hidden', !taxNoteOn);
+    }
     var tier = feeTier(income);
     for (var n = 1; n <= 11; n++) {
       var row = $('fs' + n);
@@ -5547,6 +5613,7 @@ function bindQuoteRecipientSync() {
     var sv = function (id, v) { var el = $(id); if (el) el.value = (v == null ? '' : v); };
     if ($('q_enable')) $('q_enable').checked = (q.enable === undefined ? true : !!q.enable);
     if ($('q_print_quote_only')) $('q_print_quote_only').checked = !!q.print_quote_only;
+      if ($('q_taxcredit_note')) $('q_taxcredit_note').checked = !!q.taxcredit_note;
     setQuoteRecipientValue(q.recipient, q.recipient_user_edited);
     sv('q_writedate', quoteNormalizeWriteDateInput(q.writedate));
     quoteUpdateWriteDateDisplay();
@@ -5585,6 +5652,7 @@ function bindQuoteRecipientSync() {
    return {
       enable: $('q_enable') ? $('q_enable').checked : true,
       print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
+          taxcredit_note: $('q_taxcredit_note') ? $('q_taxcredit_note').checked : false,
       recipient: recipientEdited ? recipientRaw : '',
       recipient_user_edited: recipientEdited,
       writedate: quoteNormalizeWriteDateInput(gv('q_writedate')),
