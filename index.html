@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-25 18:19 (견적서 이관 안내문구 체크값 저장 누락 보완) -->
+<!-- BUILD_DATE: 2026-05-25 18:30 (견적서 안내문구 출력 위치 변경 + 세액공제적용 고객 자유입력란 신설) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1497,7 +1497,8 @@ textarea {
   text-align: right;
 }
 
-#quote_panel .q-transfer-note-input {
+#quote_panel .q-transfer-note-input,
+#quote_panel .q-taxcredit-customer-input {
   margin-bottom: 10px;
   padding: 10px 12px;
   border: 1px solid #d8dde6;
@@ -1505,7 +1506,8 @@ textarea {
   background: #fafbfc;
 }
 
-#quote_panel .q-transfer-note-toggle {
+#quote_panel .q-transfer-note-toggle,
+#quote_panel .q-taxcredit-customer-toggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1515,7 +1517,8 @@ textarea {
   cursor: pointer;
 }
 
-#quote_panel .q-transfer-note-toggle input {
+#quote_panel .q-transfer-note-toggle input,
+#quote_panel .q-taxcredit-customer-toggle input {
   width: auto;
   flex: none;
   margin: 0;
@@ -1533,17 +1536,30 @@ textarea {
   word-break: keep-all;
 }
 
-.quote-page .q-transfer-note {
+#quote_panel .q-taxcredit-note-box {
   margin-top: 8px;
-  margin-bottom: 12px;
-  padding: 8px 10px;
-  border: 1px solid #9aa9c6;
-  font-size: 12px;
+  min-height: 110px;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.quote-page .q-under-table-note,
+.quote-page .q-taxcredit-note-print {
+  margin: 10px 0 12px;
+  padding: 9px 4px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
   line-height: 1.65;
   color: #000;
   word-break: keep-all;
-  white-space: normal;
+  white-space: pre-wrap;
 }
+
+.quote-page .q-under-table-note + .q-taxcredit-note-print {
+  margin-top: 0;
+}
+
 .quote-page .extraStd {
   width: 100%;
   border-collapse: collapse;
@@ -2111,7 +2127,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-25 18:19</span>
+    <span class="build-date">업데이트 2026-05-25 18:30</span>
   </div>
 </header>
 
@@ -2275,15 +2291,21 @@ textarea {
           <div class="q-transfer-note-input">
             <label class="q-transfer-note-toggle">
               <input type="checkbox" id="q_transfer_note" data-field="q_transfer_note" checked>
-              기본 보수표 밑에 안내문구 인쇄
+              수입금액, 보수기준 아래 안내문구 인쇄
             </label>
             <div class="q-transfer-note-preview">
               귀하는 수임 기간 동안 보고서에 추가증빙이 필요한 금액이 1회 이상 안내된 고객으로서 타 세무대리인 이관시 전산파일 없이 조정계산서만 PDF파일로 이관됩니다.
             </div>
           </div>
 
-          <div class="q-col-title">자유입력란</div>
-          <textarea id="q_free" data-field="q_free" placeholder="견적서 합계 박스 아래에 인쇄될 메모·특이사항을 자유롭게 입력하세요. (비워 두면 인쇄물에 표시되지 않습니다)"></textarea>
+          <div class="q-taxcredit-customer-input">
+            <div class="q-col-title">세액공제적용 고객 체크박스</div>
+            <label class="q-taxcredit-customer-toggle">
+              <input type="checkbox" id="q_taxcredit_customer" data-field="q_taxcredit_customer">
+              세액공제적용 고객 안내문구 인쇄
+            </label>
+            <textarea id="q_taxcredit_note" class="q-taxcredit-note-box" data-field="q_taxcredit_note" placeholder="세액공제적용 고객에게 인쇄할 안내문구를 자유롭게 입력하세요. 체크박스가 선택되어 있고 입력값이 있을 때만 견적서에 인쇄됩니다."></textarea>
+          </div>
         </div>
       </div>
       <div class="help-text">
@@ -2291,7 +2313,7 @@ textarea {
         ※ 「＋ 항목 추가」로 보수료 항목을 늘리고 「×」로 지웁니다. 항목명과 금액을 직접 입력합니다.<br>
         ※ 기본보수료 행은 보수료 항목 맨 위에 고정됩니다. 기본값은 「보수기준표 기본보수료 × 1.023 × 결산조정 × 가중치」이며, 금액은 직접 수정할 수 있습니다.<br>
         ※ 합계 = 보수료 항목 금액의 합, 총용역수수료 = 합계 × 1.1(부가세 포함). 자동 계산됩니다.<br>
-        ※ 자유입력란을 비우면 견적서에서 메모 박스가 사라집니다.<br>
+        ※ 세액공제적용 고객 안내문구는 체크박스가 선택되어 있고 입력값이 있을 때만 견적서에 표시됩니다.<br>
         ※ 「인쇄 시 견적서만 출력」을 체크하면 인쇄/PDF 저장 시 보고서 본문은 제외되고 견적서만 출력됩니다.<br>
         ※ 「견적서를 보고서 1페이지로 포함」 체크를 해제하면 견적서 없이 보고서만 인쇄됩니다.
       </div>
@@ -2519,16 +2541,12 @@ textarea {
             </tr>
           </table>
           <table class="boxB"><tbody id="qp_feeBody"></tbody></table>
-                 <div class="q-transfer-note is-hidden" id="qp_transfer_note">
-                       귀하는 수임 기간 동안 보고서에 추가증빙이 필요한 금액이 1회 이상 안내된 고객으로서 타 세무대리인 이관시 전산파일 없이 조정계산서만 PDF파일로 이관됩니다.
-                </div>
-                <table class="extraStd is-hidden" id="qp_extraTable">
+                 <table class="extraStd is-hidden" id="qp_extraTable">
             <colgroup><col style="width:52%"><col style="width:48%"></colgroup>
             <thead><tr><th>항 목 명</th><th>금 액</th></tr></thead>
             <tbody id="qp_extraBody"></tbody>
           </table>
-          <div class="free-print is-hidden" id="qp_free_box"></div>
-        </div>
+         </div>
         <div class="q-tbl-right">
           <table class="feeStd">
             <colgroup><col style="width:21%"><col style="width:19%"><col style="width:60%"></colgroup>
@@ -2549,7 +2567,12 @@ textarea {
           </table>
           </div>
       </div>
+      <div class="q-under-table-note is-hidden" id="qp_transfer_note">
+        귀하는 수임 기간 동안 보고서에 추가증빙이 필요한 금액이 1회 이상 안내된 고객으로서 타 세무대리인 이관시 전산파일 없이 조정계산서만 PDF파일로 이관됩니다.
+      </div>
+      <div class="q-taxcredit-note-print is-hidden" id="qp_taxcredit_note_box"></div>
       <div class="q-page-bottom">
+
         <div class="total-box">
           총 용 역 수 수 료 :　<span class="total-val" id="qp_total">　</span>　<span class="total-tail">원 (부가세 포함)</span>
         </div>
@@ -5785,11 +5808,12 @@ function bindQuoteRecipientSync() {
     qp.classList.toggle('is-hidden', !enable);
 
     var rc = $('qp_recipient');
-  if (rc) {
-    var rv = quoteNormalizeRecipient(($('q_recipient') || {}).value || '');
-    var autoV = quoteAutoRecipientValue();
-    rc.textContent = rv || autoV || '\u3000';
-  }
+    if (rc) {
+      var rv = quoteNormalizeRecipient(($('q_recipient') || {}).value || '');
+      var autoV = quoteAutoRecipientValue();
+      rc.textContent = rv || autoV || '\u3000';
+    }
+
     var wd = $('qp_writedate');
     if (wd) {
       var w = quoteFormatWriteDate((($('q_writedate') || {}).value || ''));
@@ -5819,18 +5843,10 @@ function bindQuoteRecipientSync() {
       feeNo.textContent = qOnly ? '2.' : '3.';
     }
 
-    var transferNoteOn = $('q_transfer_note') ? $('q_transfer_note').checked : true;
-    var transferNoteBox = $('qp_transfer_note');
-
-    if (transferNoteBox) {
-      transferNoteBox.classList.toggle('is-hidden', !transferNoteOn);
-    }
-
     var income = qNum(($('q_income') || {}).value) || 0;
     var qi = $('qp_income');
     if (qi) qi.textContent = income ? qFmt(income) : '\u3000';
 
-    // 수입금액 기준 기본보수료 및 가중치 적용 산정금액 — 라이브 표시
     var baseFee = calcBaseFee(income);
     var calcFee = calcWeightedBaseFee(income);
     var bv = $('q_basefeeView');
@@ -5839,7 +5855,6 @@ function bindQuoteRecipientSync() {
     if (cv) cv.textContent = calcFee ? qFmt(calcFee) : '0';
     ensureBaseFeeRow(false);
 
-    // 보수료 항목 → 합계 + boxB 동적 렌더
     var r = quoteRecalc();
     var body = $('qp_feeBody');
     if (body) {
@@ -5847,7 +5862,8 @@ function bindQuoteRecipientSync() {
       collectFeeItems().forEach(function (it) {
         var amtN = qNum(it.amt) || 0;
         var lbl = (it.label || '').trim();
-        if (!lbl && !amtN) return;   // 빈 행은 견적서에 출력하지 않음
+        if (!lbl && !amtN) return;
+
         var isBaseRow = !!it.base || quoteIsBaseFeeLabel(lbl);
         var rowCls = (isBaseRow ? ' q-basefee-row' : '') + (it.disc ? ' bB-disc-row' : '');
         var labelHtml = isBaseRow
@@ -5860,14 +5876,16 @@ function bindQuoteRecipientSync() {
 
         html += '<tr' + (rowCls ? ' class="' + rowCls.trim() + '"' : '') + '><td class="bB-lab' + (isBaseRow ? ' q-basefee-lab' : '') + '">' + labelHtml + '</td>' +
                 '<td class="bB-val' + (isBaseRow ? ' q-basefee-val' : '') + '">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
-
       });
+
       html += '<tr><td class="bB-lab bB-sum">합\u3000\u3000계</td>' +
               '<td class="bB-sumval">' + (r.sum ? qFmt(r.sum) : '-') + '</td></tr>';
+
       if (r.discSum > 0) {
         html += '<tr class="bB-disctotal-row"><td class="bB-lab">할인적용총액(부가세 포함)</td>' +
                 '<td class="bB-val">' + qFmt(r.discTotal) + '</td></tr>';
       }
+
       body.innerHTML = html;
     }
 
@@ -5881,6 +5899,7 @@ function bindQuoteRecipientSync() {
         extraHtml += '<tr><td class="qx-lab-print">' + escapeHtml((it.label || '').trim() || '\u3000') + '</td>' +
                      '<td class="qx-amt-print">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
       });
+
       if (extraItems.length) {
         extraHtml += '<tr><td class="qx-sum-lab">합\u3000\u3000계</td>' +
                      '<td class="qx-sum-val">' + (r.extraSum ? qFmt(r.extraSum) : '-') + '</td></tr>';
@@ -5892,21 +5911,35 @@ function bindQuoteRecipientSync() {
       }
     }
 
+    var transferNoteOn = $('q_transfer_note') ? $('q_transfer_note').checked : true;
+    var transferNoteBox = $('qp_transfer_note');
+    if (transferNoteBox) {
+      transferNoteBox.classList.toggle('is-hidden', !transferNoteOn);
+    }
+
+    var taxcreditOn = $('q_taxcredit_customer') ? $('q_taxcredit_customer').checked : false;
+    var taxcreditNote = (($('q_taxcredit_note') || {}).value) || '';
+    var taxcreditBox = $('qp_taxcredit_note_box');
+    if (taxcreditBox) {
+      if (taxcreditOn && taxcreditNote.trim()) {
+        taxcreditBox.textContent = taxcreditNote;
+        taxcreditBox.classList.remove('is-hidden');
+      } else {
+        taxcreditBox.textContent = '';
+        taxcreditBox.classList.add('is-hidden');
+      }
+    }
+
     var qt = $('qp_total');
     if (qt) qt.textContent = r.total ? qFmt(r.total) : '\u3000';
 
-    var freeV = (($('q_free') || {}).value) || '';
-    var fb = $('qp_free_box');
-    if (fb) {
-      if (freeV.trim()) { fb.textContent = freeV; fb.classList.remove('is-hidden'); }
-      else { fb.textContent = ''; fb.classList.add('is-hidden'); }
-    }
     var tier = feeTier(income);
     for (var n = 1; n <= 11; n++) {
       var row = $('fs' + n);
       if (row) row.classList.toggle('fs-active', n === tier);
     }
   }
+
   window.quoteUpdatePreview = quoteUpdatePreview;
 
   // ----- 견적서 데이터 적용/수집 -----
@@ -5920,14 +5953,20 @@ function bindQuoteRecipientSync() {
   function quoteApplyData(q) {
     q = q || {};
     var sv = function (id, v) { var el = $(id); if (el) el.value = (v == null ? '' : v); };
+
     if ($('q_enable')) $('q_enable').checked = (q.enable === undefined ? true : !!q.enable);
     if ($('q_print_quote_only')) $('q_print_quote_only').checked = !!q.print_quote_only;
-      if ($('q_transfer_note')) $('q_transfer_note').checked = (q.transfer_note === undefined ? true : !!q.transfer_note);
+    if ($('q_transfer_note')) $('q_transfer_note').checked = (q.transfer_note === undefined ? true : !!q.transfer_note);
+
+    var legacyFree = q.free == null ? '' : q.free;
+    var taxcreditNote = q.taxcredit_note === undefined ? legacyFree : q.taxcredit_note;
+    if ($('q_taxcredit_customer')) {
+      $('q_taxcredit_customer').checked = q.taxcredit_customer === undefined ? !!String(taxcreditNote || '').trim() : !!q.taxcredit_customer;
+    }
+
     sv('q_writedate', quoteNormalizeWriteDateInput(q.writedate));
     quoteUpdateWriteDateDisplay();
 
-    // 제목은 기본값 고정. 사용자가 직접 수정한 경우에만 저장된 수정 제목을 복원한다.
-    // 구버전 슬롯/자동저장에 남은 비정상 제목값은 기본 제목으로 되돌린다.
     var titleEdited = (q.title_user_edited === true || q.title_user_edited === '1');
     setQuoteTitleValue(titleEdited ? q.title : QUOTE_TITLE_DEFAULT, titleEdited);
 
@@ -5935,8 +5974,8 @@ function bindQuoteRecipientSync() {
     sv('q_income', q.income);
     sv('q_weight', q.weight === undefined ? '1.2' : q.weight);
     sv('q_adjust', q.adjust === undefined ? '1' : q.adjust);
-    sv('q_free', q.free);
-    // 보수료 항목: 신규 items 우선, 없으면 구버전(basefee/honest/explain) 자동 변환
+    sv('q_taxcredit_note', taxcreditNote);
+
     var items = q.items;
     if (!items && (q.basefee || q.honest || q.explain)) {
       items = [];
@@ -5944,6 +5983,7 @@ function bindQuoteRecipientSync() {
       if (q.honest) items.push({ label: '성실신고확인', amt: q.honest });
       if (q.explain) items.push({ label: '신고후소명', amt: q.explain });
     }
+
     setFeeItems(items);
     setExtraItems(q.extraItems);
   }
@@ -5957,10 +5997,15 @@ function bindQuoteRecipientSync() {
        var recipientRaw = quoteNormalizeRecipient(gv('q_recipient'));
        var recipientEdited = !!(recipientEl && recipientEl.dataset.userEdited === '1' && recipientRaw);
 
+       var taxcreditNote = gv('q_taxcredit_note');
+
        return {
           enable: $('q_enable') ? $('q_enable').checked : true,
           print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
           transfer_note: $('q_transfer_note') ? $('q_transfer_note').checked : true,
+          taxcredit_customer: $('q_taxcredit_customer') ? $('q_taxcredit_customer').checked : false,
+          taxcredit_note: taxcreditNote,
+          free: taxcreditNote,
           recipient: recipientEdited ? recipientRaw : '',
           recipient_user_edited: recipientEdited,
           writedate: quoteNormalizeWriteDateInput(gv('q_writedate')),
@@ -5970,7 +6015,6 @@ function bindQuoteRecipientSync() {
           income: gv('q_income'),
           weight: gv('q_weight'),
           adjust: gv('q_adjust'),
-          free: gv('q_free'),
           items: collectFeeItems(),
           extraItems: collectExtraItems()
        };
@@ -6092,7 +6136,7 @@ bindQuoteWriteDateFormat();
     quoteUpdatePreview();
     try {
       if (typeof autoResizeTextarea === 'function') {
-        var f = $('q_free');
+        var f = $('q_taxcredit_note');
         if (f) autoResizeTextarea(f);
       }
     } catch (e) {}
