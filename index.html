@@ -2488,7 +2488,7 @@ textarea {
         <div class="cy-toggle-body" id="cy_toggle_body">
           <label class="cy-year">
             <input type="checkbox" id="inp_caution_y2025_chk" data-field="caution_y2025_chk" onchange="syncCautionYearGroup('2025')">
-            <span>2025년 귀속 신고안내문(위 안내문 참조)</span>
+            <span>2025년 귀속분 개별분석안내(위 안내문 참조)</span>
           </label>
           <div class="cy-group" id="cy_group_2025" style="display:none;">
             <div class="cy-row"><span class="cy-num">①</span><input type="text" id="inp_caution_y2025_n1" data-field="caution_y2025_n1"></div>
@@ -2497,7 +2497,7 @@ textarea {
           </div>
           <label class="cy-year">
             <input type="checkbox" id="inp_caution_y2024_chk" data-field="caution_y2024_chk" onchange="syncCautionYearGroup('2024')">
-            <span>2024년 귀속 신고안내문</span>
+            <span>2024년 귀속분 개별분석안내</span>
           </label>
           <div class="cy-group" id="cy_group_2024" style="display:none;">
             <div class="cy-row"><span class="cy-num">①</span><input type="text" id="inp_caution_y2024_n1" data-field="caution_y2024_n1"></div>
@@ -2506,7 +2506,7 @@ textarea {
           </div>
           <label class="cy-year">
             <input type="checkbox" id="inp_caution_y2023_chk" data-field="caution_y2023_chk" onchange="syncCautionYearGroup('2023')">
-            <span>2023년 귀속 신고안내문</span>
+            <span>2023년 귀속분 개별분석안내</span>
           </label>
           <div class="cy-group" id="cy_group_2023" style="display:none;">
             <div class="cy-row"><span class="cy-num">①</span><input type="text" id="inp_caution_y2023_n1" data-field="caution_y2023_n1"></div>
@@ -2515,7 +2515,7 @@ textarea {
           </div>
           <label class="cy-year">
             <input type="checkbox" id="inp_caution_y2022_chk" data-field="caution_y2022_chk" onchange="syncCautionYearGroup('2022')">
-            <span>2022년 귀속 신고안내문</span>
+            <span>2022년 귀속분 개별분석안내</span>
           </label>
           <div class="cy-group" id="cy_group_2022" style="display:none;">
             <div class="cy-row"><span class="cy-num">①</span><input type="text" id="inp_caution_y2022_n1" data-field="caution_y2022_n1"></div>
@@ -3543,10 +3543,10 @@ function buildCautionOpinion() {
   if (free) parts.push(free);
   var CY_MARK = ['①', '②', '③'];
   var years = [
-    { y: '2025', head: '2025년 귀속 신고안내문(위 안내문 참조)' },
-    { y: '2024', head: '2024년 귀속 신고안내문' },
-    { y: '2023', head: '2023년 귀속 신고안내문' },
-    { y: '2022', head: '2022년 귀속 신고안내문' }
+    { y: '2025', head: '2025년 귀속분 개별분석안내(위 안내문 참조)' },
+    { y: '2024', head: '2024년 귀속분 개별분석안내' },
+    { y: '2023', head: '2023년 귀속분 개별분석안내' },
+    { y: '2022', head: '2022년 귀속분 개별분석안내' }
   ];
   var blocks = [];
   years.forEach(function (yr) {
