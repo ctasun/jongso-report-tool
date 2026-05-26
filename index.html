@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 09:32 (견적서 기본보수료·추가항목 표 색상 정리) -->
+<!-- BUILD_DATE: 2026-05-26 10:26 (보수료 항목 헤더 결산수수료 포함 체크박스 추가·결산조정 하한 해제) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2177,7 +2177,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 09:32</span>
+    <span class="build-date">업데이트 2026-05-26 10:26</span>
   </div>
 </header>
 
@@ -2303,13 +2303,13 @@ textarea {
             <span class="qauto-label">수입금액 기준 기본보수료</span>
             <span class="qauto-amt"><span id="q_basefeeView">0</span> 원</span>
             <label class="qauto-control">결산조정
-              <input type="number" id="q_weight" data-field="q_weight" min="1.2" max="3" step="0.1" value="1.2">
+              <input type="number" id="q_weight" data-field="q_weight" max="3" step="0.1" value="1.2">
             </label>
             <label class="qauto-control">가중치
               <input type="number" id="q_adjust" data-field="q_adjust" step="0.1" value="1">
             </label>
             <div class="qauto-formula">
-              기본보수료 행 기본값 = 보수기준표 기본보수료 × 1.023 × 결산조정 × 가중치
+              기본보수료 행 기본값 = 보수기준표 기본보수료 × 1.023 × 가중치 (「결산수수료 포함」 체크 시 × 결산조정)
               <strong>(자동산정: <span id="q_calcfeeView">0</span> 원)</strong>
             </div>
           </div>
@@ -2363,7 +2363,7 @@ textarea {
       <div class="help-text">
         ※ 작성일자는 4자리(MMDD) 입력 시 「2026년 M월 D일」로 자동 변환됩니다.<br>
         ※ 「＋ 항목 추가」로 보수료 항목을 늘리고 「×」로 지웁니다. 항목명과 금액을 직접 입력합니다.<br>
-        ※ 기본보수료 행은 보수료 항목 맨 위에 고정됩니다. 기본값은 「보수기준표 기본보수료 × 1.023 × 결산조정 × 가중치」이며, 금액은 직접 수정할 수 있습니다.<br>
+        ※ 기본보수료 행은 보수료 항목 맨 위에 고정됩니다. 기본값은 「보수기준표 기본보수료 × 1.023 × 가중치」이며, 헤더의 「결산수수료 포함」 체크 시 결산조정이 추가로 곱해집니다(체크 해제 시 결산조정 미적용·항목명에서 (결산수수료 포함) 제거). 금액은 직접 수정할 수 있습니다.<br>
         ※ 합계 = 보수료 항목 금액의 합, 총용역수수료 = 합계 × 1.1(부가세 포함). 자동 계산됩니다.<br>
         ※ 세액공제적용 고객 안내문구는 체크박스가 선택되어 있고 입력값이 있을 때만 견적서에 표시됩니다.<br>
         ※ 「인쇄 시 견적서만 출력」을 체크하면 인쇄/PDF 저장 시 보고서 본문은 제외되고 견적서만 출력됩니다.<br>
@@ -5561,7 +5561,6 @@ function bindQuoteRecipientSync() {
 
   function quoteWeight() {
     var w = quoteFloat('q_weight', 1.2);
-    if (w < 1.2) w = 1.2;
     if (w > 3) w = 3;
     return w;
   }
@@ -5571,12 +5570,25 @@ function bindQuoteRecipientSync() {
     return isFinite(a) ? a : 1;
   }
 
+  function quoteClosingFeeOn() {
+    var el = $('q_closingfee');
+    return el ? el.checked : true;
+  }
+
   function calcWeightedBaseFee(income) {
     var base = calcBaseFee(income);
     if (!base) return 0;
-    return Math.round(base * 1.023 * quoteWeight() * quoteAdjust());
+    var settleMul = quoteClosingFeeOn() ? quoteWeight() : 1;
+    return Math.round(base * 1.023 * settleMul * quoteAdjust());
   }
-  var QUOTE_BASE_FEE_INPUT_LABEL = '보수표에 의한 기본 보수료 (결산수수료 포함)';
+
+  var QUOTE_BASE_FEE_LABEL_ON = '보수표에 의한 기본 보수료 (결산수수료 포함)';
+  var QUOTE_BASE_FEE_LABEL_OFF = '보수표에 의한 기본 보수료';
+  var QUOTE_BASE_FEE_INPUT_LABEL = QUOTE_BASE_FEE_LABEL_ON;
+
+  function quoteBaseFeeLabel() {
+    return quoteClosingFeeOn() ? QUOTE_BASE_FEE_LABEL_ON : QUOTE_BASE_FEE_LABEL_OFF;
+  }
 
   function quoteBaseFeeLabelKey(v) {
     return String(v || '').replace(/\s+/g, '');
@@ -5584,7 +5596,9 @@ function bindQuoteRecipientSync() {
 
   function quoteIsBaseFeeLabel(v) {
     var k = quoteBaseFeeLabelKey(v);
-    return k === '기본보수료' || k === '보수표에의한기본보수료(결산수수료포함)';
+    return k === '기본보수료'
+        || k === '보수표에의한기본보수료(결산수수료포함)'
+        || k === '보수표에의한기본보수료';
   }
   function findBaseFeeRow() {
     if (!feeRows) feeRows = $('q_feeRows');
@@ -5604,7 +5618,7 @@ function bindQuoteRecipientSync() {
     row.dataset.baseFeeRow = '1';
     var lblEl = row.querySelector('.qf-lbl');
     if (lblEl) {
-      lblEl.value = QUOTE_BASE_FEE_INPUT_LABEL;
+      lblEl.value = quoteBaseFeeLabel();
       lblEl.readOnly = true;
       lblEl.tabIndex = -1;
     }
@@ -5974,10 +5988,10 @@ function bindQuoteRecipientSync() {
           ? '<span class="q-basefee-print">' +
             '<span class="q-basefee-line">보수표에 의한</span>' +
             '<span class="q-basefee-line">기본 보수료</span>' +
-            '<span class="q-basefee-line">(결산수수료 포함)</span>' +
+            (quoteClosingFeeOn() ? '<span class="q-basefee-line">(결산수수료 포함)</span>' : '') +
             '</span>'
           : escapeHtml(lbl || '\u3000');
-
+        
         html += '<tr' + (rowCls ? ' class="' + rowCls.trim() + '"' : '') + '><td class="bB-lab' + (isBaseRow ? ' q-basefee-lab' : '') + '">' + labelHtml + '</td>' +
                 '<td class="bB-val' + (isBaseRow ? ' q-basefee-val' : '') + '">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
       });
@@ -6061,6 +6075,7 @@ function bindQuoteRecipientSync() {
     if ($('q_enable')) $('q_enable').checked = (q.enable === undefined ? true : !!q.enable);
     if ($('q_print_quote_only')) $('q_print_quote_only').checked = !!q.print_quote_only;
     if ($('q_transfer_note')) $('q_transfer_note').checked = (q.transfer_note === undefined ? true : !!q.transfer_note);
+    if ($('q_closingfee')) $('q_closingfee').checked = (q.closingfee === undefined ? true : !!q.closingfee);
 
     var legacyFree = q.free == null ? '' : q.free;
     var taxcreditNote = q.taxcredit_note === undefined ? legacyFree : q.taxcredit_note;
@@ -6108,6 +6123,7 @@ function bindQuoteRecipientSync() {
           enable: $('q_enable') ? $('q_enable').checked : true,
           print_quote_only: $('q_print_quote_only') ? $('q_print_quote_only').checked : false,
           transfer_note: $('q_transfer_note') ? $('q_transfer_note').checked : true,
+          closingfee: $('q_closingfee') ? $('q_closingfee').checked : true,
           taxcredit_customer: $('q_taxcredit_customer') ? $('q_taxcredit_customer').checked : false,
           taxcredit_note: taxcreditNote,
           free: taxcreditNote,
@@ -6208,7 +6224,7 @@ bindQuoteRecipientSync();
 bindQuoteWriteDateFormat();
 
   // ----- 기본보수료 자동산정 입력값 변경 시 기본 행 갱신 -----
-  ['q_income', 'q_weight', 'q_adjust'].forEach(function (id) {
+  ['q_income', 'q_weight', 'q_adjust', 'q_closingfee'].forEach(function (id) {
     var el = $(id);
     if (!el) return;
     var ev = (el.tagName === 'SELECT') ? 'change' : 'input';
