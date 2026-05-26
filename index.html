@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 10:39 (합계 숫자셀 색상 통일·합계 문구 부가세 제외 표기) -->
+<!-- BUILD_DATE: 2026-05-26 11:18 (견적서 합계 행 회색 통일·추가항목 합계 부가세 포함 ×1.1·총용역수수료 박스 색상·크기) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1037,26 +1037,25 @@ textarea {
 .quote-page .free-print { margin-top:12px; border:1px solid #9aa9c6; border-radius:2px; padding:8px 10px; font-size:12px; line-height:1.62; color:#14264f; min-height:70px; white-space:pre-wrap; }
 .quote-page .total-box {
   margin: 16px 0 6px;
-  background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%);
+  background: #e8f0fe;
   border: 3px double #000;
   padding: 11px 14px;
   text-align: center;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
   letter-spacing: 2px;
   color: #000;
 }
-
 .quote-page .total-box .total-val {
   color: #000;
-  font-size: 17px;
+  font-size: 18px;
   letter-spacing: 0;
   border-bottom: 1.5px solid #000;
   padding: 0 14px 1px;
 }
 
 .quote-page .total-box .total-tail {
-  font-size: 13px;
+  font-size: 16px;
   letter-spacing: 0;
   color: #000;
 }
@@ -1961,23 +1960,26 @@ textarea {
 
 /* 견적서 기존 확정 디자인 유지 */
 .quote-page .boxA .bA-lab,
-.quote-page .boxB .bB-lab,
-.quote-page .total-box {
+.quote-page .boxB .bB-lab {
   background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
 }
 
-/* 견적서 기본보수료 합계 / 추가항목 합계 라인 색상: 숫자셀 포함 행 전체 */
+/* 견적서 기본보수료 합계 라인 색상: 수신·작성일자 표와 동일 (숫자셀 포함 행 전체) */
 .quote-page .boxB tr.bB-sum-row > td,
 .quote-page .boxB tr.bB-sum-row > td *,
+.quote-page .boxB .bB-sum,
+.quote-page .boxB .bB-sumval {
+  background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
+}
+
+/* 견적서 추가항목 합계 라인 색상: 숫자셀 포함 행 전체 */
 .quote-page .q-tbl-left .extraStd tr.qx-sum-row > td,
 .quote-page .q-tbl-left .extraStd tr.qx-sum-row > td *,
-.quote-page .boxB .bB-sum,
-.quote-page .boxB .bB-sumval,
 .quote-page .q-tbl-left .extraStd .qx-sum-lab,
 .quote-page .q-tbl-left .extraStd .qx-sum-val {
   background: #e8f0fe !important;
 }
-
+  
 /* 추가항목 표 헤더 색상: 수신·작성일자 표 헤더와 동일 */
 .quote-page .q-tbl-left .extraStd th {
   background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
@@ -2163,7 +2165,7 @@ textarea {
 #quote_panel .qsel-item:hover { background:#e3e9f6; }
 #quote_panel .qsel-item input { width:15px; height:15px; margin:0; cursor:pointer; accent-color:#1a2c5b; }
 #quote_panel .qsel-item span { font-size:12.5px; color:#1f2433; }
-#quotePage .boxB .bB-sumval { background:#fff !important; }
+#quotePage .boxB .bB-sumval { background:linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important; }
 #quotePage .boxB tr.bB-disc-row td,
 #quotePage .boxB tr.bB-disc-row td * { color:#c0392b !important; font-weight:700 !important; text-decoration:line-through !important; }
 #quotePage .boxB tr.bB-disctotal-row td { background:#fff !important; color:#c0392b !important; font-weight:700 !important; }
@@ -2179,7 +2181,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 10:39</span>
+    <span class="build-date">업데이트 2026-05-26 11:18</span>
   </div>
 </header>
 
@@ -5546,12 +5548,13 @@ function bindQuoteRecipientSync() {
       else sum += amt;
     });
     var extraSum = quoteExtraSum();
+    var extraTotal = Math.round(extraSum * 1.1);
     var total = Math.round(sum * 1.1);
     var discTotal = Math.round(discSum * 1.1);
     var sv = $('q_sumView'); if (sv) sv.textContent = sum ? qFmt(sum) : '0';
     var tv = $('q_totalView'); if (tv) tv.textContent = total ? qFmt(total) : '0';
-    var esv = $('q_extraSumView'); if (esv) esv.textContent = extraSum ? qFmt(extraSum) : '0';
-    return { sum: sum, total: total, extraSum: extraSum, discSum: discSum, discTotal: discTotal };
+    var esv = $('q_extraSumView'); if (esv) esv.textContent = extraTotal ? qFmt(extraTotal) : '0';
+    return { sum: sum, total: total, extraSum: extraSum, extraTotal: extraTotal, discSum: discSum, discTotal: discTotal }; 
   }
 
   function quoteFloat(id, def) {
@@ -6021,8 +6024,8 @@ function bindQuoteRecipientSync() {
       });
 
       if (extraItems.length) {
-        extraHtml += '<tr class="qx-sum-row"><td class="qx-sum-lab">합계(부가세 제외)</td>' +
-                     '<td class="qx-sum-val">' + (r.extraSum ? qFmt(r.extraSum) : '-') + '</td></tr>';
+        extraHtml += '<tr class="qx-sum-row"><td class="qx-sum-lab">합계(부가세 포함)</td>' +
+                     '<td class="qx-sum-val">' + (r.extraTotal ? qFmt(r.extraTotal) : '-') + '</td></tr>';     
         extraBody.innerHTML = extraHtml;
         extraTable.classList.remove('is-hidden');
       } else {
