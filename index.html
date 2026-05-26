@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 13:25 (슬롯 전환 시 현재 작업 미저장 입력 유실 수정 — onSlotSelect·importSlotFile에 clearTimeout+saveCurrentSlot 추가) -->
+<!-- BUILD_DATE: 2026-05-26 13:40 (JSON 불러오기를 항상 새 슬롯으로 추가 — importSlotFile의 키 충돌 덮어쓰기 모달 제거) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2189,7 +2189,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 13:25</span>
+    <span class="build-date">업데이트 2026-05-26 13:40</span>
   </div>
 </header>
 
@@ -4167,45 +4167,34 @@ function importSlotFile(ev) {
         ev.target.value = '';
         return;
       }
-      var existing = localStorage.getItem(SLOT_PREFIX + data.key);
-      var importNow = function () {
-        try {
-          clearTimeout(autoSaveTimer);
-          saveCurrentSlot();
-          var saveData = Object.assign({}, data);      
-          saveData.meta = saveData.meta || {};
-          saveData.meta.updated = new Date().toISOString();
-          localStorage.setItem(SLOT_PREFIX + data.key, JSON.stringify(saveData));
-          upsertSlotInIndex({
-            key: data.key,
-            name: saveData.meta.name || '',
-            rrn: saveData.meta.rrn || '',
-            updated: saveData.meta.updated
-          });
-          applySlotState(saveData);
-          currentSlotKey = data.key;
-          markSaved();
-          updateSlotUI();
-        } catch (err) { handleStorageError(err); }
-      };
-      if (existing) {
-        var lbl = getSlotLabel(data.key);
-        showModal('슬롯 덮어쓰기',
-          '"' + lbl + '" 슬롯이 이미 있습니다.\n현재 슬롯을 덮어쓸까요?',
-          [
-            { text: '취소', cls: '' },
-            { text: '덮어쓰기', cls: 'primary', action: importNow }
-          ]);
-      } else {
-        importNow();
-      }
+      // 불러오기는 항상 새 슬롯으로 추가한다 (기존 슬롯을 덮어쓰지 않음).
+      try {
+        clearTimeout(autoSaveTimer);
+        saveCurrentSlot();
+        var newKey = genSlotKey();
+        var saveData = Object.assign({}, data);
+        saveData.key = newKey;
+        saveData.meta = saveData.meta || {};
+        saveData.meta.updated = new Date().toISOString();
+        localStorage.setItem(SLOT_PREFIX + newKey, JSON.stringify(saveData));
+        upsertSlotInIndex({
+          key: newKey,
+          name: saveData.meta.name || '',
+          rrn: saveData.meta.rrn || '',
+          updated: saveData.meta.updated
+        });
+        applySlotState(saveData);
+        currentSlotKey = newKey;
+        markSaved();
+        updateSlotUI();
+      } catch (err) { handleStorageError(err); }
     } catch (err) {
       showModal('파일 읽기 실패', '파일 형식이 올바르지 않습니다.', [{ text: '확인', cls: 'primary' }]);
     }
     ev.target.value = '';
   };
   reader.readAsText(f, 'utf-8');
-}
+}  
 window.importSlotFile = importSlotFile;
 window.onSlotSelect = onSlotSelect;
 window.newSlot = newSlot;
