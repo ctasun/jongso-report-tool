@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 09:19 (입력화면 의견란 글자 크기 16px 변경) -->
+<!-- BUILD_DATE: 2026-05-26 09:32 (견적서 기본보수료·추가항목 표 색상 정리) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1019,8 +1019,20 @@ textarea {
   text-align: center !important;
   white-space: nowrap !important;
 }
-.quote-page .boxB .bB-sum { background:#c9d6ea !important; font-weight:700; font-size:13px; letter-spacing:2px; color:#14264f; }
-.quote-page .boxB .bB-sumval { background:#c9d6ea; text-align:right; font-weight:700; font-size:13.5px; color:#14264f; }
+.quote-page .boxB .bB-sum {
+  background: #e8f0fe !important;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #000;
+}
+.quote-page .boxB .bB-sumval {
+  background: #e8f0fe !important;
+  text-align: right;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #000;
+}
 .q-dash { color:#555; }
 .quote-page .free-print { margin-top:12px; border:1px solid #9aa9c6; border-radius:2px; padding:8px 10px; font-size:12px; line-height:1.62; color:#14264f; min-height:70px; white-space:pre-wrap; }
 .quote-page .total-box {
@@ -1663,8 +1675,8 @@ textarea {
 
 
 <style>
-/* PATCH: 별도표 위치/출력 보정 — 오른쪽 보수기준표가 아니라 왼쪽 기본보수료 표 하단에 표시.
-   입력값이 없으면 미리보기·인쇄 모두 미출력. 표 크기와 톤은 기본보수료 표(boxB)와 맞춤. */
+/* PATCH: 별도표 위치/출력 보정 — 왼쪽 기본보수료 표 하단 표시 + 추가항목 표 색상 정리.
+   입력값이 없으면 미리보기·인쇄 모두 미출력. 계산 로직 변경 없음. */
 .quote-page .q-tbl-left .extraStd {
   width: 100% !important;
   border-collapse: collapse !important;
@@ -1686,14 +1698,14 @@ textarea {
   text-overflow: clip !important;
 }
 .quote-page .q-tbl-left .extraStd th {
-  background: #fff !important;
-  color: #1a2c5b !important;
-  font-weight: 600 !important;
+  background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
+  color: #000 !important;
+  font-weight: 700 !important;
   text-align: center !important;
 }
 .quote-page .q-tbl-left .extraStd .qx-lab-print {
   text-align: center !important;
-  color: #1a2c5b !important;
+  color: #000 !important;
   font-weight: 600 !important;
   padding-left: 9px !important;
 }
@@ -1704,15 +1716,15 @@ textarea {
   padding-right: 9px !important;
 }
 .quote-page .q-tbl-left .extraStd .qx-sum-lab {
-  background: #c9d6ea !important;
-  color: #14264f !important;
+  background: #e8f0fe !important;
+  color: #000 !important;
   font-weight: 700 !important;
   text-align: center !important;
   letter-spacing: 2px !important;
 }
 .quote-page .q-tbl-left .extraStd .qx-sum-val {
-  background: #c9d6ea !important;
-  color: #14264f !important;
+  background: #e8f0fe !important;
+  color: #000 !important;
   font-weight: 700 !important;
   text-align: right !important;
   font-size: 13.5px !important;
@@ -1940,7 +1952,8 @@ textarea {
 </style>
 <style id="quote-fee-label-fill-same-as-recv">
 /* 출력 색상 보정
-   - 견적서 총용역수수료·기본보수료 영역 기존 디자인 유지
+   - 견적서 수신·작성일자 라벨과 추가항목 표 헤더 채움 통일
+   - 기본보수료 합계 / 추가항목 합계 라인 #e8f0fe 적용
    - 보고서 Ⅰ. 기본정보 표 본문 채움 제거 + 글자 검은색
    - 보고서 Ⅴ. 1. 소득 정보 표 채움 제거 + 글자 검은색
    - 보고서 Ⅴ. 2. 절세효과 상세 표 헤더·본문 채움 제거 + 글자 검은색
@@ -1949,9 +1962,20 @@ textarea {
 /* 견적서 기존 확정 디자인 유지 */
 .quote-page .boxA .bA-lab,
 .quote-page .boxB .bB-lab,
+.quote-page .total-box {
+  background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
+}
+
+/* 견적서 기본보수료 합계 / 추가항목 합계 라인 색상 */
 .quote-page .boxB .bB-sum,
 .quote-page .boxB .bB-sumval,
-.quote-page .total-box {
+.quote-page .q-tbl-left .extraStd .qx-sum-lab,
+.quote-page .q-tbl-left .extraStd .qx-sum-val {
+  background: #e8f0fe !important;
+}
+
+/* 추가항목 표 헤더 색상: 수신·작성일자 표 헤더와 동일 */
+.quote-page .q-tbl-left .extraStd th {
   background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
 }
 
@@ -2014,6 +2038,9 @@ textarea {
   .quote-page .boxB .bB-lab,
   .quote-page .boxB .bB-sum,
   .quote-page .boxB .bB-sumval,
+  .quote-page .q-tbl-left .extraStd th,
+  .quote-page .q-tbl-left .extraStd .qx-sum-lab,
+  .quote-page .q-tbl-left .extraStd .qx-sum-val,
   .quote-page .total-box {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -2150,7 +2177,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 09:19</span>
+    <span class="build-date">업데이트 2026-05-26 09:32</span>
   </div>
 </header>
 
