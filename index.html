@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 12:21 (입력 패널 2~5번 의견란·7번 유의사항 입력박스 글자 크기 16px로 통일) -->
+<!-- BUILD_DATE: 2026-05-26 12:38 (작업 관리 슬롯 시스템 개편 — 슬롯 키를 주민등록번호와 분리, 새 작업이 기존 슬롯을 삭제하지 않고 추가) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2189,7 +2189,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 12:21</span>
+    <span class="build-date">업데이트 2026-05-26 12:38</span>
   </div>
 </header>
 
@@ -3866,49 +3866,12 @@ function saveNow() {
 window.saveNow = saveNow;
 
 // --- 주민번호 변경 처리 ---
+// 슬롯 키는 주민등록번호로 만들지 않는다(거래처를 동시에 여러 개 보관하기 위해 고유 키 사용).
+// 주민번호는 거래처 정보로만 저장되며, 저장은 입력 핸들러의 scheduleAutoSave가 처리한다.
 function handleRRNChange() {
-  if (isApplyingSlot) return;
-  var rrnDigits = (val('inp_rrn') || '').replace(/[^\d]/g, '');
-  if (rrnDigits.length < 6) return; // 주민번호 앞 6자리(생년월일) 미만은 무시
-  var newKey = rrnDigits.slice(0, 6);
-  if (newKey === currentSlotKey) return;
-
-  // 일치 슬롯 조회
-  var existing = localStorage.getItem(SLOT_PREFIX + newKey);
-  if (existing) {
-    // 일치 슬롯 → 직전 슬롯의 자동 저장은 이미 수행됨, 그 슬롯 로드
-    try {
-      var data = JSON.parse(existing);
-      applySlotState(data);
-      currentSlotKey = newKey;
-      markSaved();
-      updateSlotUI();
-    } catch (e) {}
-  } else {
-    // 일치 슬롯 없음 → 키만 갱신 (rename)
-    var oldKey = currentSlotKey;
-    try {
-      var stateData = serializeCurrentState();
-      stateData.key = newKey;
-      localStorage.setItem(SLOT_PREFIX + newKey, JSON.stringify(stateData));
-      if (oldKey !== newKey) {
-        localStorage.removeItem(SLOT_PREFIX + oldKey);
-        removeSlotFromIndex(oldKey);
-      }
-      upsertSlotInIndex({
-        key: newKey,
-        name: stateData.meta.name,
-        rrn: stateData.meta.rrn,
-        updated: stateData.meta.updated
-      });
-      currentSlotKey = newKey;
-      updateSlotUI();
-    } catch (e) {
-      handleStorageError(e);
-    }
-  }
+  /* no-op: 슬롯 키와 분리됨 */
 }
-
+  
 // --- 슬롯 선택 / 새 작업 / 삭제 ---
 function onSlotSelect(key) {
   if (!key) return;
@@ -3931,21 +3894,21 @@ function onSlotSelect(key) {
   }
 }
 
-function newSlot() {
-  // 현재 작업은 자동 저장된 상태로 보존 (드롭다운에서 다시 복귀 가능)
-  clearAllInputs();
-  currentSlotKey = DRAFT_KEY;
-  // 기존 _draft 슬롯은 새 입력으로 덮어쓰기 됨 → 사전 정리
-  try {
-    localStorage.removeItem(SLOT_PREFIX + DRAFT_KEY);
-    removeSlotFromIndex(DRAFT_KEY);
-  } catch (e) {}
-  clearSaveStatus();
-  updateSlotUI();
+function genSlotKey() {
+  return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
+function newSlot() {
+  // 현재 작업을 자동 저장해 보존한 뒤, 새 빈 슬롯을 추가한다 (기존 슬롯 삭제 안 함).
+  clearTimeout(autoSaveTimer);
+  saveCurrentSlot();
+  currentSlotKey = genSlotKey();
+  clearAllInputs();
+  saveCurrentSlot();
+}
+  
 function deleteCurrentSlot() {
-  var label = currentSlotKey === DRAFT_KEY ? '임시 작업' : getSlotLabel(currentSlotKey);
+  var label = getSlotLabel(currentSlotKey);
   showModal('슬롯 삭제',
     '"' + label + '" 슬롯을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.',
     [
@@ -3955,14 +3918,25 @@ function deleteCurrentSlot() {
           localStorage.removeItem(SLOT_PREFIX + currentSlotKey);
           removeSlotFromIndex(currentSlotKey);
         } catch (e) {}
+        var arr = loadSlotIndex();
+        if (arr.length > 0) {
+          var raw = localStorage.getItem(SLOT_PREFIX + arr[0].key);
+          if (raw) {
+            try {
+              applySlotState(JSON.parse(raw));
+              markSaved();
+              updateSlotUI();
+              return;
+            } catch (e) {}
+          }
+        }
+        currentSlotKey = genSlotKey();
         clearAllInputs();
-        currentSlotKey = DRAFT_KEY;
-        clearSaveStatus();
-        updateSlotUI();
+        saveCurrentSlot();
       }}
     ]);
 }
-
+  
 function clearAllInputs() {
   isApplyingSlot = true;
   try {
@@ -3991,15 +3965,15 @@ function clearAllInputs() {
 
 // --- 라벨 ---
 function getSlotLabel(key) {
-  if (key === DRAFT_KEY) return '임시 작업';
   var arr = loadSlotIndex();
   var meta = arr.find(function (m) { return m.key === key; });
-  if (!meta) return key;
-  var name = meta.name || '(이름 미입력)';
+  var fallback = (key === DRAFT_KEY) ? '임시 작업' : '(이름 미입력)';
+  if (!meta) return fallback;
+  var name = meta.name || fallback;
   var rrn = meta.rrn || '';
   var rrnShort = rrn ? maskRRN(rrn) : '';
   return name + (rrnShort ? ' (' + rrnShort + ')' : '');
-}
+}  
 function maskRRN(rrn) {
   var d = rrn.replace(/[^\d]/g, '');
   if (d.length < 7) return rrn;
@@ -4047,7 +4021,7 @@ function updateSlotUI() {
   // 옵션 렌더
   sel.innerHTML = '<option value="">─ 슬롯 선택 ─</option>';
   items.forEach(function (m) {
-    var label = (m.key === DRAFT_KEY ? '임시 작업 (주민번호 미입력)' : getSlotLabel(m.key));
+    var label = getSlotLabel(m.key);
     var up = formatUpdated(m.updated);
     var mark = (m.key === currentSlotKey) ? ' ← 현재' : '';
     var opt = document.createElement('option');
@@ -4059,11 +4033,7 @@ function updateSlotUI() {
 
   // 현재 작업 표시
   var nameEl = document.getElementById('slot_current_name');
-  if (currentSlotKey === DRAFT_KEY) {
-    nameEl.textContent = '임시 작업';
-  } else {
-    nameEl.textContent = getSlotLabel(currentSlotKey);
-  }
+  nameEl.textContent = getSlotLabel(currentSlotKey);
 
   // 용량 표시
   var bytes = getStorageUsageBytes();
