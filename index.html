@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 11:18 (견적서 합계 행 회색 통일·추가항목 합계 부가세 포함 ×1.1·총용역수수료 박스 색상·크기) -->
+<!-- BUILD_DATE: 2026-05-26 12:13 (PDF 자동 불러오기: 주민번호 앞 6자리를 거래처 폴더명 생년월일에서 우선 채우도록 보강) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2181,7 +2181,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 11:18</span>
+    <span class="build-date">업데이트 2026-05-26 12:13</span>
   </div>
 </header>
 
@@ -5104,7 +5104,7 @@ function pdfxExtractIndustry(all) {
     var clrImg = (typeof window.clearImage === 'function') ? window.clearImage : null;
 
     pdfxSetField('inp_name', info.name);
-    pdfxSetField('inp_rrn', formatRRN(info.birth6));   // 주민등록번호 앞 6자리 + 마스킹
+    pdfxSetField('inp_rrn', formatRRN((c && c.birth) || info.birth6 || ''));   // 주민등록번호 앞 6자리: 폴더명 생년월일 우선, 미검출 시 안내문 추출값
     pdfxSetField('inp_company', info.company);
     pdfxSetField('inp_brn', info.brn);
     if (info.industry) pdfxSetField('inp_industry', info.industry);
