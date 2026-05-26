@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 08:41 (견적서 금액란 소숫점 연산 및 입력 중 계산식 표시) -->
+<!-- BUILD_DATE: 2026-05-26 09:08 (견적서 수신자 초기화·복원 누락 수정) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2148,7 +2148,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 08:41</span>
+    <span class="build-date">업데이트 2026-05-26 09:08</span>
   </div>
 </header>
 
@@ -3828,8 +3828,8 @@ window.saveNow = saveNow;
 function handleRRNChange() {
   if (isApplyingSlot) return;
   var rrnDigits = (val('inp_rrn') || '').replace(/[^\d]/g, '');
-  if (rrnDigits.length !== 13) return; // 미완성은 무시
-  var newKey = rrnDigits;
+  if (rrnDigits.length < 6) return; // 주민번호 앞 6자리(생년월일) 미만은 무시
+  var newKey = rrnDigits.slice(0, 6);
   if (newKey === currentSlotKey) return;
 
   // 일치 슬롯 조회
@@ -6044,6 +6044,7 @@ function bindQuoteRecipientSync() {
 
     var titleEdited = (q.title_user_edited === true || q.title_user_edited === '1');
     setQuoteTitleValue(titleEdited ? q.title : QUOTE_TITLE_DEFAULT, titleEdited);
+      setQuoteRecipientValue(q.recipient, q.recipient_user_edited);
 
     sv('q_cmsdate', q.cmsdate);
     sv('q_income', q.income);
