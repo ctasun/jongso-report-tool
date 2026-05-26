@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 10:26 (보수료 항목 헤더 결산수수료 포함 체크박스 추가·결산조정 하한 해제) -->
+<!-- BUILD_DATE: 2026-05-26 10:39 (합계 숫자셀 색상 통일·합계 문구 부가세 제외 표기) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1953,7 +1953,7 @@ textarea {
 <style id="quote-fee-label-fill-same-as-recv">
 /* 출력 색상 보정
    - 견적서 수신·작성일자 라벨과 추가항목 표 헤더 채움 통일
-   - 기본보수료 합계 / 추가항목 합계 라인 #e8f0fe 적용
+   - 기본보수료 합계 / 추가항목 합계 숫자셀 포함 행 전체 #e8f0fe 적용
    - 보고서 Ⅰ. 기본정보 표 본문 채움 제거 + 글자 검은색
    - 보고서 Ⅴ. 1. 소득 정보 표 채움 제거 + 글자 검은색
    - 보고서 Ⅴ. 2. 절세효과 상세 표 헤더·본문 채움 제거 + 글자 검은색
@@ -1966,7 +1966,11 @@ textarea {
   background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
 }
 
-/* 견적서 기본보수료 합계 / 추가항목 합계 라인 색상 */
+/* 견적서 기본보수료 합계 / 추가항목 합계 라인 색상: 숫자셀 포함 행 전체 */
+.quote-page .boxB tr.bB-sum-row > td,
+.quote-page .boxB tr.bB-sum-row > td *,
+.quote-page .q-tbl-left .extraStd tr.qx-sum-row > td,
+.quote-page .q-tbl-left .extraStd tr.qx-sum-row > td *,
 .quote-page .boxB .bB-sum,
 .quote-page .boxB .bB-sumval,
 .quote-page .q-tbl-left .extraStd .qx-sum-lab,
@@ -2036,11 +2040,9 @@ textarea {
 @media print {
   .quote-page .boxA .bA-lab,
   .quote-page .boxB .bB-lab,
-  .quote-page .boxB .bB-sum,
-  .quote-page .boxB .bB-sumval,
+  .quote-page .boxB tr.bB-sum-row > td,
   .quote-page .q-tbl-left .extraStd th,
-  .quote-page .q-tbl-left .extraStd .qx-sum-lab,
-  .quote-page .q-tbl-left .extraStd .qx-sum-val,
+  .quote-page .q-tbl-left .extraStd tr.qx-sum-row > td,
   .quote-page .total-box {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -2177,7 +2179,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 10:26</span>
+    <span class="build-date">업데이트 2026-05-26 10:39</span>
   </div>
 </header>
 
@@ -2286,15 +2288,15 @@ textarea {
           <input type="text" id="q_income" data-field="q_income" data-format="num" inputmode="numeric" placeholder="수입금액 입력">
         </div>
         <div class="q-auto">
-          <div class="q-ak">합계<span class="q-badge">자동</span></div>
+          <div class="q-ak">합계(부가세 제외)<span class="q-badge">자동</span></div>
           <div class="q-av"><span id="q_sumView">0</span><span class="q-won"> 원</span></div>
         </div>
         <div class="q-auto total">
           <div class="q-ak">총용역수수료<span class="q-badge">자동</span></div>
           <div class="q-av"><span id="q_totalView">0</span><span class="q-won"> 원 (부가세 포함)</span></div>
         </div>
-      </div>
-
+      </div>      
+      
       <!-- 보수료 항목(동적) + 자유입력란 2단 -->
       <div class="q-cols">
         <div class="q-col-left">
@@ -2364,7 +2366,7 @@ textarea {
         ※ 작성일자는 4자리(MMDD) 입력 시 「2026년 M월 D일」로 자동 변환됩니다.<br>
         ※ 「＋ 항목 추가」로 보수료 항목을 늘리고 「×」로 지웁니다. 항목명과 금액을 직접 입력합니다.<br>
         ※ 기본보수료 행은 보수료 항목 맨 위에 고정됩니다. 기본값은 「보수기준표 기본보수료 × 1.023 × 가중치」이며, 헤더의 「결산수수료 포함」 체크 시 결산조정이 추가로 곱해집니다(체크 해제 시 결산조정 미적용·항목명에서 (결산수수료 포함) 제거). 금액은 직접 수정할 수 있습니다.<br>
-        ※ 합계 = 보수료 항목 금액의 합, 총용역수수료 = 합계 × 1.1(부가세 포함). 자동 계산됩니다.<br>
+        ※ 합계(부가세 제외) = 보수료 항목 금액의 합, 총용역수수료 = 합계 × 1.1(부가세 포함). 자동 계산됩니다.<br>
         ※ 세액공제적용 고객 안내문구는 체크박스가 선택되어 있고 입력값이 있을 때만 견적서에 표시됩니다.<br>
         ※ 「인쇄 시 견적서만 출력」을 체크하면 인쇄/PDF 저장 시 보고서 본문은 제외되고 견적서만 출력됩니다.<br>
         ※ 「견적서를 보고서 1페이지로 포함」 체크를 해제하면 견적서 없이 보고서만 인쇄됩니다.
@@ -5996,7 +5998,7 @@ function bindQuoteRecipientSync() {
                 '<td class="bB-val' + (isBaseRow ? ' q-basefee-val' : '') + '">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
       });
 
-      html += '<tr><td class="bB-lab bB-sum">합\u3000\u3000계</td>' +
+      html += '<tr class="bB-sum-row"><td class="bB-lab bB-sum">합계(부가세 제외)</td>' +
               '<td class="bB-sumval">' + (r.sum ? qFmt(r.sum) : '-') + '</td></tr>';
 
       if (r.discSum > 0) {
@@ -6019,7 +6021,7 @@ function bindQuoteRecipientSync() {
       });
 
       if (extraItems.length) {
-        extraHtml += '<tr><td class="qx-sum-lab">합\u3000\u3000계</td>' +
+        extraHtml += '<tr class="qx-sum-row"><td class="qx-sum-lab">합계(부가세 제외)</td>' +
                      '<td class="qx-sum-val">' + (r.extraSum ? qFmt(r.extraSum) : '-') + '</td></tr>';
         extraBody.innerHTML = extraHtml;
         extraTable.classList.remove('is-hidden');
@@ -6028,7 +6030,7 @@ function bindQuoteRecipientSync() {
         extraTable.classList.add('is-hidden');
       }
     }
-
+    
     var transferNoteOn = $('q_transfer_note') ? $('q_transfer_note').checked : true;
     var transferNoteBox = $('qp_transfer_note');
     if (transferNoteBox) {
