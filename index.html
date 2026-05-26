@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 12:13 (PDF 자동 불러오기: 주민번호 앞 6자리를 거래처 폴더명 생년월일에서 우선 채우도록 보강) -->
+<!-- BUILD_DATE: 2026-05-26 12:21 (입력 패널 2~5번 의견란·7번 유의사항 입력박스 글자 크기 16px로 통일) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -315,6 +315,14 @@ textarea {
   min-height: 72px;
   background: #fff;
   overflow-y: hidden;
+}
+/* 2~5번 의견란 + 7번 유의사항 입력박스 글자 크기를 8번 의견란(.opinion-item textarea)과 동일하게 16px */
+#inp_caution_opinion,
+#inp_guide_opinion,
+#inp_analysis_opinion,
+#inp_pl_opinion,
+#taxcredit_rows textarea[data-tc="note"] {
+  font-size: 16px;
 }
 .image-drop {
   border: 2px dashed #ccc;
@@ -2181,7 +2189,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 12:13</span>
+    <span class="build-date">업데이트 2026-05-26 12:21</span>
   </div>
 </header>
 
