@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 12:38 (작업 관리 슬롯 시스템 개편 — 슬롯 키를 주민등록번호와 분리, 새 작업이 기존 슬롯을 삭제하지 않고 추가) -->
+<!-- BUILD_DATE: 2026-05-26 13:25 (슬롯 전환 시 현재 작업 미저장 입력 유실 수정 — onSlotSelect·importSlotFile에 clearTimeout+saveCurrentSlot 추가) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2189,7 +2189,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 12:38</span>
+    <span class="build-date">업데이트 2026-05-26 13:25</span>
   </div>
 </header>
 
@@ -3876,13 +3876,15 @@ function handleRRNChange() {
 function onSlotSelect(key) {
   if (!key) return;
   if (key === currentSlotKey) { updateSlotUI(); return; }
-  // 현재 작업은 이미 자동 저장됨 → 안전하게 전환
   var raw = localStorage.getItem(SLOT_PREFIX + key);
   if (!raw) {
     showModal('슬롯을 찾을 수 없음', '선택한 슬롯이 존재하지 않습니다.', []);
     updateSlotUI();
     return;
   }
+  // 전환 전, 현재 작업의 미저장 입력을 즉시 저장한다(자동 저장 1초 대기 중 전환 시 입력 유실 방지).
+  clearTimeout(autoSaveTimer);
+  saveCurrentSlot();
   try {
     var data = JSON.parse(raw);
     applySlotState(data);
@@ -3893,7 +3895,7 @@ function onSlotSelect(key) {
     showModal('슬롯 로드 실패', '슬롯 데이터를 읽을 수 없습니다.', []);
   }
 }
-
+  
 function genSlotKey() {
   return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
@@ -4168,7 +4170,9 @@ function importSlotFile(ev) {
       var existing = localStorage.getItem(SLOT_PREFIX + data.key);
       var importNow = function () {
         try {
-          var saveData = Object.assign({}, data);
+          clearTimeout(autoSaveTimer);
+          saveCurrentSlot();
+          var saveData = Object.assign({}, data);      
           saveData.meta = saveData.meta || {};
           saveData.meta.updated = new Date().toISOString();
           localStorage.setItem(SLOT_PREFIX + data.key, JSON.stringify(saveData));
