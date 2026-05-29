@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-29 10:14 (견적서 별도표 항목명 줄바꿈 허용 + 괄호( 또는 하이픈- 이후 부언설명 80% 축소) -->
+<!-- BUILD_DATE: 2026-05-29 10:31 (손익계산서 「체크시 인쇄제외」 체크박스를 제목줄 옆 한 줄로 이동·문구 변경) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2240,7 +2240,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-29 10:14</span>
+    <span class="build-date">업데이트 2026-05-29 10:31</span>
   </div>
 </header>
 
@@ -2580,11 +2580,13 @@ textarea {
     </section>
 
     <section class="input-section" id="pl_panel">
-      <h3>5. 손익계산서(당기 <input type="text" id="inp_pl_period" data-field="pl_period" inputmode="numeric" placeholder="5" style="width:54px; padding:3px 6px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-weight:400; font-family:inherit; text-align:center; vertical-align:middle;"> 기)</h3>
-      <label class="pl-print-skip" style="display:flex; align-items:flex-start; gap:7px; margin:0 2px 10px; padding:8px 10px; background:#fdf3e7; border:1px solid #e0b87a; border-radius:5px; cursor:pointer;">
-        <input type="checkbox" id="inp_pl_print_skip" data-field="pl_print_skip" style="margin-top:2px;">
-        <span style="font-size:12px; line-height:1.5; color:#9a6213;"><strong>검토만 · 인쇄 제외</strong><br>체크 시 내용이 있어도 이 손익계산서는 인쇄·PDF에 출력되지 않습니다(화면에서는 그대로 표시).</span>
-      </label>
+      <h3 style="display:flex; align-items:center; flex-wrap:wrap; gap:12px;">
+        <span style="white-space:nowrap;">5. 손익계산서(당기 <input type="text" id="inp_pl_period" data-field="pl_period" inputmode="numeric" placeholder="5" style="width:54px; padding:3px 6px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-weight:400; font-family:inherit; text-align:center; vertical-align:middle;"> 기)</span>
+        <label class="pl-print-skip" style="display:flex; align-items:center; gap:6px; flex:1 1 300px; min-width:280px; padding:5px 10px; background:#fdf3e7; border:1px solid #e0b87a; border-radius:5px; cursor:pointer; font-weight:400;">
+          <input type="checkbox" id="inp_pl_print_skip" data-field="pl_print_skip" style="margin:0; flex:none;">
+          <span style="font-size:11.5px; line-height:1.4; color:#9a6213; word-break:keep-all;"><span style="font-weight:600;">체크시 인쇄제외</span> — 체크 시 내용이 있어도 이 손익계산서는 인쇄·PDF에 출력되지 않습니다(화면에서는 그대로 표시).</span>
+        </label>
+      </h3>
       <div class="pl-input-head">
         <span>과목</span><span>당기</span><span>전기</span><span>증감(자동)</span>
       </div>
