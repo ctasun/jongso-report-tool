@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-29 10:05 (손익계산서 「검토만·인쇄 제외」 체크박스 추가 — 체크 시 인쇄·PDF에서 Ⅴ.손익계산서 제외 및 섹션 번호 자동 당김) -->
+<!-- BUILD_DATE: 2026-05-29 10:14 (견적서 별도표 항목명 줄바꿈 허용 + 괄호( 또는 하이픈- 이후 부언설명 80% 축소) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -1747,9 +1747,10 @@ textarea {
   line-height: 1.35 !important;
   letter-spacing: 0 !important;
   word-spacing: 0 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
+  white-space: normal !important;
+  overflow: visible !important;
   text-overflow: clip !important;
+  word-break: keep-all !important;
 }
 .quote-page .q-tbl-left .extraStd th {
   background: linear-gradient(90deg, #f3f3f3 0%, #e9eaec 100%) !important;
@@ -1763,6 +1764,9 @@ textarea {
   font-weight: 600 !important;
   padding-left: 9px !important;
 }
+.quote-page .q-tbl-left .extraStd .qx-lab-print .qx-sub {
+  font-size: 80% !important;
+}  
 .quote-page .q-tbl-left .extraStd .qx-amt-print {
   text-align: right !important;
   font-size: 13px !important;
@@ -2236,7 +2240,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-29 10:05</span>
+    <span class="build-date">업데이트 2026-05-29 10:14</span>
   </div>
 </header>
 
@@ -6163,7 +6167,8 @@ function bindQuoteRecipientSync() {
       var extraHtml = '';
       extraItems.forEach(function (it) {
         var amtN = qNum(it.amt) || 0;
-        extraHtml += '<tr><td class="qx-lab-print">' + escapeHtml((it.label || '').trim() || '\u3000') + '</td>' +
+        var exLab = escapeHtml((it.label || '').trim() || '\u3000').replace(/([(\-].*)$/, '<span class="qx-sub">$1</span>');
+        extraHtml += '<tr><td class="qx-lab-print">' + exLab + '</td>' +
                      '<td class="qx-amt-print">' + (amtN ? qFmt(amtN) : '<span class="q-dash">-</span>') + '</td></tr>';
       });
 
