@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-05-26 18:26 (Ⅱ. 종합소득세 신고도움서비스 개별안내 — 소득세 개별분석자료 안내대상자 연도별 토글 입력 추가) -->
+<!-- BUILD_DATE: 2026-05-29 10:05 (손익계산서 「검토만·인쇄 제외」 체크박스 추가 — 체크 시 인쇄·PDF에서 Ⅴ.손익계산서 제외 및 섹션 번호 자동 당김) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2236,7 +2236,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-05-26 18:26</span>
+    <span class="build-date">업데이트 2026-05-29 10:05</span>
   </div>
 </header>
 
@@ -2577,6 +2577,10 @@ textarea {
 
     <section class="input-section" id="pl_panel">
       <h3>5. 손익계산서(당기 <input type="text" id="inp_pl_period" data-field="pl_period" inputmode="numeric" placeholder="5" style="width:54px; padding:3px 6px; border:1px solid #ccc; border-radius:4px; font-size:13px; font-weight:400; font-family:inherit; text-align:center; vertical-align:middle;"> 기)</h3>
+      <label class="pl-print-skip" style="display:flex; align-items:flex-start; gap:7px; margin:0 2px 10px; padding:8px 10px; background:#fdf3e7; border:1px solid #e0b87a; border-radius:5px; cursor:pointer;">
+        <input type="checkbox" id="inp_pl_print_skip" data-field="pl_print_skip" style="margin-top:2px;">
+        <span style="font-size:12px; line-height:1.5; color:#9a6213;"><strong>검토만 · 인쇄 제외</strong><br>체크 시 내용이 있어도 이 손익계산서는 인쇄·PDF에 출력되지 않습니다(화면에서는 그대로 표시).</span>
+      </label>
       <div class="pl-input-head">
         <span>과목</span><span>당기</span><span>전기</span><span>증감(자동)</span>
       </div>
@@ -3886,6 +3890,7 @@ function serializeCurrentState() {
       cardcost: val('inp_cardcost'),
       cardcost_enable: !!((document.getElementById('inp_cardcost_enable') || {}).checked),
       footer_taxcredit_note: !!((document.getElementById('inp_footer_taxcredit_note') || {}).checked),
+      pl_print_skip: !!((document.getElementById('inp_pl_print_skip') || {}).checked),
       caution_opinion: val('inp_caution_opinion'),
       caution_years: serializeCautionYears(),
       guide_opinion: val('inp_guide_opinion'),
@@ -3934,6 +3939,7 @@ function applySlotState(data) {
     setVal('inp_cardcost', f.cardcost);
     var _cce1 = document.getElementById('inp_cardcost_enable'); if (_cce1) _cce1.checked = !!f.cardcost_enable;
        var _ftn1 = document.getElementById('inp_footer_taxcredit_note'); if (_ftn1) _ftn1.checked = !!f.footer_taxcredit_note;
+    var _pps1 = document.getElementById('inp_pl_print_skip'); if (_pps1) _pps1.checked = !!f.pl_print_skip;
     setVal('inp_caution_opinion', f.caution_opinion);
     applyCautionYears(f.caution_years);
     setVal('inp_guide_opinion', f.guide_opinion);
@@ -4114,6 +4120,7 @@ function clearAllInputs() {
     ids.forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
     var _cce0 = document.getElementById('inp_cardcost_enable'); if (_cce0) _cce0.checked = false;
     var _ftn0 = document.getElementById('inp_footer_taxcredit_note'); if (_ftn0) _ftn0.checked = false;
+    var _pps0 = document.getElementById('inp_pl_print_skip'); if (_pps0) _pps0.checked = false;
     document.getElementById('inp_period').value = '2025.01.01. ~ 2025.12.31.';
     document.getElementById('inp_reportdate').value = formatReportDate('0531');
 
@@ -7024,6 +7031,29 @@ bindQuoteWriteDateFormat();
   } catch (e) {}
 
   render();
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+  var plSkipApplied = false;
+  window.addEventListener('beforeprint', function () {
+    var cb = document.getElementById('inp_pl_print_skip');
+    var sec = document.getElementById('sec_pl');
+    if (cb && cb.checked && sec && !sec.classList.contains('is-hidden')) {
+      sec.classList.add('is-hidden');
+      plSkipApplied = true;
+      if (typeof renumberReportSections === 'function') renumberReportSections();
+    }
+  });
+  window.addEventListener('afterprint', function () {
+    if (!plSkipApplied) return;
+    var sec = document.getElementById('sec_pl');
+    if (sec) sec.classList.remove('is-hidden');
+    plSkipApplied = false;
+    if (typeof renumberReportSections === 'function') renumberReportSections();
+  });
 })();
 </script>
 
