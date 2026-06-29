@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수수료 견적서 · 종합소득세 신고보고서 작성 도구 · 세무법인삼호 남부지점</title>
-<!-- BUILD_DATE: 2026-06-08 14:03 (손익계산서 「체크시 인쇄제외」 체크 시 보고서 미리보기에서도 Ⅴ 섹션 숨김 — 미리보기·인쇄 일치) -->
+<!-- BUILD_DATE: 2026-06-29 14:12 (매출·소득 요약 및 절세효과 섹션에 「체크시 인쇄제외」 체크박스 추가) -->
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -2240,7 +2240,7 @@ textarea {
   <div class="sync-info">
     <span id="syncTime"></span>
     <button class="refresh-btn" onclick="hardReload()">↻ 새로고침</button>
-    <span class="build-date">업데이트 2026-06-08 14:03</span>
+    <span class="build-date">업데이트 2026-06-29 14:12</span>
   </div>
 </header>
 
@@ -2604,7 +2604,13 @@ textarea {
     </section>
 
     <section class="input-section section-income">
-      <h3>6. 매출·소득 요약 및 절세효과</h3>
+      <h3 style="display:flex; align-items:center; flex-wrap:wrap; gap:12px;">
+        <span style="white-space:nowrap;">6. 매출·소득 요약 및 절세효과</span>
+        <label style="display:flex; align-items:center; gap:6px; flex:1 1 300px; min-width:280px; padding:5px 10px; background:#fdf3e7; border:1px solid #e0b87a; border-radius:5px; cursor:pointer; font-weight:400;">
+          <input type="checkbox" id="inp_income_print_skip" data-field="income_print_skip" style="margin:0; flex:none;">
+          <span style="font-size:11.5px; line-height:1.4; color:#9a6213; word-break:keep-all;"><span style="font-weight:600;">체크시 인쇄제외</span> — 체크 시 내용이 있어도 이 매출·소득 요약 및 절세효과는 보고서(미리보기·인쇄·PDF)에 출력되지 않습니다(입력칸은 그대로 유지됩니다).</span>
+        </label>
+      </h3>
       <div class="field" style="margin-bottom:8px;">
         <label>종합소득금액(반영후)</label>
         <input type="text" id="inp_income_after" data-field="income_after" data-format="num" inputmode="numeric">
@@ -7046,6 +7052,85 @@ bindQuoteWriteDateFormat();
   } catch (e) {}
 
   render();
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  function incCb() { return document.getElementById('inp_income_print_skip'); }
+
+  function applyIncomeSkip() {
+    var sec = document.getElementById('sec_income');
+    if (!sec) return;
+    var cb = incCb();
+    sec.classList.toggle('is-hidden', !!(cb && cb.checked));
+    if (typeof renumberReportSections === 'function') renumberReportSections();
+  }
+
+  if (typeof updatePreview === 'function') {
+    var _origUpdate = updatePreview;
+    updatePreview = function () {
+      _origUpdate();
+      applyIncomeSkip();
+    };
+    window.updatePreview = updatePreview;
+  }
+
+  if (typeof serializeCurrentState === 'function') {
+    var _origSerialize = serializeCurrentState;
+    serializeCurrentState = function () {
+      var d = _origSerialize();
+      var cb = incCb();
+      d.income_print_skip = !!(cb && cb.checked);
+      return d;
+    };
+    window.serializeCurrentState = serializeCurrentState;
+  }
+
+  if (typeof applySlotState === 'function') {
+    var _origApply = applySlotState;
+    applySlotState = function (data) {
+      _origApply(data);
+      var cb = incCb();
+      if (cb) cb.checked = !!(data && data.income_print_skip);
+      applyIncomeSkip();
+    };
+    window.applySlotState = applySlotState;
+  }
+
+  if (typeof clearAllInputs === 'function') {
+    var _origClear = clearAllInputs;
+    clearAllInputs = function () {
+      _origClear();
+      var cb = incCb();
+      if (cb) cb.checked = false;
+      applyIncomeSkip();
+    };
+    window.clearAllInputs = clearAllInputs;
+  }
+
+  var cb0 = incCb();
+  if (cb0) {
+    cb0.addEventListener('change', function () {
+      applyIncomeSkip();
+      if (typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    });
+  }
+
+  try {
+    var key = (typeof currentSlotKey !== 'undefined') ? currentSlotKey : '_draft';
+    var prefix = (typeof SLOT_PREFIX !== 'undefined') ? SLOT_PREFIX : 'jongso:slot:';
+    var raw = localStorage.getItem(prefix + key);
+    if (raw) {
+      var saved = JSON.parse(raw);
+      var cb1 = incCb();
+      if (cb1 && saved) cb1.checked = !!saved.income_print_skip;
+    }
+  } catch (e) {}
+
+  applyIncomeSkip();
 })();
 </script>
 
